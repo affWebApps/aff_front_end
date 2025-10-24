@@ -34,10 +34,24 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 
-Each page or work should have a new branch. The branch name should be named in the format; "ft-pageName", fix-fixName, refactor-featureName
+## Contributing 
+- Each page or work should have a new branch. The branch name should be named in the format; "ft-pageName", fix-fixName, refactor-featureName
 
-Create a PR to merge into dev from your feature/page branch, which will be reviewed and merged by the organisation admin. 
+- Create a PR to merge into dev from your feature/page branch, which will be reviewed and merged by the organisation admin.
 
+- Use DRY coding methods
+
+- Refactored and well modular codes please.
+
+- Reusable components are highly expected
+
+- Adherence to folder structure
+
+- Adherence to coding standards like in terms of casing, structure, orderliness, lint rules.
+
+- Distinct seperation of client vs server-side code
+
+- Remember to keep your branch up to date by originally checking out of dev and regularly pulling in dev
 
 ### Requirements
 
