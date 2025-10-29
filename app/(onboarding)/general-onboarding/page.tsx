@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { BackButton } from "../../components/ui/BackNavigation";
 import { Button } from "../../components/ui/Button";
 
@@ -30,7 +30,7 @@ const RoleSelectionPage = () => {
   ];
 
   // Animation variants
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -41,7 +41,7 @@ const RoleSelectionPage = () => {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -53,7 +53,7 @@ const RoleSelectionPage = () => {
     },
   };
 
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95 },
     visible: {
       opacity: 1,
@@ -114,7 +114,7 @@ const RoleSelectionPage = () => {
           variants={containerVariants}
           className="hidden md:grid md:grid-cols-3 gap-6 mb-12 "
         >
-          {roles.map((role, index) => (
+          {roles.map((role) => (
             <motion.button
               key={role.id}
               variants={cardVariants}
@@ -147,7 +147,7 @@ const RoleSelectionPage = () => {
           variants={containerVariants}
           className="md:hidden space-y-6 mb-12 "
         >
-          {roles.map((role, index) => (
+          {roles.map((role) => (
             <motion.button
               key={role.id}
               variants={cardVariants}
