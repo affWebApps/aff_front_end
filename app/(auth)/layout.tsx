@@ -43,13 +43,11 @@ const authImages = {
 export default function AuthLayout({ children }: AuthLayoutProps) {
   const pathname = usePathname();
 
-  // Get images for current route or use default
   const images =
     authImages[pathname as keyof typeof authImages] || authImages.default;
 
   return (
     <div className="min-h-screen flex flex-col xl:flex-row xl:p-4 xl:gap-6 bg-[#fff8ef]">
-      {/* Left side - Image */}
       <div
         className={`xl:w-1/2 relative overflow-hidden w-full ${styles.slideInLeft}`}
       >
@@ -83,7 +81,6 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
       </div>
 
-      {/* Right side - Content */}
       <div
         className={`xl:w-1/2 bg-[#fff8ef] flex items-center justify-center p-6 xl:p-8 ${styles.slideInRight}`}
       >
