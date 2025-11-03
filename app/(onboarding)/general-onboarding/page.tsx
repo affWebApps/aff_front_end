@@ -1,86 +1,40 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion, Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { BackButton } from "../../components/ui/BackNavigation";
 import { Button } from "../../components/ui/Button";
+import { useRouter } from "next/navigation";
+import { cardVariants, containerVariants, itemVariants } from "../styles";
+import { roles } from "../../types/onboadingTypes";
 
 const RoleSelectionPage = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
-
-  const roles = [
-    {
-      id: "client",
-      title: "I'm a Client/Designer",
-      description: "Create patterns, export production files.",
-      image: "/images/client-designer.jpg",
-    },
-    {
-      id: "tailor",
-      title: "I'm a Tailor",
-      description: "Get jobs, show your portfolio, get paid.",
-      image: "/images/tailor.jpg",
-    },
-    {
-      id: "both",
-      title: "I'm Both",
-      description: "Do both and switch anytime.",
-      image: "/images/both.jpg",
-    },
-  ];
-
-  // Animation variants
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
+  const router = useRouter();
+  const handleCardClick = (roleId: string) => {
+    setSelectedRole(roleId);
   };
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
+  const handleNext = () => {
+    if (!selectedRole) return;
 
-  const cardVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut",
-      },
-    },
-    hover: {
-      scale: 1.03,
-      transition: {
-        duration: 0.2,
-      },
-    },
-    tap: {
-      scale: 0.98,
-    },
+    if (selectedRole === "client") {
+      router.push("/client-onboarding");
+    } else if (selectedRole === "tailor") {
+      router.push("/tailor-onboarding");
+    } else if (selectedRole === "both") {
+      router.push("/both-onboarding");
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#fff8ef]">
+      {/* Logo - Desktop only */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="hidden md:block fixed top-0 left-0 right-0  z-10 px-6 py-4"
+        className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-[#fff8ef] px-6 py-4"
       >
         <div className="inline-block px-4 py-2 rounded-lg">
           <Image
@@ -93,26 +47,32 @@ const RoleSelectionPage = () => {
         </div>
       </motion.div>
 
+      {/* Fixed Back Button - Mobile only */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-[#fff8ef] px-4 py-4">
+        <BackButton />
+      </div>
+
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-7xl mx-auto px-4  py-8 md:pt-24"
+        className="max-w-7xl mx-auto px-4 pt-20 md:pt-24 pb-8"
       >
-        <motion.div variants={itemVariants}>
-          <BackButton className="mb-12" />
+        {/* Static Back Button - Desktop only */}
+        <motion.div variants={itemVariants} className="hidden md:block mb-12">
+          <BackButton />
         </motion.div>
 
         <motion.div variants={itemVariants} className="text-center mb-12">
           <h1 className="header-large mb-4">Which best describes you?</h1>
-          <p className=" font-normal text-base leading-6 tracking-normal text-center">
+          <p className="font-normal text-base leading-6 tracking-normal text-center">
             Choose a role to get the best experience on AFF Designer.
           </p>
         </motion.div>
 
         <motion.div
           variants={containerVariants}
-          className="hidden md:grid md:grid-cols-3 gap-6 mb-12 "
+          className="hidden md:grid md:grid-cols-3 gap-6 mb-12"
         >
           {roles.map((role) => (
             <motion.button
@@ -120,7 +80,7 @@ const RoleSelectionPage = () => {
               variants={cardVariants}
               whileHover="hover"
               whileTap="tap"
-              onClick={() => setSelectedRole(role.id)}
+              onClick={() => handleCardClick(role.id)}
               className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer ${
                 selectedRole === role.id ? "ring-2 ring-[#FAB75B]" : ""
               }`}
@@ -145,14 +105,14 @@ const RoleSelectionPage = () => {
 
         <motion.div
           variants={containerVariants}
-          className="md:hidden space-y-6 mb-12 "
+          className="md:hidden space-y-6 mb-12"
         >
           {roles.map((role) => (
             <motion.button
               key={role.id}
               variants={cardVariants}
               whileTap="tap"
-              onClick={() => setSelectedRole(role.id)}
+              onClick={() => handleCardClick(role.id)}
               className={`w-full bg-white rounded-2xl overflow-hidden shadow-sm active:shadow-lg transition-shadow duration-300 ${
                 selectedRole === role.id ? "ring-2 ring-[#FAB75B]" : ""
               }`}
@@ -190,6 +150,7 @@ const RoleSelectionPage = () => {
               variant="default"
               size="large"
               disabled={!selectedRole}
+              onClick={handleNext}
               className="w-full"
             >
               Next
