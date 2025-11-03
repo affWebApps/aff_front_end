@@ -12,9 +12,14 @@ import { MultiSelectButtons } from "../components/MultiSelectButtons";
 import { ToggleSwitch } from "../components/ToggleSwitch";
 import { PortfolioUpload } from "../components/PortfolioUpload";
 import { CompletionStep } from "../components/CompletionStep";
-import { countryOptions, FormDataTailor, pricingOptions, skillCategories } from "../../types/onboadingTypes";
-
-
+import {
+  countryOptions,
+  FormDataTailor,
+  pricingOptions,
+  skillCategories,
+} from "../../types/onboadingTypes";
+import { MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const TailorOnboardingPage = () => {
   const router = useRouter();
@@ -32,13 +37,12 @@ const TailorOnboardingPage = () => {
     availability: false,
     pricingType: "per-garment",
     baseRate: "",
+    currency: "",
     whatsIncluded: "",
     portfolioImages: [],
   });
 
   const totalSteps = 5;
-
- 
 
   useEffect(() => {
     if (contentRef.current) {
@@ -93,7 +97,7 @@ const TailorOnboardingPage = () => {
       case 3:
         return formData.pricingType && formData.baseRate;
       case 4:
-        return true; 
+        return true;
       default:
         return true;
     }
@@ -264,15 +268,45 @@ const TailorOnboardingPage = () => {
                   }
                   options={pricingOptions}
                 />
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Base Rate<span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">
-                      ₦
-                    </span>
+                  <div className="flex gap-2">
+                    <Select
+                      value={formData.currency}
+                      onChange={(e: SelectChangeEvent) =>
+                        setFormData({ ...formData, currency: e.target.value })
+                      }
+                      IconComponent={KeyboardArrowDownIcon}
+                      sx={{
+                        width: "100px",
+                        height: "48px",
+                        borderRadius: "12px",
+                        backgroundColor: "white",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#d1d5db",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#d1d5db",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#FAB75B",
+                          borderWidth: "2px",
+                        },
+                        "& .MuiSelect-select": {
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 500,
+                        },
+                      }}
+                    >
+                      <MenuItem value="NGN">₦</MenuItem>
+                      <MenuItem value="USD">$</MenuItem>
+                      <MenuItem value="GBP">£</MenuItem>
+                      <MenuItem value="EUR">€</MenuItem>
+                    </Select>
                     <input
                       type="text"
                       placeholder="Enter amount"
@@ -280,7 +314,7 @@ const TailorOnboardingPage = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, baseRate: e.target.value })
                       }
-                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FAB75B] bg-white"
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FAB75B] bg-white"
                     />
                   </div>
                 </div>

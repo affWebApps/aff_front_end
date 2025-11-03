@@ -12,6 +12,7 @@ export interface FormData {
   availability: boolean;
   pricingType: string;
   baseRate: string;
+  currency: string;
   whatsIncluded: string;
   portfolioImages: File[];
 } 
@@ -130,6 +131,7 @@ export interface FormData {
       availability: boolean;
       pricingType: string;
       baseRate: string;
+      currency: string;
       whatsIncluded: string;
       portfolioImages: File[];
     }

@@ -187,14 +187,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 key={index}
                 className="relative aspect-square border-2 border-gray-300 rounded-xl overflow-hidden bg-white group"
               >
+                {" "}
                 <Image
-                  src="/icons/upload-icon.svg"
-                  alt="Upload icon"
-                  width={40}
-                  height={40}
-                  className="mx-auto mb-2"
+                  src={url}
+                  alt={`Preview ${index + 1}`}
+                  fill
+                  className="object-cover"
                 />
-
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button
                     onClick={() => handleEdit(index)}
