@@ -35,4 +35,17 @@ body {
       @apply text-[24px] leading-9;
     }
   }
+
+  .header-small {
+    font-family: var(--font-montserrat);
+    @apply font-medium text-base leading-6 tracking-normal text-center;
+  }
+
+  @media (max-width: 768px) {
+    .header-small {
+      @apply  leading-5;
+    }
+  }
+
+
 }
