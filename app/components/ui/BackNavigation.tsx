@@ -33,7 +33,7 @@ export const BackButton: React.FC<BackButtonProps> = ({
         text-gray-600 hover:text-gray-800 
         transition-all duration-200
         hover:gap-3
-        focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 cursor-pointer
         rounded-lg px-2 py-1 -ml-2
         ${!showOnMobile ? "hidden sm:flex" : "flex"}
         ${className}
