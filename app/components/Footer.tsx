@@ -22,7 +22,7 @@ export const Footer: React.FC = () => {
   return (
     <footer className="relative bg-[#FAF6F0]">
       <div className="relative z-10 mx-auto px-4 sm:px-6 flex items-center justify-center">
-        <div className="bg-linear-to-r from-[#f5b563] to-[#f8c477] rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-lg border translate-y-1/2 w-full max-w-[1200px]">
+        <div className="bg-linear-to-r from-[#f5b563] to-[#f8c477] rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-lg  border-white border-2 translate-y-1/2 w-full max-w-[1200px]">
           <div className="shrink-0 w-full md:w-auto flex justify-center md:justify-start">
             <Image
               src="/images/african-woman.png"
