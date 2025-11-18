@@ -1,15 +1,11 @@
 "use client";
 import { Button } from "./ui/Button";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function IntroLanding() {
-  const { scrollYProgress } = useScroll();
-  const canvasY = useTransform(scrollYProgress, [0, 0.3], [100, 0]);
-  const canvasOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
-
   return (
-    <div className="min-h-screen bg-linear-to-br from-amber-50 via-orange-50 to-rose-50 relative">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 via-orange-50 to-rose-50 relative pb-[150px] sm:pb-[200px] md:pb-[225px]">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-7xl">
         <div className="relative min-h-[600px] lg:min-h-[700px]">
           <div className="text-center pt-8 px-4 sm:px-8 md:px-16 lg:px-28">
@@ -70,7 +66,7 @@ export default function IntroLanding() {
                   />
                 </motion.div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">
+                <h1 className="homeH1">
                   Bring Your <span className="text-orange-400">Designs</span>
                 </h1>
 
@@ -91,7 +87,7 @@ export default function IntroLanding() {
             </motion.div>
 
             <motion.h2
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-6"
+              className="homeH1"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -101,7 +97,8 @@ export default function IntroLanding() {
             </motion.h2>
 
             <motion.p
-              className="text-gray-600 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 px-4 sm:px-0"
+              className="text-gray-600 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 px-4 sm:px-0 font-medium lg:text-[20px] lg:leading-7 tracking-[0px] text-center mt-4"
+              style={{ fontFamily: "var(--font-montserrat)" }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.5 }}
@@ -184,7 +181,7 @@ export default function IntroLanding() {
 
             {/* Mobile and Tablet Garments - Visible only on mobile and tablet */}
             <motion.div
-              className="flex lg:hidden items-center justify-center gap-8 sm:gap-12 md:gap-16 mb-8"
+              className="flex lg:hidden items-center justify-center gap-8 sm:gap-12 md:gap-16 mb-12"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.4 }}
@@ -212,11 +209,14 @@ export default function IntroLanding() {
         </div>
       </div>
 
+      {/* Canvas Section - Redesigned */}
       <motion.div
-        className="absolute bottom-0 left-0 right-0 z-10 mx-auto px-4 sm:px-6 flex items-center justify-center translate-y-1/4 sm:translate-y-1/3"
-        style={{ y: canvasY, opacity: canvasOpacity }}
+        className="absolute bottom-0 left-0 right-0 z-100 mx-auto px-4 sm:px-6 flex items-center justify-center translate-y-1/2 lg:translate-y-1/12"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, delay: 0.9 }}
       >
-        <div className="bg-white rounded-3xl shadow-xl p-8 sm:p-12 md:p-16 lg:p-16 min-h-[500px] sm:min-h-[400px] md:min-h-[450px] flex items-center justify-center w-full max-w-4xl">
+        <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-12 md:p-16 lg:p-16 min-h-[300px] sm:min-h-[400px] md:min-h-[450px] flex items-center justify-center w-full max-w-md sm:max-w-4xl">
           <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
             CANVAS
           </h3>

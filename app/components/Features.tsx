@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { motion, Variants } from "framer-motion";
 import { Palette, Ruler, Package, Briefcase, Download } from "lucide-react";
 
 export default function FeaturesSection() {
@@ -40,32 +41,82 @@ export default function FeaturesSection() {
     },
   ];
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const headerVariants: Variants = {
+    hidden: { opacity: 0, y: -30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.7,
+      },
+    },
+  };
+
+  const featureItemVariants: Variants = {
+    hidden: { opacity: 0, x: -30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
+  const imageVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.7,
+      },
+    },
+  };
+
   return (
     <div className="min-h-screen py-16 px-4">
-      <div className="max-w-7xl mx-auto">
+      <motion.div
+        className="max-w-7xl mx-auto"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={containerVariants}
+      >
         {/* Header */}
-        <div className="mb-16">
+        <motion.div className="mb-16" variants={headerVariants}>
           <div className="flex items-center gap-3 mb-6">
-            <div className="h-px w-12 bg-amber-600"></div>
-            <span className="text-amber-700 font-medium">Features</span>
-            <div className="h-px w-12 bg-amber-600"></div>
+            <div className="h-px w-12 bg-[#B28241]"></div>
+            <span className="homeH5">Features</span>
+            <div className="h-px w-12 bg-[#B28241]"></div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="homeH2 mb-4">
             Discover what sets AFF apart
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl">
+          <p className="text-gray-600 lg:text-lg max-w-2xl">
             Discover the tools that make designing, and collaborating effortless
             for both designers and tailors.
           </p>
-        </div>
+        </motion.div>
 
         {/* Features Layout */}
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left Side - Feature List */}
           <div className="space-y-4">
             {features.map((feature, index) => (
-              <div
+              <motion.div
                 key={index}
+                variants={featureItemVariants}
                 onClick={() => setActiveFeature(index)}
                 className={`flex items-start gap-4 p-6 rounded-xl cursor-pointer transition-all duration-300 border-b border-amber-200 ${
                   activeFeature === index
@@ -83,20 +134,20 @@ export default function FeaturesSection() {
                   {feature.icon}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <h3 className="lg:text-xl text-lg lg:font-bold font-semibold text-gray-900 mb-2">
                     {feature.title}
                   </h3>
                   {activeFeature === index && (
-                    <p className="text-gray-600">{feature.description}</p>
+                    <p className="text-gray-600 text-sm lg:text-[15px]">{feature.description}</p>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
           {/* Right Side - Image */}
-          <div className="sticky top-8">
-            <div className="rounded-3xl overflow-hidden shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 h-full">
+          <motion.div className="sticky top-8" variants={imageVariants}>
+            <div className="rounded-3xl overflow-hidden shadow-xl bg-linear-to-br from-amber-50 to-orange-50 h-full">
               <Image
                 src="/images/features-img.jpg"
                 alt="Designer working on fashion designs"
@@ -106,9 +157,9 @@ export default function FeaturesSection() {
                 priority
               />
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

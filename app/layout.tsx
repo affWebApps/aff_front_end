@@ -54,10 +54,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${roboto.variable} ${montserrat.variable} font-roboto antialiased`}
       >
-        <Header />
         <main className="min-h-screen">{children}</main>
-        <Footer />
       </body>
     </html>
   );
 }
+
+

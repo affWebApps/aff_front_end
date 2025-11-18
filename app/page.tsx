@@ -1,13 +1,10 @@
-import FeaturesSection from "./components/Features";
-import HowItWorks from "./components/HowItWorks";
-import IntroLanding from "./components/IntroLanding";
+import HomePage from "./(home)/page";
+
 
 export default function Home() {
   return (
-    <div className=" w-full">
-      <IntroLanding />
-      <HowItWorks />
-      <FeaturesSection />
-    </div>
+    <>
+     <HomePage />
+    </>
   );
 }
