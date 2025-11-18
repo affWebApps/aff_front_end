@@ -7,9 +7,10 @@ export default function HomeLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full">
+    <div className="w-full bg-linear-to-b from-orange-50 to-white">
       <Header />
-      <main className="min-h-screen">{children}</main>
+      {/* Add padding-top to prevent content from hiding under fixed header */}
+      <main className="min-h-screen pt-20 lg:mt-16">{children}</main>
       <Footer />
     </div>
   );

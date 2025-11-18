@@ -1,13 +1,14 @@
-
-'use client'
+"use client";
 import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "./ui/Button";
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -18,7 +19,7 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="bg-linear-to-r from-[#6b4e3d] to-[#5a3d2f] shadow-lg">
+    <header className="fixed top-0 left-0 right-0 bg-linear-to-r from-[#6b4e3d] to-[#5a3d2f] shadow-lg z-50">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center justify-between gap-10">
@@ -40,7 +41,7 @@ export const Header: React.FC = () => {
                   key={index}
                   href={item.href}
                   className={`text-[15px] font-medium transition-colors duration-200 pb-1 border-b-2 ${
-                    item.label === "Home"
+                    pathname === item.href
                       ? "text-white border-[#F5A623]"
                       : "text-gray-300 hover:text-white border-transparent hover:border-[#F5A623]/50"
                   }`}
@@ -53,9 +54,12 @@ export const Header: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <button className="text-white text-[15px] font-medium hover:text-gray-200 transition-colors duration-200 hidden lg:block">
+            <Link
+              href="/sign-up"
+              className="text-white text-[15px] font-medium hover:text-gray-200 transition-colors duration-200 hidden lg:block"
+            >
               Sign In
-            </button>
+            </Link>
             <Button size="medium">Get Started</Button>
           </div>
 
@@ -82,7 +86,7 @@ export const Header: React.FC = () => {
                   key={index}
                   href={item.href}
                   className={`text-[15px] font-medium transition-colors duration-200 ${
-                    item.label === "Home"
+                    pathname === item.href
                       ? "text-white"
                       : "text-gray-300 hover:text-white"
                   }`}

@@ -90,7 +90,7 @@ export default function HowItWorks() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br py-16 px-4 mt-48 relative z-10">
+    <div className="min-h-screen bg-linear-to-br py-16 px-4 mt-48 relative z-10 bg-gray-50">
       {" "}
       <div className="max-w-7xl mx-auto">
         {/* Header */}

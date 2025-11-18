@@ -37,7 +37,7 @@ export default function FashionRoles() {
   };
 
   return (
-    <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <motion.div
         className="max-w-7xl mx-auto"
         initial="hidden"
@@ -73,7 +73,7 @@ export default function FashionRoles() {
             className="bg-[#5C4033] rounded-lg overflow-hidden shadow-xl"
             variants={cardVariants}
           >
-            <div className="aspect-[4/3] bg-[#5C4033] relative overflow-hidden p-3">
+            <div className="aspect-4/3 bg-[#5C4033] relative overflow-hidden p-3">
               <div className="relative w-full h-full">
                 <Image
                   src="/images/client.jpg"
@@ -99,10 +99,10 @@ export default function FashionRoles() {
 
           {/* Tailor Card */}
           <motion.div
-            className="bg-[#FAF6F0] rounded-3xl overflow-hidden shadow-xl border rounded-lg border-gray-200"
+            className="bg-[#FAF6F0] rounded-3xl overflow-hidden shadow-xl border border-gray-200"
             variants={cardVariants}
           >
-            <div className="aspect-[4/3] bg-[#FAF6F0] relative overflow-hidden p-2">
+            <div className="aspect-4/3 bg-[#FAF6F0] relative overflow-hidden p-2">
               <div className="relative w-full h-full">
                 <Image
                   src="/images/tailor2.jpg"

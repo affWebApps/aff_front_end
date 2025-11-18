@@ -85,7 +85,7 @@ export default function FeaturesSection() {
   };
 
   return (
-    <div className="min-h-screen py-16 px-4">
+    <div className="min-h-screen py-16 px-4 bg-gray-50">
       <motion.div
         className="max-w-7xl mx-auto"
         initial="hidden"
@@ -100,9 +100,7 @@ export default function FeaturesSection() {
             <span className="homeH5">Features</span>
             <div className="h-px w-12 bg-[#B28241]"></div>
           </div>
-          <h1 className="homeH2 mb-4">
-            Discover what sets AFF apart
-          </h1>
+          <h1 className="homeH2 mb-4">Discover what sets AFF apart</h1>
           <p className="text-gray-600 lg:text-lg max-w-2xl">
             Discover the tools that make designing, and collaborating effortless
             for both designers and tailors.
@@ -138,7 +136,9 @@ export default function FeaturesSection() {
                     {feature.title}
                   </h3>
                   {activeFeature === index && (
-                    <p className="text-gray-600 text-sm lg:text-[15px]">{feature.description}</p>
+                    <p className="text-gray-600 text-sm lg:text-[15px]">
+                      {feature.description}
+                    </p>
                   )}
                 </div>
               </motion.div>

@@ -3,114 +3,115 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "./ui/Button";
+import Image from "next/image";
+
+interface DesktopImage {
+  id: number;
+  span: string;
+  position: string;
+  image: string;
+  marginTop?: string;
+}
 
 export default function FashionGallery() {
-  const desktopImages = [
+  const desktopImages: DesktopImage[] = [
     {
       id: 1,
-      span: "row-span-2",
+      span: "row-span-1",
       position: "col-start-1 row-start-1",
-      image:
-        "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=600&fit=crop",
+      image: "/images/exl.jpg",
     },
     {
       id: 2,
       span: "row-span-2",
-      position: "col-start-1 row-start-3",
-      image:
-        "https://images.unsplash.com/photo-1558769132-cb1aea6c6e7d?w=400&h=600&fit=crop",
+      position: "col-start-1 row-start-2",
+      image: "/images/exl2.jpg",
     },
     {
       id: 3,
-      span: "row-span-2",
+      span: "row-span-1",
       position: "col-start-2 row-start-1",
-      image:
-        "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=500&fit=crop",
+      image: "/images/l1.jpg",
+      marginTop: "mt-16",
     },
     {
       id: 4,
-      span: "row-span-2",
-      position: "col-start-2 row-start-3",
-      image:
-        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=500&fit=crop",
+      span: "row-span-1",
+      position: "col-start-2 row-start-2",
+      image: "/images/l2.jpg",
     },
     {
       id: 5,
-      span: "row-span-2",
-      position: "col-start-2 row-start-5",
-      image:
-        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=600&fit=crop",
+      span: "row-span-1",
+      position: "col-start-2 row-start-3",
+      image: "/images/l3.jpg",
     },
     {
       id: 6,
-      span: "row-span-5",
-      position: "col-start-3 row-start-2",
-      image:
-        "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=400&h=800&fit=crop",
+      span: "row-span-3",
+      position: "col-start-3 row-start-1",
+      image: "/images/midl.jpg",
+      marginTop: "mt-8",
     },
     {
       id: 7,
-      span: "row-span-6",
+      span: "row-span-3",
       position: "col-start-4 row-start-1",
-      image:
-        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=800&fit=crop",
+      image: "/images/mid1.png",
     },
     {
       id: 8,
-      span: "row-span-5",
-      position: "col-start-5 row-start-2",
-      image:
-        "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=800&fit=crop",
+      span: "row-span-3",
+      position: "col-start-5 row-start-1",
+      image: "/images/midr.png",
+      marginTop: "mt-12",
     },
     {
       id: 9,
-      span: "row-span-2",
+      span: "row-span-1",
       position: "col-start-6 row-start-1",
-      image:
-        "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=400&h=500&fit=crop",
+      image: "/images/r1.jpg",
+      marginTop: "mt-20",
     },
     {
       id: 10,
-      span: "row-span-2",
-      position: "col-start-6 row-start-3",
-      image:
-        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
+      span: "row-span-1",
+      position: "col-start-6 row-start-2",
+      image: "/images/r2.jpg",
     },
     {
       id: 11,
-      span: "row-span-2",
-      position: "col-start-6 row-start-5",
-      image:
-        "https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=500&fit=crop",
+      span: "row-span-1",
+      position: "col-start-6 row-start-3",
+      image: "/images/r3.jpg",
     },
     {
       id: 12,
-      span: "row-span-2",
+      span: "row-span-1",
       position: "col-start-7 row-start-1",
-      image:
-        "https://images.unsplash.com/photo-1470309864661-68328b2cd0a5?w=400&h=600&fit=crop",
+      image: "/images/exr.jpg",
+      marginTop: "mt-8",
     },
     {
       id: 13,
-      span: "row-span-3",
-      position: "col-start-7 row-start-3",
-      image:
-        "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=700&fit=crop",
+      span: "row-span-2",
+      position: "col-start-7 row-start-2",
+      image: "/images/ex-r2.jpg",
     },
   ];
 
   const images = [
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1558769132-cb1aea6c6e7d?w=400&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=500&fit=crop",
-    "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=500&fit=crop",
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=400&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=800&fit=crop",
-    "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=400&h=500&fit=crop",
-    "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
-    "https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=500&fit=crop",
+    "/images/r1.jpg",
+    "/images/midl.jpg",
+    "/images/l1.jpg",
+    "/images/exl.jpg",
+    "/images/mid1.png",
+    "/images/exr.jpg",
+    "/images/exl2.jpg",
+    "/images/midr.png",
+    "/images/r2.jpg",
+    "/images/r2.jpg",
+    "/images/l2.jpg",
   ];
 
   // Animation variants
@@ -183,46 +184,54 @@ export default function FashionGallery() {
           {/* Column 1 */}
           <div className="flex flex-col gap-3">
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-[3/4] border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-3/4 border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[0]}
                 alt="Fashion design 1"
+                width={300}
+                height={400}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-square border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-square border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[3]}
                 alt="Fashion design 4"
+                width={300}
+                height={300}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-[3/4] border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-3/4 border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[6]}
                 alt="Fashion design 7"
+                width={300}
+                height={400}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-square border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-square border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[9]}
                 alt="Fashion design 10"
+                width={300}
+                height={300}
                 className="w-full h-full object-cover"
               />
             </motion.div>
@@ -231,35 +240,41 @@ export default function FashionGallery() {
           {/* Column 2 - Center, taller images */}
           <div className="flex flex-col gap-3">
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-[3/5] border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-3/5 border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[1]}
                 alt="Fashion design 2"
+                width={300}
+                height={500}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-[2/3] border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-2/3 border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[4]}
                 alt="Fashion design 5"
+                width={300}
+                height={450}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-[3/5] border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-3/5 border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[7]}
                 alt="Fashion design 8"
+                width={300}
+                height={500}
                 className="w-full h-full object-cover"
               />
             </motion.div>
@@ -268,46 +283,54 @@ export default function FashionGallery() {
           {/* Column 3 */}
           <div className="flex flex-col gap-3">
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-square border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-square border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[2]}
                 alt="Fashion design 3"
+                width={300}
+                height={300}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-[3/4] border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-3/4 border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[5]}
                 alt="Fashion design 6"
+                width={300}
+                height={400}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-square border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-square border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[8]}
                 alt="Fashion design 9"
+                width={300}
+                height={300}
                 className="w-full h-full object-cover"
               />
             </motion.div>
             <motion.div
-              className="rounded-3xl overflow-hidden shadow-md aspect-[3/4] border-4 border-amber-600"
+              className="rounded-3xl overflow-hidden shadow-md aspect-3/4 border-2 border-[#FAB75B]"
               variants={fadeInUp}
               transition={{ duration: 0.4 }}
             >
-              <img
+              <Image
                 src={images[10]}
                 alt="Fashion design 11"
+                width={300}
+                height={400}
                 className="w-full h-full object-cover"
               />
             </motion.div>
@@ -316,7 +339,7 @@ export default function FashionGallery() {
 
         {/* Desktop Grid */}
         <motion.div
-          className="hidden lg:grid grid-cols-7 gap-3 auto-rows-[120px] mb-16"
+          className="hidden lg:grid grid-cols-7 gap-2 auto-rows-[200px] mb-16 max-w-5xl mx-auto"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
@@ -325,13 +348,17 @@ export default function FashionGallery() {
           {desktopImages.map((item) => (
             <motion.div
               key={item.id}
-              className={`${item.span} ${item.position} rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer border-2 border-amber-600`}
+              className={`${item.span} ${item.position} ${
+                item.marginTop || ""
+              } rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer border-2 border-[#FAB75B]`}
               variants={fadeInUp}
               transition={{ duration: 0.5 }}
             >
-              <img
+              <Image
                 src={item.image}
                 alt={`Fashion design ${item.id}`}
+                width={400}
+                height={600}
                 className="w-full h-full object-cover"
               />
             </motion.div>

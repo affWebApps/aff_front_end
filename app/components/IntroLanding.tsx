@@ -211,7 +211,7 @@ export default function IntroLanding() {
 
       {/* Canvas Section - Redesigned */}
       <motion.div
-        className="absolute bottom-0 left-0 right-0 z-100 mx-auto px-4 sm:px-6 flex items-center justify-center translate-y-1/2 lg:translate-y-1/12"
+        className="absolute bottom-0 left-0 right-0 z-40 mx-auto px-4 sm:px-6 flex items-center justify-center translate-y-1/2 lg:translate-y-1/12"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.9 }}

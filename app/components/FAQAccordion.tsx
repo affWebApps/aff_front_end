@@ -3,12 +3,19 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+interface FAQ {
+  question: string;
+  answer: string;
+}
+
 export default function FAQAccordion() {
-  const [openIndex, setOpenIndex] = useState(2);
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef(null);
+  const [openIndex, setOpenIndex] = useState<number>(2);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const currentRef = sectionRef.current; // Store ref value
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -18,18 +25,18 @@ export default function FAQAccordion() {
       { threshold: 0.1 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, []);
 
-  const faqs = [
+  const faqs: FAQ[] = [
     {
       question: "How long does the custom tailoring process take?",
       answer:
@@ -57,19 +64,19 @@ export default function FAQAccordion() {
     },
   ];
 
-  const toggleAccordion = (index) => {
+  const toggleAccordion = (index: number) => {
     setOpenIndex(openIndex === index ? -1 : index);
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-orange-50 flex items-center justify-center p-6">
       <div
         ref={sectionRef}
         className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20"
       >
         {/* Left Section */}
         <div
-          className={`flex flex-col justify-center transition-all duration-1000 ${
+          className={`flex flex-col justify-start transition-all duration-1000 ${
             isVisible
               ? "opacity-100 translate-x-0"
               : "opacity-0 -translate-x-12"
@@ -87,42 +94,46 @@ export default function FAQAccordion() {
 
         {/* Right Section - Accordion */}
         <div className="flex flex-col gap-1">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className={`border-b border-[#d4c8bf] relative transition-all duration-700 ${
-                isVisible
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 translate-x-12"
-              }`}
-              style={{ transitionDelay: `${index * 100}ms` }}
-            >
-              {/* Active border indicator */}
-              {openIndex === index && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#8b7355]"></div>
-              )}
+          {faqs.map((faq, index) => {
+            const delay = index * 100;
 
-              <button
-                onClick={() => toggleAccordion(index)}
-                className="w-full flex items-center justify-between py-6 px-6 text-left transition-colors"
+            return (
+              <div
+                key={index}
+                className={`border-b border-[#d4c8bf] relative transition-all duration-700 ${
+                  isVisible
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 translate-x-12"
+                }`}
+                style={{ transitionDelay: `${delay}ms` }}
               >
-                <span className="text-[#3d2f2f] font-medium text-base lg:text-lg pr-4">
-                  {faq.question}
-                </span>
-                {openIndex === index ? (
-                  <ChevronUp className="w-5 h-5 text-[#3d2f2f] flex-shrink-0" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-[#3d2f2f] flex-shrink-0" />
+                {/* Active border indicator */}
+                {openIndex === index && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#8b7355]"></div>
                 )}
-              </button>
 
-              {openIndex === index && faq.answer && (
-                <div className="px-6 pb-6 text-[#6b5e5e] text-sm lg:text-base leading-relaxed">
-                  {faq.answer}
-                </div>
-              )}
-            </div>
-          ))}
+                <button
+                  onClick={() => toggleAccordion(index)}
+                  className="w-full flex items-center justify-between py-6 px-6 text-left transition-colors"
+                >
+                  <span className="text-[#3d2f2f] font-medium text-base lg:text-lg pr-4">
+                    {faq.question}
+                  </span>
+                  {openIndex === index ? (
+                    <ChevronUp className="w-5 h-5 text-[#3d2f2f] shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-[#3d2f2f] shrink-0" />
+                  )}
+                </button>
+
+                {openIndex === index && faq.answer && (
+                  <div className="px-6 pb-6 text-[#6b5e5e] text-sm lg:text-base leading-relaxed">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
