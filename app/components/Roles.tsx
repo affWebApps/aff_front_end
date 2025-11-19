@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { motion, Variants } from "framer-motion";
 import { Button } from "./ui/Button";
+import Link from "next/link";
 
 export default function FashionRoles() {
   const containerVariants: Variants = {
@@ -93,7 +94,10 @@ export default function FashionRoles() {
                 <br />
                 collaborate with tailors to make them real.
               </p>
+                          <Link href="/sign-in">
+
               <Button className="mx-auto">Get Started</Button>
+              </Link>
             </div>
           </motion.div>
 
@@ -123,7 +127,10 @@ export default function FashionRoles() {
                 <br />
                 and earn doing what you love.
               </p>
+                          <Link href="/sign-in">
+
               <Button className="mx-auto">Get Started</Button>
+              </Link>ß
             </div>
           </motion.div>
         </div>

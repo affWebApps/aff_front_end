@@ -60,7 +60,9 @@ export const Header: React.FC = () => {
             >
               Sign In
             </Link>
-            <Button size="medium">Get Started</Button>
+            <Link href="/sign-in">
+              <Button size="medium">Get Started</Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -96,10 +98,16 @@ export const Header: React.FC = () => {
                 </Link>
               ))}
               <div className="flex flex-col gap-3 pt-4 border-t border-white/10">
-                <button className="text-white text-[15px] font-medium hover:text-gray-200 transition-colors duration-200">
+                <Link
+                  href="/sign-in"
+                  className="text-white text-[15px] font-medium hover:text-gray-200 transition-colors duration-200"
+                >
                   Sign In
-                </button>
+                </Link>
+                            <Link href="/sign-in">
+
                 <Button size="medium">Get Started</Button>
+                            </Link>
               </div>
             </nav>
           </div>

@@ -40,12 +40,15 @@ export const Footer: React.FC = () => {
             <p className="text-[#6b4e3d] text-base sm:text-lg mb-6">
               Join a growing community of designers and tailors.
             </p>
+                      <Link href="/sign-in">
+
             <Button
               size="large"
               className="bg-[#5a3d2f]! hover:bg-[#4a3020]! rounded-xl! px-8 sm:px-10! w-full sm:w-auto"
             >
               Get Started
             </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -53,9 +56,9 @@ export const Footer: React.FC = () => {
       {/* Footer Content */}
       <div className="bg-[#5a3d2f] pt-32 sm:pt-40">
         <div className="max-w-[1300px] mx-auto px-4 sm:px-6 pb-12 mt-24 sm:mt-20">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-10 items-start mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10 items-start mb-12">
             {/* Logo */}
-            <div className="w-[60px] h-10 xl:w-[76px] xl:h-[46px]">
+            <div className="w-[60px] h-10 xl:w-[76px] xl:h-[46px] lg:col-span-2">
               <Image
                 src="/images/logo.svg"
                 alt="logo"
@@ -66,7 +69,7 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Pages */}
-            <div className="text-left">
+            <div className="text-left lg:col-span-2">
               <h3 className="text-white font-semibold text-lg mb-4">Pages</h3>
               <ul className="space-y-3">
                 <li>
@@ -105,7 +108,7 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Services */}
-            <div className="text-left">
+            <div className="text-left lg:col-span-2">
               <h3 className="text-white font-semibold text-lg mb-4">
                 Services
               </h3>
@@ -130,7 +133,7 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Contact */}
-            <div className="text-left">
+            <div className="text-left lg:col-span-4">
               <h3 className="text-white font-semibold text-lg">Contact</h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3 mt-4">
@@ -149,7 +152,7 @@ export const Footer: React.FC = () => {
                   <Mail className="text-white w-5 h-5 mt-1 shrink-0" />
                   <a
                     href="mailto:moreinfo@afrofashionfuse.com"
-                    className="text-gray-300 hover:text-white transition-colors break-all"
+                    className="text-gray-300 hover:text-white transition-colors"
                   >
                     moreinfo@afrofashionfuse.com
                   </a>
@@ -168,7 +171,7 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Social Media */}
-            <div className="flex items-start gap-5 flex-col">
+            <div className="flex items-start gap-5 flex-col lg:col-span-2">
               <span className="text-white font-semibold mb-2">
                 Social media
               </span>

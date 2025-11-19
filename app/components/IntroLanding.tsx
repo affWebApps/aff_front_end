@@ -2,6 +2,7 @@
 import { Button } from "./ui/Button";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function IntroLanding() {
   return (
@@ -153,6 +154,8 @@ export default function IntroLanding() {
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto"
               >
+                            <Link href="/sign-in">
+
                 <Button
                   variant="default"
                   size="large"
@@ -160,6 +163,7 @@ export default function IntroLanding() {
                 >
                   Get Started
                 </Button>
+                </Link>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}

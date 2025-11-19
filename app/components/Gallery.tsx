@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "./ui/Button";
 import Image from "next/image";
+import Link from "next/link";
 
 interface DesktopImage {
   id: number;
@@ -365,7 +366,6 @@ export default function FashionGallery() {
           ))}
         </motion.div>
 
-        {/* CTA Button */}
         <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 30 }}
@@ -373,9 +373,11 @@ export default function FashionGallery() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Button size="large" className="mx-auto">
-            Explore more
-          </Button>
+          <Link href="/gallery" passHref>
+            <Button size="large" className="mx-auto">
+              Explore more
+            </Button>
+          </Link>
         </motion.div>
       </div>
     </div>
