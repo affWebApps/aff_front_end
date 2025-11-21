@@ -48,4 +48,34 @@ body {
   }
 
 
+
+
+  .homeH1 {
+  font-family: var(--font-montserrat);
+  @apply  font-bold text-[50px] leading-[60px] tracking-[0px] text-center;
 }
+
+ @media (max-width: 768px) {
+    .homeH1 {
+      @apply text-[32px] leading-10 ;
+    }
+  }
+
+ .homeH2 {
+  font-family: var(--font-montserrat);
+  @apply  font-semibold lg:text-[32px] lg:leading-10 tracking-[0px];
+  
+ }
+
+ .homeH5 {
+  font-family: var(--font-montserrat);
+  @apply  font-semibold lg:text-[16px] lg:leading-6 tracking-[0px] text-[#B28241];
+  
+ }
+
+
+
+}
+/* class="font-roboto font-semibold text-[16px] leading-[24px] tracking-[0px] text-[#B28241]" */
+
+
