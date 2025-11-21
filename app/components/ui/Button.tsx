@@ -1,4 +1,5 @@
 import React from "react";
+import { Plus, ArrowRight, PlayCircle } from "lucide-react";
 import {
   ButtonVariant,
   ButtonSize,
@@ -62,8 +63,9 @@ export const Button: React.FC<ButtonProps> = ({
   `;
 
   const renderIcon = () => {
-    if (icon === "plus") return <span className="text-lg">+</span>;
-    if (icon === "arrow") return <span className="text-lg">→</span>;
+    if (icon === "plus") return <Plus size={20} />;
+    if (icon === "arrow") return <ArrowRight size={20} />;
+    if (icon === "play") return <PlayCircle size={20} />;
     return null;
   };
 

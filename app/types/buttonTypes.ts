@@ -4,7 +4,7 @@ export type ButtonVariant =
   | "multichoice"
   | "multichoiceActive";
 export type ButtonSize = "small" | "medium" | "large";
-export type IconType = "plus" | "arrow" | null;
+export type IconType = "plus" | "arrow" | "play" | null;
 export type IconPosition = "left" | "right" | "none";
 
 export interface SocialButtonProps {
