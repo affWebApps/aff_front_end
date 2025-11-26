@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "../../components/ui/Button";
-import styles from "@/app/styles/login.module.css";
-import { StatusMessage } from "../../components/ui/StatusMessage";
+import { Button } from "../../../components/ui/Button";
+import styles from "@/styles/login.module.css";
+import { StatusMessage } from "../../../components/ui/StatusMessage";
 import Link from "next/link";
 
 export default function VerifyEmailPage() {

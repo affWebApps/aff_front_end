@@ -130,7 +130,7 @@ export default function FashionRoles() {
                           <Link href="/sign-in">
 
               <Button className="mx-auto">Get Started</Button>
-              </Link>ß
+              </Link>
             </div>
           </motion.div>
         </div>

@@ -6,10 +6,10 @@ import * as Yup from "yup";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 
-import styles from "@/app/styles/login.module.css";
+import styles from "@/styles/login.module.css";
 import Link from "next/link";
-import { Button } from "../../components/ui/Button";
-import { SocialButton } from "../../components/ui/SocialButtons";
+import { Button } from "../../../components/ui/Button";
+import { SocialButton } from "../../../components/ui/SocialButtons";
 
 const validationSchema = Yup.object({
   email: Yup.string()
