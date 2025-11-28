@@ -94,7 +94,7 @@ export default function FashionRoles() {
                 <br />
                 collaborate with tailors to make them real.
               </p>
-                          <Link href="/sign-in">
+                          <Link href="/sign-up">
 
               <Button className="mx-auto">Get Started</Button>
               </Link>
@@ -127,7 +127,7 @@ export default function FashionRoles() {
                 <br />
                 and earn doing what you love.
               </p>
-                          <Link href="/sign-in">
+                          <Link href="/sign-up">
 
               <Button className="mx-auto">Get Started</Button>
               </Link>

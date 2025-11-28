@@ -244,12 +244,12 @@ export const Header: React.FC = () => {
               </div>
 
               <Link
-                href="/sign-up"
+                href="/sign-in"
                 className="text-white text-[15px] font-medium hover:text-gray-200 transition-colors duration-200 hidden lg:block"
               >
                 Sign In
               </Link>
-              <Link href="/sign-in">
+              <Link href="/sign-up">
                 <Button size="medium">Get Started</Button>
               </Link>
             </div>
@@ -293,7 +293,7 @@ export const Header: React.FC = () => {
                   >
                     Sign In
                   </Link>
-                  <Link href="/sign-in">
+                  <Link href="/sign-up">
                     <Button size="medium">Get Started</Button>
                   </Link>
                 </div>

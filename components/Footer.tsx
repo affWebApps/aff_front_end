@@ -40,7 +40,7 @@ export const Footer: React.FC = () => {
             <p className="text-[#6b4e3d] text-base sm:text-lg mb-6">
               Join a growing community of designers and tailors.
             </p>
-                      <Link href="/sign-in">
+                      <Link href="/sign-up">
 
             <Button
               size="large"
