@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import styles from "@/app/styles/login.module.css";
+import styles from "@/styles/login.module.css";
 
 interface StatusMessageProps {
   message: string;

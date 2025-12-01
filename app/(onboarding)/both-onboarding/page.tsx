@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "../../components/ui/Button";
+import { Button } from "../../../components/ui/Button";
 import { NavigationHeader } from "../components/NavigationHeader";
 import { ProgressBar } from "../components/ProgressBar";
 import { FormInput } from "../components/FormInput";
@@ -12,7 +12,7 @@ import { MultiSelectButtons } from "../components/MultiSelectButtons";
 import { ToggleSwitch } from "../components/ToggleSwitch";
 import { CompletionStep } from "../components/CompletionStep";
 import { PortfolioUpload } from "../components/PortfolioUpload";
-import { countryOptions, fabricTypes, FormData, garmentTypes, pricingOptions, skillCategories } from "../../types/onboadingTypes";
+import { countryOptions, fabricTypes, FormData, garmentTypes, pricingOptions, skillCategories } from "../../../types/onboadingTypes";
 import { MenuItem, Select } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 

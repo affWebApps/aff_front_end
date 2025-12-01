@@ -2,11 +2,46 @@
 import { Search } from "@mui/icons-material";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CustomSelect } from "../components/CustomSelect";
-import { ProductsGrid } from "../components/grid/ProductsGrid";
-import { ServicesGrid } from "../components/grid/ServicesGrid";
-import { Pagination } from "../components/ui/Pagination";
 import HomeLayout from "../(home)/layout";
+import ProductDetailPage from "./products/[id]/page";
+import { CustomSelect } from "../../components/CustomSelect";
+import { ProductsGrid } from "../../components/grid/ProductsGrid";
+import { ServicesGrid } from "../../components/grid/ServicesGrid";
+import { Pagination } from "../../components/ui/Pagination";
+import ServiceDetailPage from "./services/[id]/page";
+
+
+interface Product {
+  id: number;
+  image: string;
+  title: string;
+  price: string | number; // ✅ Changed from string to string | number
+  seller: string;
+}
+
+interface Service {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+  fullDescription: string;
+  category: string;
+  deadline: string;
+  startingBid: number;
+  currentBid: number;
+  totalBids: number;
+  requiredSkills: string[];
+  client: {
+    name: string;
+    username: string;
+    avatar: string;
+    bio: string;
+    email: string;
+    location: string;
+  };
+  budget: string | number; // ✅ Changed from string to string | number
+  bids: string | number; // ✅ Changed from string to string | number
+}
 
 export default function MarketplacePage() {
   const [activeTab, setActiveTab] = useState("products");
@@ -14,6 +49,10 @@ export default function MarketplacePage() {
   const [size, setSize] = useState("");
   const [expertiseLevel, setExpertiseLevel] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
+  const [showProductDetail, setShowProductDetail] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null); 
+  const [showServiceDetail, setShowServiceDetail] = useState(false);
 
   const products = [
     {
@@ -81,6 +120,26 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription:
+        "I'm looking for a skilled tailor to bring my design concept to life for an upcoming wedding. I have a clear vision, drafted patterns, and a collection of inspiration images for the wedding gown.",
+      category: "Sewing and Tailoring",
+      deadline: "2 weeks",
+      startingBid: 100000,
+      currentBid: 150000,
+      totalBids: 5,
+      requiredSkills: [
+        "Fashion Design",
+        "Pattern Drafting",
+        "Alterations & Repairs",
+      ],
+      client: {
+        name: "Amina Yusuf",
+        username: "@aminat60",
+        avatar: "/api/placeholder/80/80",
+        bio: "Passionate about fashion and design.",
+        email: "aminayusuf@gmail.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -90,6 +149,26 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription:
+        "I'm looking for a skilled tailor to bring my design concept to life for an upcoming wedding. I have a clear vision, drafted patterns, and a collection of inspiration images for the wedding gown.",
+      category: "Sewing and Tailoring",
+      deadline: "3 weeks",
+      startingBid: 120000,
+      currentBid: 150000,
+      totalBids: 8,
+      requiredSkills: [
+        "Fashion Design",
+        "Pattern Drafting",
+        "Alterations & Repairs",
+      ],
+      client: {
+        name: "Folake Johnson",
+        username: "@folake_j",
+        avatar: "/api/placeholder/80/80",
+        bio: "Fashion enthusiast and designer.",
+        email: "folake@example.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -99,6 +178,22 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription:
+        "I'm looking for a skilled tailor to bring my design concept to life for an upcoming wedding.",
+      category: "Sewing and Tailoring",
+      deadline: "4 weeks",
+      startingBid: 100000,
+      currentBid: 150000,
+      totalBids: 6,
+      requiredSkills: ["Fashion Design", "Pattern Drafting"],
+      client: {
+        name: "Zainab Ahmed",
+        username: "@zainab_a",
+        avatar: "/api/placeholder/80/80",
+        bio: "Designer and creator.",
+        email: "zainab@example.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -108,6 +203,21 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription: "Seeking experienced tailor for custom wedding gown.",
+      category: "Sewing and Tailoring",
+      deadline: "2 weeks",
+      startingBid: 100000,
+      currentBid: 150000,
+      totalBids: 7,
+      requiredSkills: ["Fashion Design", "Alterations & Repairs"],
+      client: {
+        name: "Ngozi Eze",
+        username: "@ngozi_e",
+        avatar: "/api/placeholder/80/80",
+        bio: "Fashion lover.",
+        email: "ngozi@example.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -117,6 +227,21 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription: "Need expert tailor for wedding gown project.",
+      category: "Sewing and Tailoring",
+      deadline: "3 weeks",
+      startingBid: 100000,
+      currentBid: 150000,
+      totalBids: 4,
+      requiredSkills: ["Fashion Design", "Pattern Drafting"],
+      client: {
+        name: "Aisha Bello",
+        username: "@aisha_b",
+        avatar: "/api/placeholder/80/80",
+        bio: "Style enthusiast.",
+        email: "aisha@example.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -126,6 +251,21 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription: "Looking for professional tailor for custom gown.",
+      category: "Sewing and Tailoring",
+      deadline: "2 weeks",
+      startingBid: 100000,
+      currentBid: 150000,
+      totalBids: 9,
+      requiredSkills: ["Fashion Design"],
+      client: {
+        name: "Chidinma Okon",
+        username: "@chidi_o",
+        avatar: "/api/placeholder/80/80",
+        bio: "Creative designer.",
+        email: "chidinma@example.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -135,6 +275,21 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription: "Experienced tailor needed for wedding gown.",
+      category: "Sewing and Tailoring",
+      deadline: "4 weeks",
+      startingBid: 100000,
+      currentBid: 150000,
+      totalBids: 5,
+      requiredSkills: ["Fashion Design", "Pattern Drafting"],
+      client: {
+        name: "Fatima Usman",
+        username: "@fatima_u",
+        avatar: "/api/placeholder/80/80",
+        bio: "Fashion designer.",
+        email: "fatima@example.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -144,6 +299,22 @@ export default function MarketplacePage() {
       title: "Custom wedding gown sewing",
       description:
         "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
+      fullDescription:
+        "Skilled tailor required for custom wedding gown design.",
+      category: "Sewing and Tailoring",
+      deadline: "3 weeks",
+      startingBid: 100000,
+      currentBid: 150000,
+      totalBids: 6,
+      requiredSkills: ["Fashion Design", "Alterations & Repairs"],
+      client: {
+        name: "Blessing Nwosu",
+        username: "@blessing_n",
+        avatar: "/api/placeholder/80/80",
+        bio: "Design enthusiast.",
+        email: "blessing@example.com",
+        location: "Lagos, NG",
+      },
       budget: "150,000",
       bids: "5 - 10",
     },
@@ -158,6 +329,43 @@ export default function MarketplacePage() {
     hidden: { opacity: 0, y: -30 },
     visible: { opacity: 1, y: 0 },
   };
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setShowProductDetail(true);
+  };
+
+  const handleServiceClick = (service: Service) => {
+    setSelectedService(service);
+    setShowServiceDetail(true);
+  };
+
+  const handleBackToMarketplace = () => {
+    setShowProductDetail(false);
+    setSelectedProduct(null);
+  };
+
+  if (showProductDetail && selectedProduct) {
+    return (
+      <HomeLayout>
+        <ProductDetailPage
+          product={selectedProduct}
+          onBack={handleBackToMarketplace}
+        />
+      </HomeLayout>
+    );
+  }
+
+  if (showServiceDetail && selectedService) {
+    return (
+      <HomeLayout>
+        <ServiceDetailPage
+          service={selectedService}
+          onBack={handleBackToMarketplace}
+        />
+      </HomeLayout>
+    );
+  }
 
   return (
     <HomeLayout>
@@ -288,9 +496,15 @@ export default function MarketplacePage() {
 
           {/* Content Grid */}
           {activeTab === "products" ? (
-            <ProductsGrid products={products} />
+            <ProductsGrid
+              products={products}
+              onProductClick={handleProductClick}
+            />
           ) : (
-            <ServicesGrid services={services} />
+            <ServicesGrid
+              services={services}
+              onServiceClick={handleServiceClick}
+            />
           )}
 
           {/* Pagination */}

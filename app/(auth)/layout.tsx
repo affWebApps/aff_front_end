@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import styles from "@/app/styles/login.module.css";
+import styles from "@/styles/login.module.css";
 
 interface AuthLayoutProps {
   children: React.ReactNode;

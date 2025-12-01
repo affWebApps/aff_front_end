@@ -2,19 +2,38 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface Service {
-  id: string | number;
+  id: number; 
   image: string;
   title: string;
   description: string;
+  fullDescription: string; 
+  category: string; 
+  deadline: string; 
+  startingBid: number; 
+  currentBid: number; 
+  totalBids: number; 
+  requiredSkills: string[]; 
+  client: {
+    name: string;
+    username: string;
+    avatar: string;
+    bio: string;
+    email: string;
+    location: string;
+  };
   budget: string | number;
   bids: string | number;
 }
 
 interface ServicesGridProps {
   services: Service[];
+  onServiceClick: (service: Service) => void; 
 }
 
-export const ServicesGrid = ({ services }: ServicesGridProps) => {
+export const ServicesGrid = ({
+  services,
+  onServiceClick,
+}: ServicesGridProps) => {
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -33,6 +52,7 @@ export const ServicesGrid = ({ services }: ServicesGridProps) => {
         <motion.div
           key={service.id}
           variants={fadeInUp}
+          onClick={() => onServiceClick(service)}
           className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer flex flex-col sm:flex-row"
         >
           <div className="w-full sm:w-40 h-48 sm:h-auto shrink-0 relative">

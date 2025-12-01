@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import Header from "../../components/ui/Header";
+import Footer from "../../components/Footer";
 
 export default function HomeLayout({
   children,

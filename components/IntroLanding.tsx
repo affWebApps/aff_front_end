@@ -154,7 +154,7 @@ export default function IntroLanding() {
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto"
               >
-                            <Link href="/sign-in">
+                            <Link href="/sign-up">
 
                 <Button
                   variant="default"

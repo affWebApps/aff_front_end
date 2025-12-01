@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import styles from "@/app/styles/login.module.css";
-import { Button } from "../../components/ui/Button";
+import styles from "@/styles/login.module.css";
+import { Button } from "../../../components/ui/Button";
 
 export default function PasswordUpdatedPage() {
   return (

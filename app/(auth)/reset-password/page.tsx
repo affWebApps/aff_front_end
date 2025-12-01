@@ -6,9 +6,9 @@ import * as Yup from "yup";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
-import styles from "@/app/styles/login.module.css";
-import { Button } from "../../components/ui/Button";
-import { StatusMessage } from "../../components/ui/StatusMessage";
+import styles from "@/styles/login.module.css";
+import { Button } from "../../../components/ui/Button";
+import { StatusMessage } from "../../../components/ui/StatusMessage";
 
 
 

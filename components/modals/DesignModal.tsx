@@ -3,6 +3,7 @@ import React from "react";
 import { Heart, MessageCircle, X } from "lucide-react";
 import Image from "next/image";
 import { BaseModal } from "./BaseModal";
+import { Button } from "../ui/Button";
 
 interface Design {
   id: number;
@@ -114,12 +115,14 @@ export const DesignModal = ({ isOpen, onClose, design }: DesignModalProps) => {
         </div>
 
         <div className="flex gap-3 mt-6">
-          <button className="flex-1 bg-[#FAB75B] hover:bg-[#e9a547] text-white font-semibold py-3 rounded-lg transition-colors">
-            Hire this Tailor
-          </button>
-          <button className="flex-1 border-2 border-[#FAB75B] text-[#FAB75B] hover:bg-orange-50 font-semibold py-3 rounded-lg transition-colors">
+          <Button variant="default" size="large">
+            {" "}
+            Hire this Tailor{" "}
+          </Button>{" "}
+          <Button variant="default" size="large">
+            {" "}
             View Profile
-          </button>
+          </Button>{" "}
         </div>
       </div>
     </BaseModal>
