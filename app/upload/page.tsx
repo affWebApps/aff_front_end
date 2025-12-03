@@ -22,6 +22,12 @@ export default function UploadPage() {
   const [files, setFiles] = useState<FileState[]>([]);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml",
+    "video/mp4", "video/webm", "video/ogg",
+    "audio/mpeg", "audio/wav", "audio/ogg", "audio/aac", "audio/mp4", "audio/x-m4a",
+    "application/pdf"];
+  const maxSizeMb = 10;
+
   const hasMissingEnv = useMemo(() => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
     const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
@@ -31,12 +37,26 @@ export default function UploadPage() {
   const onFilesSelected = (selected: FileList | null) => {
     if (!selected || selected.length === 0) return;
 
-    const nextFiles: FileState[] = Array.from(selected).map((file) => ({
-      file,
-      status: "idle",
-    }));
+    const nextFiles: FileState[] = [];
+    let skipped = 0;
+
+    Array.from(selected).forEach((file) => {
+      const isAllowedType = allowedTypes.includes(file.type);
+      const isAllowedSize = file.size <= maxSizeMb * 1024 * 1024;
+
+      if (isAllowedType && isAllowedSize) {
+        nextFiles.push({ file, status: "idle" });
+      } else {
+        skipped += 1;
+      }
+    });
+
     setFiles(nextFiles);
-    setGlobalError(null);
+    setGlobalError(
+      skipped > 0
+        ? `Skipped ${skipped} file(s). Allowed types: JPG/PNG. Max size: ${maxSizeMb}MB.`
+        : null
+    );
   };
 
   const handleDrop = (event: DragEvent<HTMLLabelElement>) => {
@@ -140,6 +160,7 @@ export default function UploadPage() {
               id="file-input"
               type="file"
               multiple
+              accept={allowedTypes.join(",")}
               className="sr-only"
               onChange={handleInputChange}
               aria-label="Upload files"
