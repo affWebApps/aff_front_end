@@ -1,0 +1,98 @@
+import axios from "axios";
+import { useAuthStore } from "@/store/authStore";
+
+const BASE_URL = "https://aff-back-end.onrender.com/v1";
+
+// Create axios instance
+export const apiClient = axios.create({
+  baseURL: BASE_URL,
+  timeout: 30000,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+  withCredentials: false,
+});
+
+// Request interceptor - automatically adds token to requests
+apiClient.interceptors.request.use(
+  (config) => {
+    // Log the request for debugging
+    console.log("🚀 API Request:", {
+      method: config.method?.toUpperCase(),
+      url: `${config.baseURL}${config.url}`,
+      data: config.data,
+      headers: config.headers,
+    });
+
+    // Get token directly from Zustand store (no localStorage needed!)
+    const token = useAuthStore.getState().token;
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    console.error("❌ Request Error:", error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor - handles errors globally
+apiClient.interceptors.response.use(
+  (response) => {
+    // Log successful response
+    console.log("✅ API Response:", {
+      status: response.status,
+      data: response.data,
+      url: response.config.url,
+    });
+    return response;
+  },
+  (error) => {
+    // Log error details for debugging
+    console.error("❌ API Error:", {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method,
+    });
+
+    // Handle 404 Not Found
+    if (error.response?.status === 404) {
+      console.error(
+        "404 Error: Endpoint not found. Check your URL:",
+        error.config?.url
+      );
+    }
+
+    // Handle CORS errors
+    if (error.message.includes("Network Error") || !error.response) {
+      console.error(
+        "CORS or Network Error: The server might not be responding or CORS is not configured properly"
+      );
+    }
+
+    // Handle 401 Unauthorized - token expired or invalid
+    if (error.response?.status === 401) {
+      const logout = useAuthStore.getState().logout;
+      logout();
+      if (typeof window !== "undefined") {
+        window.location.href = "/sign-in";
+      }
+    }
+
+    // Handle 500 Server Error
+    if (error.response?.status === 500) {
+      console.error("Server error:", error.response.data);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
