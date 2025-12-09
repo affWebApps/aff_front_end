@@ -1,7 +1,9 @@
 import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
 
-const BASE_URL = "https://aff-back-end.onrender.com/v1";
+// Use environment variable for base URL
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Create axios instance
 export const apiClient = axios.create({

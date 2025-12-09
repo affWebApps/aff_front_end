@@ -1,12 +1,17 @@
-import { MessageSquare, Search, Bell, Menu } from "lucide-react";
+"use client";
+
+import { MessageSquare, Search, Bell, Menu, User } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useAuthStore } from "@/store/authStore";
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
+  const { user } = useAuthStore();
+
   return (
     <header className="bg-[#FAF6F0] border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
       <div className="flex items-center justify-between gap-4">
@@ -48,18 +53,28 @@ export function Header({ onMenuClick }: HeaderProps) {
             <Bell size={20} className="text-gray-600" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
+
+          {/* User Avatar */}
           <Link
             href="/user"
-            className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden"
+            className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden"
             aria-label="User profile"
           >
-            <Image
-              src="/images/profile"
-              alt="User"
-              fill
-              className="object-cover"
-              sizes="40px"
-            />
+            {user?.avatar_url ? (
+              <Image
+                src={user.avatar_url}
+                alt={
+                  user.display_name || `${user.first_name} ${user.last_name}`
+                }
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500">
+                <User size={20} className="text-white" />
+              </div>
+            )}
           </Link>
         </div>
       </div>

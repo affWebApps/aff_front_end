@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   FolderOpen,
@@ -9,15 +11,18 @@ import {
   ShoppingBag,
   Lightbulb,
 } from "lucide-react";
+import { useAuthStore } from "../../../store/authStore";
 
 export default function Dashboard() {
+  const { user } = useAuthStore();
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2 font-(family-name:--font-montserrat) ">
-            Welcome back, Alex
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            Welcome back, {user?.first_name || user?.display_name}
           </h1>
           <p className="text-gray-500">
             Here&apos;s the overview of your engagements
@@ -80,7 +85,7 @@ export default function Dashboard() {
           {/* Recent Designs */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-thin text-gray-900 font-(family-name:--font-montserrat) ">
+              <h2 className="text-xl font-thin text-gray-900">
                 Recent Designs
               </h2>
               <button className="text-[#FBC57C] hover:text-[#dfac68] font-medium cursor-pointer">
@@ -195,7 +200,7 @@ export default function Dashboard() {
           <div className="bg-[#FBF6F0] rounded-lg shadow-sm overflow-hidden">
             <div className="flex items-center gap-2 p-4 bg-[#FBC57C]">
               <Lightbulb className="w-5 h-5 text-gray-900" />
-              <h2 className="text-xl font-thin text-gray-900 font-(family-name:--font-montserrat) ">
+              <h2 className="text-xl font-thin text-gray-900">
                 Marketplace activity
               </h2>
             </div>
@@ -237,7 +242,7 @@ export default function Dashboard() {
                     </span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    "Photoshoot Stylist&ldquo;
+                    "Photoshoot Stylist"
                   </div>
                   <div className="text-sm text-gray-500 mt-1">1d ago</div>
                 </div>

@@ -82,7 +82,7 @@ export default function FAQAccordion() {
               : "opacity-0 -translate-x-12"
           }`}
         >
-          <h1 className="text-5xl lg:text-6xl text-[#3d2f2f] mb-4 ">
+          <h1 className="text-5xl lg:text-6xl text-[#3d2f2f] mb-4 font-(family-name:--font-montserrat)">
             Frequently asked
             <br />
             Questions

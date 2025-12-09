@@ -84,7 +84,7 @@ export default function TestimonialSection() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <motion.h2
-          className="text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-12 lg:mb-16 homeH2"
+          className="text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-12 lg:mb-16 homeH2 "
           variants={itemVariants}
         >
           Trusted by Designers and Tailors

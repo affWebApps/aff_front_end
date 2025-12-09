@@ -1,13 +1,7 @@
+// store/authStore.ts
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { authService } from "@/services/authServices";
-
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-}
+import { authService, User } from "@/services/authServices";
 
 interface AuthState {
   user: User | null;
@@ -48,7 +42,7 @@ export const useAuthStore = create<AuthState>()(
         }));
       },
 
-      // NEW: Verify token is still valid and fetch fresh user data
+      // Verify token is still valid and fetch fresh user data
       checkAuth: async () => {
         try {
           const token = get().token;
