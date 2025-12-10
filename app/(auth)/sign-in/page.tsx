@@ -14,7 +14,7 @@ import { SocialButton } from "../../../components/ui/SocialButtons";
 import { useAuthStore } from "@/store/authStore";
 import { authService } from "../../../services/authServices";
 import { AuthRedirect } from "../../../components/auth/AuthRedirect";
-import { useGoogleAuth } from "@/hooks/useGoogleAuth";
+import { useOAuth } from "../../../hooks/useOAuth";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -28,7 +28,7 @@ function SignInContent() {
   const [loginError, setLoginError] = useState("");
   const router = useRouter();
   const { setAuth } = useAuthStore();
-  const { loginWithGoogle } = useGoogleAuth();
+  const { loginWithGoogle, loginWithFacebook } = useOAuth();
 
   const formik = useFormik({
     initialValues: {
@@ -62,6 +62,7 @@ function SignInContent() {
 
         setAuth(userData, loginResponse.access_token);
         router.push("/dashboard");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("❌ Login error:", error);
 
@@ -252,6 +253,7 @@ function SignInContent() {
                 />
               }
               text="Continue with Facebook"
+              onClick={loginWithFacebook}
             />
           </div>
           <div
