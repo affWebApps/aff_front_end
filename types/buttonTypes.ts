@@ -11,4 +11,5 @@ export interface SocialButtonProps {
   icon: React.ReactNode;
   text: string;
   color?: string;
+  onClick?: () => void;
 }

@@ -1,16 +1,24 @@
+// components/modals/ViewPortfolioModal.tsx
 "use client";
 import React from "react";
+import Image from "next/image";
+import { Star } from "lucide-react";
 import { BaseModal } from "./BaseModal";
+import { Portfolio } from "@/services/portfolioService";
 
 interface ViewPortfolioModalProps {
   isOpen: boolean;
   onClose: () => void;
+  portfolio: Portfolio | null;
 }
 
 export default function ViewPortfolioModal({
   isOpen,
   onClose,
+  portfolio,
 }: ViewPortfolioModalProps) {
+  if (!portfolio) return null;
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -20,34 +28,61 @@ export default function ViewPortfolioModal({
       maxWidth="lg"
     >
       <div className="p-6 max-h-[70vh] overflow-y-auto">
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        {/* Project Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Project title
             </label>
-            <p className="text-gray-900">Milkmaid dress</p>
+            <p className="text-gray-900 font-semibold">{portfolio.title}</p>
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Project description
             </label>
-            <p className="text-gray-900">
-              Female dress that can be worn to Picnics
+            <p className="text-gray-700 leading-relaxed">
+              {portfolio.description}
             </p>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <img
-            src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&h=600&fit=crop"
-            alt="Milkmaid dress"
-            className="w-full rounded-lg object-cover"
-          />
-          <img
-            src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&h=600&fit=crop"
-            alt="Milkmaid dress detail"
-            className="w-full rounded-lg object-cover"
-          />
+        {/* Portfolio Images */}
+        {portfolio.Image && portfolio.Image.length > 0 ? (
+          <div className="space-y-4">
+            {portfolio.Image.map((image, index) => (
+              <div key={image.id} className="relative">
+                <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden bg-gray-100">
+                  <Image
+                    src={image.image_url}
+                    alt={`${portfolio.title} - Image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 600px"
+                  />
+                  {image.is_primary && (
+                    <div className="absolute top-4 left-4 bg-[#FAB75B] text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium">
+                      <Star className="w-3 h-3 fill-current" />
+                      Primary Image
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            <p>No images available for this portfolio</p>
+          </div>
+        )}
+
+        {/* Metadata */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <span>
+              Created: {new Date(portfolio.created_at).toLocaleDateString()}
+            </span>
+            <span>{portfolio.Image.length} images</span>
+          </div>
         </div>
       </div>
     </BaseModal>
