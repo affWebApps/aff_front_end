@@ -2,7 +2,6 @@
 
 import { MessageSquare, Search, Bell, Menu, User } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuthStore } from "@/store/authStore";
 
 interface HeaderProps {
@@ -57,21 +56,20 @@ export function Header({ onMenuClick }: HeaderProps) {
           {/* User Avatar */}
           <Link
             href="/user"
-            className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden"
+            className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center overflow-hidden"
             aria-label="User profile"
           >
             {user?.avatar_url ? (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={user.avatar_url}
                 alt={
                   user.display_name || `${user.first_name} ${user.last_name}`
                 }
-                fill
-                className="object-cover"
-                sizes="40px"
+                className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-400 to-orange-500">
+              <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-amber-400 to-orange-500">
                 <User size={20} className="text-white" />
               </div>
             )}

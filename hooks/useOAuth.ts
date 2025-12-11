@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { googleAuthService } from "@/services/googleAuthService";
 import { facebookAuthService } from "@/services/facebookAuthService";
+import { authService } from "@/services/authServices";
 import { useAuthStore } from "@/store/authStore";
-import { User } from "@/services/authServices";
 
 type OAuthProvider = "google" | "facebook";
 
@@ -59,7 +59,9 @@ export const useOAuth = () => {
       if (code) {
         setIsLoading(true);
         try {
-          // Use the appropriate service to exchange the code
+          console.log(`🔄 Starting ${provider} OAuth exchange...`);
+
+          // Step 1: Exchange OAuth code for access token
           const authData =
             provider === "facebook"
               ? await facebookAuthService.exchangeOAuthCode(code, "facebook")
@@ -67,38 +69,31 @@ export const useOAuth = () => {
 
           console.log(`✅ ${provider} OAuth exchange successful:`, authData);
 
-          const user: User = {
-            id: authData.user.id,
-            email: authData.user.email,
-            first_name: authData.user.firstName,
-            last_name: authData.user.lastName,
-            display_name: `${authData.user.firstName} ${authData.user.lastName}`,
-            avatar_url: null,
-            is_verified: true,
-            is_active: true,
-            role: "user",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            reviews_received: [],
-            portfolios: [],
-            projects: [],
-            bids: [],
-          };
+          // Step 2: Fetch full user details using the access token
+          console.log("🔄 Fetching user details from /auth/users/me...");
+          const fullUserData = await authService.getCurrentUser(
+            authData.access_token
+          );
 
-          setAuth(user, authData.access_token);
+          console.log("✅ User details fetched:", fullUserData);
+
+          // Step 3: Store auth data in Zustand store (which persists to localStorage)
+          setAuth(fullUserData, authData.access_token);
           setError(null);
 
+          // Small delay to ensure state is persisted
           await new Promise((resolve) => setTimeout(resolve, 100));
 
-          // Get redirect URL from the appropriate service
+          // Step 4: Clean up and redirect
           const redirectUrl =
             provider === "facebook"
               ? facebookAuthService.getRedirectUrl()
               : googleAuthService.getRedirectUrl();
 
+          console.log("✅ Redirecting to:", redirectUrl);
           router.push(redirectUrl);
         } catch (error) {
-          console.error(`Failed to exchange ${provider} OAuth code:`, error);
+          console.error(`❌ Failed to complete ${provider} OAuth:`, error);
 
           const errorMessage =
             error instanceof Error

@@ -8,7 +8,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   setAuth: (user: User, token: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
   checkAuth: () => Promise<void>;
 }
@@ -21,6 +21,10 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: (user, token) => {
+        console.log("✅ Setting auth in store:", {
+          userId: user.id,
+          email: user.email,
+        });
         set({
           user,
           token,
@@ -28,12 +32,28 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      logout: () => {
+      logout: async () => {
+        const token = get().token;
+
+        // Call backend logout endpoint if token exists
+        if (token) {
+          try {
+            await authService.logout(token);
+          } catch (error) {
+            console.error("Backend logout failed:", error);
+            // Continue with local cleanup even if API fails
+          }
+        }
+
+        // Clear auth state (this will automatically clear localStorage via zustand persist)
+        console.log("🔄 Clearing auth state and localStorage...");
         set({
           user: null,
           token: null,
           isAuthenticated: false,
         });
+
+        console.log("✅ Logout complete");
       },
 
       updateUser: (updatedUser) => {
@@ -51,8 +71,12 @@ export const useAuthStore = create<AuthState>()(
             throw new Error("No token found");
           }
 
+          console.log("🔄 Checking auth status...");
+
           // Fetch current user with existing token
           const userData = await authService.getCurrentUser(token);
+
+          console.log("✅ Auth check successful");
 
           // Update user data
           set({
@@ -60,7 +84,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
           });
         } catch (error) {
-          console.error("Auth check failed:", error);
+          console.error("❌ Auth check failed:", error);
           // Clear auth state if token is invalid
           set({
             user: null,

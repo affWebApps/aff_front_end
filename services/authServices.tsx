@@ -1,14 +1,36 @@
-// ==================== INTERFACES ====================
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// services/authServices.ts
 import apiClient from "../lib/api/axios";
-import { AxiosError } from "axios";
 
-// Request body for registration (API expects camelCase)
-export interface RegisterData {
+// ============================================
+// TYPES & INTERFACES
+// ============================================
+
+export interface User {
+  id: string;
   email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
+  display_name: string;
+  avatar_url: string | null;
+  is_verified: boolean;
+  is_active: boolean;
+  role: string;
+  created_at: string;
+  updated_at: string;
+  reviews_received: Review[];
+  portfolios: any[];
+  projects: any[];
+  bids: any[];
+}
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  reviewer_id: string;
+  reviewer_name: string;
+  created_at: string;
 }
 
 export interface LoginCredentials {
@@ -16,313 +38,164 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface LoginResponse {
-  access_token: string;
-}
-
-export interface RegisterResponse {
-  status: string; // "verification_email_sent"
-}
-
-// API Error Response Type
-export interface ApiErrorResponse {
-  message?: string;
-  detail?: string;
-  error?: string;
-  [key: string]: unknown;
-}
-
-// Review Type
-export interface Review {
-  id: string;
-  rating: number;
-  comment?: string;
-  review_text?: string;
-  reviewer_name?: string;
-  created_at?: string;
-}
-
-// Portfolio Type
-export interface Portfolio {
-  id: string;
-  title: string;
-  description?: string;
-  [key: string]: unknown;
-}
-
-// Project Type
-export interface Project {
-  id: string;
-  title: string;
-  [key: string]: unknown;
-}
-
-// Bid Type
-export interface Bid {
-  id: string;
-  amount: number;
-  [key: string]: unknown;
-}
-
-// User Type - API returns snake_case
-export interface User {
-  id: string;
+export interface RegisterData {
   email: string;
+  password: string;
   first_name: string;
   last_name: string;
-  display_name: string | null;
-  avatar_url: string | null;
-  role: string;
-  is_active: boolean;
-  is_verified: boolean;
-  reviews_received: Review[];
-  portfolios: Portfolio[];
-  projects: Project[];
-  bids: Bid[];
-  created_at: string;
-  updated_at: string;
 }
 
-export interface VerifyEmailData {
-  token: string;
+export interface AuthResponse {
+  access_token: string;
+  user: User;
 }
 
-export interface ForgotPasswordData {
-  email: string;
-}
-
-export interface ResetPasswordData {
-  token: string;
-  password: string;
-}
-
-export interface VerifyEmailResponse {
-  message: string;
-  status: string;
-}
-
-export interface ForgotPasswordResponse {
-  message: string;
-  status: string;
-}
-
-export interface ResetPasswordResponse {
-  message: string;
-  status: string;
-}
-
-// ==================== AUTH SERVICE ====================
+// ============================================
+// AUTH SERVICE
+// ============================================
 
 export const authService = {
   /**
    * Register a new user
-   * POST /auth/register
-   * Expects: { email, password, firstName, lastName } (camelCase)
    */
-  register: async (data: RegisterData): Promise<RegisterResponse> => {
+  register: async (data: RegisterData): Promise<AuthResponse> => {
     try {
-      console.log("📝 Registering user with data:", {
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-      });
+      console.log("🔄 Registering new user...");
 
-      // Send data as-is (camelCase as API expects)
-      const response = await apiClient.post<RegisterResponse>(
+      const response = await apiClient.post<AuthResponse>(
         "/auth/register",
         data
       );
 
-      console.log("✅ Registration successful:", response.data);
+      console.log("✅ Registration successful");
       return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
+    } catch (error: any) {
       console.error("❌ Registration failed:", {
-        message: axiosError.message,
-        response: axiosError.response?.data,
-        status: axiosError.response?.status,
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
       });
       throw error;
     }
   },
 
   /**
-   * Login user
-   * POST /auth/login
-   * Expects: { email, password }
+   * Login with email and password
    */
-  login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
+  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     try {
-      console.log("🔐 Logging in user:", credentials.email);
+      console.log("🔄 Logging in user...");
 
-      const response = await apiClient.post<LoginResponse>(
+      const response = await apiClient.post<AuthResponse>(
         "/auth/login",
         credentials
       );
 
       console.log("✅ Login successful");
       return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
+    } catch (error: any) {
       console.error("❌ Login failed:", {
-        message: axiosError.message,
-        response: axiosError.response?.data,
-        status: axiosError.response?.status,
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
       });
       throw error;
     }
   },
 
   /**
-   * Get current authenticated user
-   * GET /users/me
-   * Returns: User object with snake_case fields
+   * Fetch current user details using access token
    */
-  getCurrentUser: async (token?: string): Promise<User> => {
+  getCurrentUser: async (token: string): Promise<User> => {
     try {
-      console.log("👤 Fetching current user...");
+      console.log("🔄 Fetching current user from /auth/users/me");
 
-      // If token is provided, use it directly in this request
-      const config = token
-        ? {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        : {};
+      const response = await apiClient.get<User>("/users/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const response = await apiClient.get<User>("/users/me", config);
-
-      console.log("✅ Current user fetched:", response.data.email);
+      console.log("✅ User details fetched successfully");
       return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("❌ Get current user failed:", {
-        message: axiosError.message,
-        status: axiosError.response?.status,
-        url: axiosError.config?.url,
+    } catch (error: any) {
+      console.error("❌ Failed to fetch user details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
       });
       throw error;
     }
   },
 
   /**
-   * Verify email with token
-   * POST /auth/verify-email
+   * Logout user (call backend logout endpoint if needed)
    */
-  verifyEmail: async (token: string): Promise<VerifyEmailResponse> => {
+  logout: async (token: string): Promise<void> => {
     try {
-      console.log("✉️ Verifying email with token...");
-
-      const response = await apiClient.post<VerifyEmailResponse>(
-        "/auth/verify-email",
-        { token }
+      await apiClient.post(
+        "/auth/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-
-      console.log("✅ Email verified successfully");
-      return response.data;
+      console.log("✅ Backend logout successful");
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("❌ Email verification failed:", {
-        message: axiosError.message,
-        response: axiosError.response?.data,
-      });
-      throw error;
+      console.error("Backend logout error:", error);
+      // Still allow local logout even if API call fails
     }
   },
 
   /**
    * Request password reset
-   * POST /auth/forgot-password
    */
-  forgotPassword: async (email: string): Promise<ForgotPasswordResponse> => {
+  requestPasswordReset: async (email: string): Promise<void> => {
     try {
-      console.log("🔑 Requesting password reset for:", email);
+      console.log("🔄 Requesting password reset...");
 
-      const response = await apiClient.post<ForgotPasswordResponse>(
-        "/auth/forgot-password",
-        { email }
-      );
+      await apiClient.post("/auth/forgot-password", { email });
 
       console.log("✅ Password reset email sent");
-      return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("❌ Forgot password failed:", {
-        message: axiosError.message,
-        response: axiosError.response?.data,
-      });
+    } catch (error: any) {
+      console.error("❌ Password reset request failed:", error);
       throw error;
     }
   },
 
   /**
    * Reset password with token
-   * POST /auth/reset-password
    */
-  resetPassword: async (
-    token: string,
-    newPassword: string
-  ): Promise<ResetPasswordResponse> => {
+  resetPassword: async (token: string, newPassword: string): Promise<void> => {
     try {
-      console.log("🔐 Resetting password...");
+      console.log("🔄 Resetting password...");
 
-      const response = await apiClient.post<ResetPasswordResponse>(
-        "/auth/reset-password",
-        {
-          token,
-          password: newPassword,
-        }
-      );
+      await apiClient.post("/auth/reset-password", {
+        token,
+        password: newPassword,
+      });
 
       console.log("✅ Password reset successful");
-      return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("❌ Reset password failed:", {
-        message: axiosError.message,
-        response: axiosError.response?.data,
-      });
+    } catch (error: any) {
+      console.error("❌ Password reset failed:", error);
       throw error;
     }
   },
 
   /**
-   * Logout user (if you have a backend logout endpoint)
-   * POST /auth/logout
+   * Verify email with token
    */
-  logout: async (): Promise<void> => {
+  verifyEmail: async (token: string): Promise<void> => {
     try {
-      console.log("🚪 Logging out...");
+      console.log("🔄 Verifying email...");
 
-      await apiClient.post("/auth/logout");
+      await apiClient.post("/auth/verify-email", { token });
 
-      console.log("✅ Logout successful");
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("❌ Logout failed:", {
-        message: axiosError.message,
-        response: axiosError.response?.data,
-      });
-      // Don't throw - we still want to clear local state even if API fails
-    }
-  },
-
-  /**
-   * Refresh access token (if you have this endpoint)
-   * POST /auth/refresh
-   */
-  refreshToken: async (refreshToken: string): Promise<LoginResponse> => {
-    try {
-      console.log("🔄 Refreshing token...");
-
-      const response = await apiClient.post<LoginResponse>("/auth/refresh", {
-        refresh_token: refreshToken,
-      });
-
-      console.log("✅ Token refreshed");
-      return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("❌ Token refresh failed:", axiosError);
+      console.log("✅ Email verified successfully");
+    } catch (error: any) {
+      console.error("❌ Email verification failed:", error);
       throw error;
     }
   },

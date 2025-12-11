@@ -382,7 +382,7 @@ export default function Profile() {
                         </div>
                       </div>
                       <p className="text-sm text-gray-700 mb-1">
-                        {review.comment || review.review_text || "No comment"}
+                        {review.comment || "No comment"}
                       </p>
                       <p className="text-xs text-gray-500">
                         {review.created_at
