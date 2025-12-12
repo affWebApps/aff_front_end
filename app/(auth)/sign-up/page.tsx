@@ -3,6 +3,7 @@
 import React, { useState, Suspense } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { Button } from "../../../components/ui/Button";
 import { SocialButton } from "../../../components/ui/SocialButtons";
@@ -31,8 +32,10 @@ const validationSchema = Yup.object({
     .required("Please confirm your password"),
 });
 
-function RegisterForm() {
 
+function RegisterFormContent() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     mutate: register,
@@ -41,6 +44,7 @@ function RegisterForm() {
     error,
     isSuccess,
   } = useRegister();
+
 
   const {
     loginWithGoogle,
@@ -69,6 +73,7 @@ function RegisterForm() {
 
   const hasError = (field: keyof typeof formik.values) =>
     !!(formik.errors[field] && formik.touched[field]);
+
 
   if (isSuccess) {
     return (
@@ -110,6 +115,7 @@ function RegisterForm() {
       </div>
     );
   }
+
 
   const getErrorMessage = () => {
     if (!error) return "Registration failed. Please try again.";
@@ -153,7 +159,6 @@ function RegisterForm() {
       )}
 
       <form onSubmit={formik.handleSubmit} className="space-y-5">
-        {/* ... all your form fields remain the same ... */}
         <div className={styles.formElement} style={{ animationDelay: "0.2s" }}>
           <label
             htmlFor="firstName"
@@ -186,8 +191,159 @@ function RegisterForm() {
           </div>
         </div>
 
-        {/* Copy all other form fields here - lastName, email, password, confirmPassword */}
-        {/* I'm omitting them for brevity, but keep all your existing fields */}
+        <div className={styles.formElement} style={{ animationDelay: "0.25s" }}>
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Last Name
+          </label>
+          <input
+            id="lastName"
+            name="lastName"
+            type="text"
+            placeholder="Enter your last name"
+            value={formik.values.lastName}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 ${
+              hasError("lastName")
+                ? `border-red-500 ring-2 ring-red-200 ${styles.errorShake}`
+                : "border-gray-300"
+            }`}
+          />
+          <div className="h-6 mt-1">
+            {hasError("lastName") && (
+              <div
+                className={`${styles.errorMessage} ${styles.show} text-red-500 text-sm`}
+              >
+                {formik.errors.lastName}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.formElement} style={{ animationDelay: "0.3s" }}>
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 ${
+              hasError("email")
+                ? `border-red-500 ring-2 ring-red-200 ${styles.errorShake}`
+                : "border-gray-300"
+            }`}
+          />
+          <div className="h-6 mt-1">
+            {hasError("email") && (
+              <div
+                className={`${styles.errorMessage} ${styles.show} text-red-500 text-sm`}
+              >
+                {formik.errors.email}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.formElement} style={{ animationDelay: "0.35s" }}>
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Password
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter your password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 pr-12 ${
+                hasError("password")
+                  ? `border-red-500 ring-2 ring-red-200 ${styles.errorShake}`
+                  : "border-gray-300"
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showPassword ? (
+                <EyeOff size={20} fill="gray" />
+              ) : (
+                <Eye size={20} fill="gray" />
+              )}
+            </button>
+          </div>
+          <div className="h-6 mt-1">
+            {hasError("password") && (
+              <div
+                className={`${styles.errorMessage} ${styles.show} text-red-500 text-sm`}
+              >
+                {formik.errors.password}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.formElement} style={{ animationDelay: "0.4s" }}>
+          <label
+            htmlFor="confirmPassword"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Confirm Password
+          </label>
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm your password"
+              value={formik.values.confirmPassword}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-300 pr-12 ${
+                hasError("confirmPassword")
+                  ? `border-red-500 ring-2 ring-red-200 ${styles.errorShake}`
+                  : "border-gray-300"
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showConfirmPassword ? (
+                <EyeOff size={20} fill="gray" />
+              ) : (
+                <Eye size={20} fill="gray" />
+              )}
+            </button>
+          </div>
+          <div className="h-6 mt-1">
+            {hasError("confirmPassword") && (
+              <div
+                className={`${styles.errorMessage} ${styles.show} text-red-500 text-sm`}
+              >
+                {formik.errors.confirmPassword}
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className={styles.formElement} style={{ animationDelay: "0.45s" }}>
           <Button
@@ -266,11 +422,19 @@ function RegisterForm() {
   );
 }
 
-// Main page component with Suspense boundary
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <RegisterForm />
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-400 border-r-transparent"></div>
+            <p className="mt-2 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <RegisterFormContent />
     </Suspense>
   );
 }
