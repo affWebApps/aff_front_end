@@ -3,7 +3,6 @@
 import React, { useState, Suspense } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { Button } from "../../../components/ui/Button";
 import { SocialButton } from "../../../components/ui/SocialButtons";
@@ -32,10 +31,8 @@ const validationSchema = Yup.object({
     .required("Please confirm your password"),
 });
 
-// Separate component that uses useOAuth
 function RegisterForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const {
     mutate: register,
