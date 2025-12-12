@@ -12,4 +12,5 @@ export interface SocialButtonProps {
   text: string;
   color?: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
