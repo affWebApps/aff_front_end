@@ -46,6 +46,12 @@ const authImages = {
 export default function AuthLayout({ children }: AuthLayoutProps) {
   const pathname = usePathname();
 
+  // If on callback page, render children without the decorative layout
+  // The callback route has its own minimal layout
+  if (pathname?.startsWith("/auth/callback")) {
+    return <QueryProvider>{children}</QueryProvider>;
+  }
+
   const images =
     authImages[pathname as keyof typeof authImages] || authImages.default;
 

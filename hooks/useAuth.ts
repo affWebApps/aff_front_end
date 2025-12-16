@@ -1,29 +1,25 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { authService, RegisterData } from "../services/authServices";
 
-import { useAuthStore } from "@/store/authStore";
-import { useRouter } from "next/navigation";
-import { authService, LoginCredentials, RegisterData } from "../services/authServices";
-
-// Register hook
+// Register hook - NO automatic redirect, let component handle success
 export const useRegister = () => {
-  const router = useRouter();
-
   return useMutation({
     mutationFn: (data: RegisterData) => authService.register(data),
     onSuccess: (data) => {
-      // Show success message - user needs to verify email
-      console.log("Registration successful:", data.status);
-      // Redirect to verification page or login
-      router.push("/verify-email");
+      console.log("✅ Registration successful:", data);
+      // Component will handle showing success message
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       console.error(
-        "Registration failed:",
-        error.response?.data?.message || error.message
+        "❌ Registration failed:",
+        err.response?.data?.message || err.message
       );
     },
   });
 };
-

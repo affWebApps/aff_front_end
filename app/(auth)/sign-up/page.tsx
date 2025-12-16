@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Eye, EyeOff } from "lucide-react";
@@ -11,8 +10,8 @@ import { SocialButton } from "../../../components/ui/SocialButtons";
 import styles from "@/styles/login.module.css";
 import Link from "next/link";
 import { useRegister } from "@/hooks/useAuth";
+import { useOAuth } from "../../../hooks/useOAuth";
 
-// This tells Next.js to not prerender this page
 export const dynamic = "force-dynamic";
 
 const validationSchema = Yup.object({
@@ -33,9 +32,11 @@ const validationSchema = Yup.object({
     .required("Please confirm your password"),
 });
 
-export default function RegisterPage() {
+
+function RegisterFormContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     mutate: register,
     isPending,
@@ -43,6 +44,13 @@ export default function RegisterPage() {
     error,
     isSuccess,
   } = useRegister();
+
+
+  const {
+    loginWithGoogle,
+    loginWithFacebook,
+    isLoading: oauthLoading,
+  } = useOAuth();
 
   const formik = useFormik({
     initialValues: {
@@ -54,12 +62,11 @@ export default function RegisterPage() {
     },
     validationSchema,
     onSubmit: (values) => {
-      // Send registration data to API
       register({
         email: values.email,
         password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
+        first_name: values.firstName,
+        last_name: values.lastName,
       });
     },
   });
@@ -67,7 +74,7 @@ export default function RegisterPage() {
   const hasError = (field: keyof typeof formik.values) =>
     !!(formik.errors[field] && formik.touched[field]);
 
-  // Show success message if registration was successful
+
   if (isSuccess) {
     return (
       <div className="max-w-md mx-auto">
@@ -109,6 +116,24 @@ export default function RegisterPage() {
     );
   }
 
+
+  const getErrorMessage = () => {
+    if (!error) return "Registration failed. Please try again.";
+
+    if (typeof error === "object" && error !== null && "response" in error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      return (
+        err.response?.data?.message || "Registration failed. Please try again."
+      );
+    }
+
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return "Registration failed. Please try again.";
+  };
+
   return (
     <>
       <div className={styles.formElement} style={{ animationDelay: "0.1s" }}>
@@ -124,21 +149,16 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      {/* Show API error if registration fails */}
       {isError && (
         <div
           className={`${styles.formElement} mb-4 p-4 bg-red-50 border border-red-200 rounded-lg`}
           style={{ animationDelay: "0.15s" }}
         >
-          <p className="text-red-700 text-sm">
-            {(error as any)?.response?.data?.message ||
-              "Registration failed. Please try again."}
-          </p>
+          <p className="text-red-700 text-sm">{getErrorMessage()}</p>
         </div>
       )}
 
       <form onSubmit={formik.handleSubmit} className="space-y-5">
-        {/* First Name */}
         <div className={styles.formElement} style={{ animationDelay: "0.2s" }}>
           <label
             htmlFor="firstName"
@@ -171,7 +191,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Last Name */}
         <div className={styles.formElement} style={{ animationDelay: "0.25s" }}>
           <label
             htmlFor="lastName"
@@ -204,7 +223,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Email */}
         <div className={styles.formElement} style={{ animationDelay: "0.3s" }}>
           <label
             htmlFor="email"
@@ -237,7 +255,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Password */}
         <div className={styles.formElement} style={{ animationDelay: "0.35s" }}>
           <label
             htmlFor="password"
@@ -283,7 +300,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Confirm Password */}
         <div className={styles.formElement} style={{ animationDelay: "0.4s" }}>
           <label
             htmlFor="confirmPassword"
@@ -329,7 +345,6 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className={styles.formElement} style={{ animationDelay: "0.45s" }}>
           <Button
             variant="default"
@@ -340,94 +355,86 @@ export default function RegisterPage() {
             {isPending ? "Creating Account..." : "Create Account"}
           </Button>
         </div>
-
-        {/* Divider */}
-        <div className={styles.formElement} style={{ animationDelay: "0.5s" }}>
-          <div className="relative py-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-[#fff8ef] text-gray-500">Or</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Social Buttons */}
-        <div className="space-y-3">
-          <div
-            className={styles.formElement}
-            style={{ animationDelay: "0.6s" }}
-          >
-            <SocialButton
-              icon={
-                <Image src="/icons/google.svg" alt="" height={20} width={20} />
-              }
-              text="Continue with Google"
-            />
-          </div>
-          <div
-            className={styles.formElement}
-            style={{ animationDelay: "0.7s" }}
-          >
-            <SocialButton
-              icon={
-                <Image
-                  src="/icons/facebook.svg"
-                  alt=""
-                  height={20}
-                  width={20}
-                />
-              }
-              text="Continue with Facebook"
-            />
-          </div>
-          <div
-            className={styles.formElement}
-            style={{ animationDelay: "0.8s" }}
-          >
-            <SocialButton
-              icon={
-                <Image
-                  src="/icons/instagram.svg"
-                  alt=""
-                  height={20}
-                  width={20}
-                />
-              }
-              text="Continue with Instagram"
-            />
-          </div>
-          <div
-            className={styles.formElement}
-            style={{ animationDelay: "0.9s" }}
-          >
-            <SocialButton
-              icon={
-                <Image
-                  src="/icons/pintrest.svg"
-                  alt=""
-                  height={20}
-                  width={20}
-                />
-              }
-              text="Continue with Pinterest"
-            />
-            <div className="w-full flex items-center justify-center mt-4 text-[#848484]">
-              <p className="text-xs align-middle">
-                By signing up, you agree to our{" "}
-                <span className="text-[#4285F4] font-medium hover:underline cursor-pointer">
-                  Terms of use,{" "}
-                </span>{" "}
-                and{" "}
-                <span className="text-[#4285F4] font-medium hover:underline cursor-pointer">
-                  Privacy policy{" "}
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
       </form>
+
+      <div className={styles.formElement} style={{ animationDelay: "0.5s" }}>
+        <div className="relative py-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-[#fff8ef] text-gray-500">Or</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div className={styles.formElement} style={{ animationDelay: "0.6s" }}>
+          <SocialButton
+            icon={
+              <Image src="/icons/google.svg" alt="" height={20} width={20} />
+            }
+            text="Continue with Google"
+            onClick={loginWithGoogle}
+            disabled={oauthLoading}
+          />
+        </div>
+        <div className={styles.formElement} style={{ animationDelay: "0.7s" }}>
+          <SocialButton
+            icon={
+              <Image src="/icons/facebook.svg" alt="" height={20} width={20} />
+            }
+            text="Continue with Facebook"
+            onClick={loginWithFacebook}
+            disabled={oauthLoading}
+          />
+        </div>
+        <div className={styles.formElement} style={{ animationDelay: "0.8s" }}>
+          <SocialButton
+            icon={
+              <Image src="/icons/instagram.svg" alt="" height={20} width={20} />
+            }
+            text="Continue with Instagram"
+          />
+        </div>
+        <div className={styles.formElement} style={{ animationDelay: "0.9s" }}>
+          <SocialButton
+            icon={
+              <Image src="/icons/pintrest.svg" alt="" height={20} width={20} />
+            }
+            text="Continue with Pinterest"
+          />
+          <div className="w-full flex items-center justify-center mt-4 text-[#848484]">
+            <p className="text-xs align-middle">
+              By signing up, you agree to our{" "}
+              <span className="text-[#4285F4] font-medium hover:underline cursor-pointer">
+                Terms of use,{" "}
+              </span>{" "}
+              and{" "}
+              <span className="text-[#4285F4] font-medium hover:underline cursor-pointer">
+                Privacy policy{" "}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
     </>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-amber-400 border-r-transparent"></div>
+            <p className="mt-2 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <RegisterFormContent />
+    </Suspense>
   );
 }

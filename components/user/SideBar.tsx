@@ -26,7 +26,8 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuthStore();
+  // Get token from auth store
+  const { logout, token } = useAuthStore();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -34,9 +35,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       setIsSigningOut(true);
       console.log("🚪 Signing out...");
 
-      // Call backend logout (optional - even if it fails, we clear local state)
+      // Call backend logout with token
       try {
-        await authService.logout();
+        if (token) {
+          await authService.logout(token);
+        }
       } catch (error) {
         console.warn("Backend logout failed, but continuing with local logout");
       }

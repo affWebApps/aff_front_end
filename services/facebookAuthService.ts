@@ -1,3 +1,4 @@
+// services/facebookAuthService.ts
 
 import apiClient from "../lib/api/axios";
 
@@ -12,20 +13,31 @@ export interface OAuthExchangeResponse {
 }
 
 export const facebookAuthService = {
-
+  /**
+   * Initiate Facebook OAuth login
+   * Redirects user to backend which then redirects to Facebook
+   */
   initiateFacebookLogin: () => {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL 
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const frontendUrl =
+      typeof window !== "undefined" ? window.location.origin : "";
 
     if (typeof window !== "undefined") {
       sessionStorage.setItem("pre_oauth_url", window.location.pathname);
       sessionStorage.setItem("oauth_provider", "facebook");
     }
 
-    window.location.href = `${backendUrl}/auth/facebook`;
+    // Pass callback URL to backend so it knows where to redirect
+    const callbackUrl = `${frontendUrl}/auth/callback`;
+    window.location.href = `${backendUrl}/auth/facebook?callback_url=${encodeURIComponent(
+      callbackUrl
+    )}`;
   },
 
- 
+  /**
+   * Handle Facebook OAuth callback
+   * Extracts code and error from URL params
+   */
   handleFacebookCallback: (): { code: string | null; error: string | null } => {
     if (typeof window === "undefined") {
       return { code: null, error: null };
@@ -37,6 +49,7 @@ export const facebookAuthService = {
     const errorReason = params.get("error_reason");
     const errorDescription = params.get("error_description");
 
+    // Clean up URL without triggering navigation
     if (code || error) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -48,7 +61,9 @@ export const facebookAuthService = {
     return { code, error: formattedError };
   },
 
-  
+  /**
+   * Exchange OAuth code for access token
+   */
   exchangeOAuthCode: async (
     code: string,
     provider: string = "facebook"
@@ -66,7 +81,6 @@ export const facebookAuthService = {
 
       console.log("✅ Facebook OAuth exchange successful");
       return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("❌ Facebook OAuth exchange failed:", {
         message: error.message,
@@ -77,7 +91,10 @@ export const facebookAuthService = {
     }
   },
 
- 
+  /**
+   * Get redirect URL after successful OAuth
+   * Returns the URL user was on before OAuth, or dashboard as default
+   */
   getRedirectUrl: (): string => {
     if (typeof window === "undefined") return "/dashboard";
 
@@ -88,7 +105,9 @@ export const facebookAuthService = {
     return savedUrl || "/dashboard";
   },
 
-
+  /**
+   * Get stored OAuth provider
+   */
   getProvider: (): string | null => {
     if (typeof window === "undefined") return null;
     return sessionStorage.getItem("oauth_provider");

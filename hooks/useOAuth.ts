@@ -1,8 +1,7 @@
-// hooks/useOAuth.ts
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { googleAuthService } from "@/services/googleAuthService";
 import { facebookAuthService } from "@/services/facebookAuthService";
 import { useAuthStore } from "@/store/authStore";
@@ -15,29 +14,25 @@ export const useOAuth = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasProcessed, setHasProcessed] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setAuth } = useAuthStore();
 
   useEffect(() => {
     if (hasProcessed) return;
 
     const handleCallback = async () => {
-      // Determine which provider is being used
-      const provider = (
-        typeof window !== "undefined"
-          ? sessionStorage.getItem("oauth_provider")
-          : null
-      ) as OAuthProvider | null;
+      // Check if we have OAuth parameters in URL
+      const code = searchParams.get("code");
+      const provider = searchParams.get("provider") as OAuthProvider | null;
+      const oauthError = searchParams.get("error");
 
-      if (!provider) {
+      // No OAuth callback in URL, nothing to process
+      if (!code && !oauthError) {
         setHasProcessed(true);
         return;
       }
 
-      const { code, error: oauthError } =
-        provider === "facebook"
-          ? facebookAuthService.handleFacebookCallback()
-          : googleAuthService.handleGoogleCallback();
-
+      // Handle OAuth errors
       if (oauthError) {
         if (oauthError === "redirect_uri_mismatch") {
           setError(
@@ -46,27 +41,35 @@ export const useOAuth = () => {
         } else if (oauthError === "access_denied") {
           setError(
             `${
-              provider.charAt(0).toUpperCase() + provider.slice(1)
+              provider
+                ? provider.charAt(0).toUpperCase() + provider.slice(1)
+                : "OAuth"
             } login was cancelled. Please try again.`
           );
         } else {
           setError(`Authentication failed: ${oauthError}`);
         }
         setHasProcessed(true);
+        // Clean URL
+        router.replace("/sign-in");
         return;
       }
 
-      if (code) {
+      // Process OAuth code
+      if (code && provider) {
         setIsLoading(true);
         try {
-          // Use the appropriate service to exchange the code
+          console.log(`🔐 Processing ${provider} OAuth callback with code`);
+
+          // Exchange code for tokens using the appropriate service
           const authData =
             provider === "facebook"
               ? await facebookAuthService.exchangeOAuthCode(code, "facebook")
               : await googleAuthService.exchangeOAuthCode(code, "google");
 
-          console.log(`✅ ${provider} OAuth exchange successful:`, authData);
+          console.log(`✅ ${provider} OAuth exchange successful`);
 
+          // Create user object from auth data
           const user: User = {
             id: authData.user.id,
             email: authData.user.email,
@@ -85,20 +88,18 @@ export const useOAuth = () => {
             bids: [],
           };
 
+          // Save auth state
           setAuth(user, authData.access_token);
           setError(null);
 
+          // Small delay to ensure state is saved
           await new Promise((resolve) => setTimeout(resolve, 100));
 
-          // Get redirect URL from the appropriate service
-          const redirectUrl =
-            provider === "facebook"
-              ? facebookAuthService.getRedirectUrl()
-              : googleAuthService.getRedirectUrl();
-
-          router.push(redirectUrl);
+          console.log("✅ Redirecting to dashboard");
+          // Redirect to dashboard
+          router.push("/dashboard");
         } catch (error) {
-          console.error(`Failed to exchange ${provider} OAuth code:`, error);
+          console.error(`❌ Failed to exchange ${provider} OAuth code:`, error);
 
           const errorMessage =
             error instanceof Error
@@ -133,6 +134,9 @@ export const useOAuth = () => {
                 `Failed to complete ${provider} sign in. Please try again.`
             );
           }
+
+          // Redirect back to sign-in on error
+          router.replace("/sign-in");
         } finally {
           setIsLoading(false);
           setHasProcessed(true);
@@ -141,15 +145,16 @@ export const useOAuth = () => {
     };
 
     handleCallback();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [hasProcessed, searchParams, router, setAuth]);
 
   const loginWithGoogle = () => {
     setError(null);
     setIsLoading(true);
     try {
+      console.log("🔐 Initiating Google login");
       googleAuthService.initiateGoogleLogin();
-    } catch {
+    } catch (err) {
+      console.error("❌ Failed to initiate Google login:", err);
       setError("Failed to initiate Google login. Please try again.");
       setIsLoading(false);
     }
@@ -159,8 +164,10 @@ export const useOAuth = () => {
     setError(null);
     setIsLoading(true);
     try {
+      console.log("🔐 Initiating Facebook login");
       facebookAuthService.initiateFacebookLogin();
-    } catch {
+    } catch (err) {
+      console.error("❌ Failed to initiate Facebook login:", err);
       setError("Failed to initiate Facebook login. Please try again.");
       setIsLoading(false);
     }

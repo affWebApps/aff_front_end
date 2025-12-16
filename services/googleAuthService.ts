@@ -1,3 +1,4 @@
+// services/googleAuthService.ts
 
 import apiClient from "../lib/api/axios";
 
@@ -12,19 +13,31 @@ export interface OAuthExchangeResponse {
 }
 
 export const googleAuthService = {
- 
+  /**
+   * Initiate Google OAuth login
+   * Redirects user to backend which then redirects to Google
+   */
   initiateGoogleLogin: () => {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL 
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const frontendUrl =
+      typeof window !== "undefined" ? window.location.origin : "";
+
     if (typeof window !== "undefined") {
       sessionStorage.setItem("pre_oauth_url", window.location.pathname);
       sessionStorage.setItem("oauth_provider", "google");
     }
 
-    window.location.href = `${backendUrl}/auth/google`;
+    // Pass callback URL to backend so it knows where to redirect
+    const callbackUrl = `${frontendUrl}/auth/callback`;
+    window.location.href = `${backendUrl}/auth/google?callback_url=${encodeURIComponent(
+      callbackUrl
+    )}`;
   },
 
-
+  /**
+   * Handle Google OAuth callback
+   * Extracts code and error from URL params
+   */
   handleGoogleCallback: (): { code: string | null; error: string | null } => {
     if (typeof window === "undefined") {
       return { code: null, error: null };
@@ -34,6 +47,7 @@ export const googleAuthService = {
     const code = params.get("code");
     const error = params.get("error");
 
+    // Clean up URL without triggering navigation
     if (code || error) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -41,7 +55,9 @@ export const googleAuthService = {
     return { code, error };
   },
 
-
+  /**
+   * Exchange OAuth code for access token
+   */
   exchangeOAuthCode: async (
     code: string,
     provider: string = "google"
@@ -53,13 +69,11 @@ export const googleAuthService = {
         "/auth/oauth-exchange",
         {
           code,
-          provider,
         }
       );
 
       console.log("✅ OAuth exchange successful");
       return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("❌ OAuth exchange failed:", {
         message: error.message,
@@ -70,7 +84,10 @@ export const googleAuthService = {
     }
   },
 
-  
+  /**
+   * Get redirect URL after successful OAuth
+   * Returns the URL user was on before OAuth, or dashboard as default
+   */
   getRedirectUrl: (): string => {
     if (typeof window === "undefined") return "/dashboard";
 
@@ -81,6 +98,9 @@ export const googleAuthService = {
     return savedUrl || "/dashboard";
   },
 
+  /**
+   * Get stored OAuth provider
+   */
   getProvider: (): string | null => {
     if (typeof window === "undefined") return null;
     return sessionStorage.getItem("oauth_provider");
