@@ -125,13 +125,11 @@ export default function Profile() {
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-full overflow-hidden bg-linear-to-br from-amber-400 to-orange-500">
                 {user.avatar_url ? (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={user.avatar_url}
                     alt={displayName}
-                    fill
-                    className="object-cover"
-                    sizes="64px"
-                    priority
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
