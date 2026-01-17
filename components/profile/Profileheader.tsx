@@ -20,7 +20,7 @@ export default function ProfileHeader({
 
   const username = user?.email?.split("@")[0] || "user";
 
-  const userBio =
+  const userBio = user?.bio 
     "No bio available. Click the edit button to add your professional bio.";
 
   return (
