@@ -17,24 +17,23 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
   const { user, updateUser } = useAuthStore();
 
-  // Memoize initial form data based on user
-  const initialFormData = useMemo(
-    () => ({
-      firstName: user?.first_name || "",
-      lastName: user?.last_name || "",
-      displayName: user?.display_name || "",
-      email: user?.email || "",
-      location: "Lagos, NG",
-      pricing: "NGN 20,000",
-      bio: user?.portfolios?.[0]?.description || "",
-      avatarUrl: user?.avatar_url || "",
-      mondayFridayFrom: "10:00am",
-      mondayFridayTo: "6:00pm",
-      saturdayFrom: "11:00am",
-      saturdayTo: "4:00pm",
-    }),
-    [user]
-  );
+ const initialFormData = useMemo(
+   () => ({
+     firstName: user?.first_name || "",
+     lastName: user?.last_name || "",
+     displayName: user?.display_name || "",
+     email: user?.email || "",
+     location: "Lagos, NG",
+     pricing: "NGN 20,000",
+     bio: user?.bio || "", 
+     avatarUrl: user?.avatar_url || "",
+     mondayFridayFrom: "10:00am",
+     mondayFridayTo: "6:00pm",
+     saturdayFrom: "11:00am",
+     saturdayTo: "4:00pm",
+   }),
+   [user]
+ );
 
   // Use a key prop on the form to reset it when modal opens
   // This is cleaner than using useEffect to set state
@@ -57,6 +56,7 @@ export default function EditProfileModal({
         last_name: formData.lastName,
         display_name: formData.displayName,
         avatar_url: formData.avatarUrl,
+        bio: formData.bio, 
       });
 
       onClose();
