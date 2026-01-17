@@ -75,6 +75,7 @@ export const useOAuth = () => {
             email: authData.user.email,
             first_name: authData.user.firstName,
             last_name: authData.user.lastName,
+            bio: null,
             display_name: `${authData.user.firstName} ${authData.user.lastName}`,
             avatar_url: null,
             is_verified: true,

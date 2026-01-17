@@ -21,6 +21,7 @@ export default function ProfileHeader({
   const username = user?.email?.split("@")[0] || "user";
 
   const userBio = user?.bio 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     "No bio available. Click the edit button to add your professional bio.";
 
   return (
