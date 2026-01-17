@@ -50,6 +50,15 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  status: string;
+}
+
 // ============================================
 // AUTH SERVICE
 // ============================================
@@ -146,6 +155,38 @@ export const authService = {
     } catch (error) {
       console.error("Backend logout error:", error);
       // Still allow local logout even if API call fails
+    }
+  },
+
+  /**
+   * Change user password
+   */
+  changePassword: async (
+    data: ChangePasswordData,
+    token: string
+  ): Promise<ChangePasswordResponse> => {
+    try {
+      console.log("🔄 Changing password...");
+
+      const response = await apiClient.post<ChangePasswordResponse>(
+        "/auth/change-password",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("✅ Password changed successfully");
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Password change failed:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      throw error;
     }
   },
 
