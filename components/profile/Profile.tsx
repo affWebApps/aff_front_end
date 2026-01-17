@@ -12,8 +12,8 @@ import { Portfolio } from "@/services/portfolioService";
 import { Review } from "@/services/authServices";
 import ProfileHeader from "./Profileheader";
 import PortfolioSection from "./Portfoliosection";
-import SkillsSection from "./Skillssection";
 import ReviewsSection from "./Reviewssection";
+import SkillsSection from "./Skillssection";
 
 export default function Profile() {
   const { user, checkAuth } = useAuthStore();
@@ -23,7 +23,6 @@ export default function Profile() {
     fetchPortfolio,
   } = usePortfolioStore();
 
-  // Modal states
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isEditSkillsOpen, setIsEditSkillsOpen] = useState(false);
   const [isAddPortfolioOpen, setIsAddPortfolioOpen] = useState(false);
@@ -39,7 +38,6 @@ export default function Profile() {
     securityAlerts: false,
   });
 
-  // Fetch fresh user data and portfolio on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -68,10 +66,8 @@ export default function Profile() {
     "Measurement Taking",
   ];
 
-  // Get portfolio title
   const portfolioTitle = portfolio?.title || null;
 
-  // Calculate average rating from reviews
   const calculateAverageRating = (): string => {
     if (!user?.reviews_received || user.reviews_received.length === 0) {
       return "0.0";
@@ -127,14 +123,12 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-6">
-        {/* Profile Header */}
         <ProfileHeader
           user={user}
           portfolioTitle={portfolioTitle}
           onEdit={() => setIsEditProfileOpen(true)}
         />
 
-        {/* Portfolio Section */}
         <PortfolioSection
           portfolio={portfolio}
           isLoading={portfolioLoading}
@@ -143,26 +137,25 @@ export default function Profile() {
           onPortfolioClick={handlePortfolioClick}
         />
 
-        {/* Skills Section */}
         <SkillsSection
           skills={skills}
           onEdit={() => setIsEditSkillsOpen(true)}
         />
 
-        {/* Reviews Section */}
+        
         <ReviewsSection
           reviews={user.reviews_received || []}
           averageRating={calculateAverageRating()}
         />
 
-        {/* Settings Section */}
+        
         <Settings
           notifications={notifications}
           onNotificationsChange={setNotifications}
         />
       </div>
 
-      {/* Modals */}
+      
       <EditProfileModal
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}

@@ -98,7 +98,7 @@ export default function EditProfileModal({
         {/* Avatar Section */}
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full overflow-hidden bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center">
               {formData.avatarUrl ? (
                 <Image
                   src={formData.avatarUrl}
