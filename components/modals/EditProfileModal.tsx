@@ -1,10 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { BaseModal } from "./BaseModal";
 import { Button } from "../ui/Button";
 import { useAuthStore } from "@/store/authStore";
-import Image from "next/image";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
+import { authService } from "@/services/authServices";
+import { uploadFileToSupabase } from "../../lib/storageService";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -15,63 +17,109 @@ export default function EditProfileModal({
   isOpen,
   onClose,
 }: EditProfileModalProps) {
-  const { user, updateUser } = useAuthStore();
+  const { user, token, updateUser } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
- const initialFormData = useMemo(
-   () => ({
-     firstName: user?.first_name || "",
-     lastName: user?.last_name || "",
-     displayName: user?.display_name || "",
-     email: user?.email || "",
-     location: "Lagos, NG",
-     pricing: "NGN 20,000",
-     bio: user?.bio || "", 
-     avatarUrl: user?.avatar_url || "",
-     mondayFridayFrom: "10:00am",
-     mondayFridayTo: "6:00pm",
-     saturdayFrom: "11:00am",
-     saturdayTo: "4:00pm",
-   }),
-   [user]
- );
+  const initialFormData = useMemo(
+    () => ({
+      firstName: user?.first_name || "",
+      lastName: user?.last_name || "",
+      displayName: user?.display_name || "",
+      email: user?.email || "",
+      location: "Lagos, NG",
+      pricing: "NGN 20,000",
+      bio: user?.bio || "",
+      avatarUrl: user?.avatar_url || "",
+      mondayFridayFrom: "10:00am",
+      mondayFridayTo: "6:00pm",
+      saturdayFrom: "11:00am",
+      saturdayTo: "4:00pm",
+    }),
+    [user]
+  );
 
-  // Use a key prop on the form to reset it when modal opens
-  // This is cleaner than using useEffect to set state
   const [formData, setFormData] = React.useState(initialFormData);
 
-  // Reset form data when modal opens by using the key
-  // Alternative: Add key={isOpen ? 'open' : 'closed'} to parent div
   React.useEffect(() => {
     if (isOpen) {
-      // Use a callback form to avoid dependency on formData
       setFormData(() => initialFormData);
+      setError(null);
     }
   }, [isOpen, initialFormData]);
 
   const handleSave = async () => {
-    try {
-      // Update user in the store (you'll need to add API call here)
-      updateUser({
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        display_name: formData.displayName,
-        avatar_url: formData.avatarUrl,
-        bio: formData.bio, 
-      });
+    if (!token) {
+      setError("No authentication token found");
+      return;
+    }
 
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      // Parse location into city and country
+      const [city, country] = formData.location
+        .split(", ")
+        .map((s) => s.trim());
+
+      // Call the API to update profile
+      const updatedUser = await authService.updateProfile(
+        {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          displayName: formData.displayName,
+          bio: formData.bio,
+          avatarUrl: formData.avatarUrl,
+          city: city || "",
+          country: country || "",
+        },
+        token
+      );
+
+      // Update the local store with the response from API
+      updateUser(updatedUser);
+
+      console.log("✅ Profile updated successfully");
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to update profile:", error);
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update profile"
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // TODO: Upload file and get URL
-      // For now, just create a local preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setFormData({ ...formData, avatarUrl: previewUrl });
+    if (!file) return;
+
+    try {
+      setIsUploadingAvatar(true);
+      setError(null);
+
+      // Upload to Supabase
+      const { publicUrl } = await uploadFileToSupabase({
+        file,
+        folder: "avatars",
+      });
+
+      if (publicUrl) {
+        setFormData({ ...formData, avatarUrl: publicUrl });
+        console.log("✅ Avatar uploaded successfully:", publicUrl);
+      } else {
+        throw new Error("Failed to get public URL for uploaded avatar");
+      }
+    } catch (error: any) {
+      console.error("Failed to upload avatar:", error);
+      setError("Failed to upload avatar. Please try again.");
+    } finally {
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -95,16 +143,21 @@ export default function EditProfileModal({
       maxWidth="2xl"
     >
       <div className="max-h-[70vh] overflow-y-auto p-6">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Avatar Section */}
         <div className="flex items-center gap-4 mb-6">
           <div className="relative">
             <div className="w-16 h-16 rounded-full overflow-hidden bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center">
               {formData.avatarUrl ? (
-                <Image
+                <img
                   src={formData.avatarUrl}
                   alt={displayName}
-                  width={64}
-                  height={64}
                   className="object-cover w-full h-full"
                 />
               ) : (
@@ -115,22 +168,31 @@ export default function EditProfileModal({
             </div>
             <label
               htmlFor="avatar-upload"
-              className="absolute bottom-0 right-0 w-6 h-6 bg-[#FAB75B] rounded-full border-2 border-white flex items-center justify-center cursor-pointer hover:bg-amber-500 transition-colors"
+              className={`absolute bottom-0 right-0 w-6 h-6 bg-[#FAB75B] rounded-full border-2 border-white flex items-center justify-center cursor-pointer hover:bg-amber-500 transition-colors ${
+                isUploadingAvatar ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              <Upload className="w-3 h-3 text-white" />
+              {isUploadingAvatar ? (
+                <Loader2 className="w-3 h-3 text-white animate-spin" />
+              ) : (
+                <Upload className="w-3 h-3 text-white" />
+              )}
               <input
                 id="avatar-upload"
                 type="file"
                 accept="image/*"
                 onChange={handleAvatarChange}
                 className="hidden"
+                disabled={isUploadingAvatar}
               />
             </label>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-900">{displayName}</p>
             <p className="text-xs text-gray-500">
-              Click the icon to change avatar
+              {isUploadingAvatar
+                ? "Uploading..."
+                : "Click the icon to change avatar"}
             </p>
           </div>
         </div>
@@ -148,6 +210,7 @@ export default function EditProfileModal({
                 setFormData({ ...formData, firstName: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B]"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -161,6 +224,7 @@ export default function EditProfileModal({
                 setFormData({ ...formData, lastName: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B]"
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -178,6 +242,7 @@ export default function EditProfileModal({
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B]"
             placeholder="How you want to be called"
+            disabled={isSubmitting}
           />
         </div>
 
@@ -211,6 +276,8 @@ export default function EditProfileModal({
                 setFormData({ ...formData, location: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B]"
+              placeholder="e.g., Lagos, NG"
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -226,6 +293,7 @@ export default function EditProfileModal({
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B] resize-none"
             placeholder="Tell us about yourself and your expertise..."
+            disabled={isSubmitting}
           />
         </div>
 
@@ -243,6 +311,7 @@ export default function EditProfileModal({
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B]"
             placeholder="e.g., NGN 20,000"
+            disabled={isSubmitting}
           />
         </div>
 
@@ -262,6 +331,7 @@ export default function EditProfileModal({
                   setFormData({ ...formData, mondayFridayFrom: e.target.value })
                 }
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B] text-sm"
+                disabled={isSubmitting}
               />
               <input
                 type="text"
@@ -271,6 +341,7 @@ export default function EditProfileModal({
                   setFormData({ ...formData, mondayFridayTo: e.target.value })
                 }
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B] text-sm"
+                disabled={isSubmitting}
               />
             </div>
             <div className="grid grid-cols-3 gap-4 items-center">
@@ -283,6 +354,7 @@ export default function EditProfileModal({
                   setFormData({ ...formData, saturdayFrom: e.target.value })
                 }
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B] text-sm"
+                disabled={isSubmitting}
               />
               <input
                 type="text"
@@ -292,6 +364,7 @@ export default function EditProfileModal({
                   setFormData({ ...formData, saturdayTo: e.target.value })
                 }
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B] text-sm"
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -303,8 +376,16 @@ export default function EditProfileModal({
           size="large"
           onClick={handleSave}
           className="w-full"
+          disabled={isSubmitting || isUploadingAvatar}
         >
-          Save Changes
+          {isSubmitting ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving...
+            </span>
+          ) : (
+            "Save Changes"
+          )}
         </Button>
       </div>
     </BaseModal>

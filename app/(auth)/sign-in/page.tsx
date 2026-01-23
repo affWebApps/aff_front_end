@@ -61,8 +61,19 @@ function SignInContent() {
         }
 
         setAuth(userData, loginResponse.access_token);
-        router.push("/dashboard");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("showToast", {
+              detail: {
+                message: `Welcome back, ${userData.first_name || "User"}!`,
+                type: "success",
+              },
+            })
+          );
+        }
+
+        router.push("/");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("❌ Login error:", error);
 
