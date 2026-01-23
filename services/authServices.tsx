@@ -60,6 +60,17 @@ export interface ChangePasswordResponse {
   status: string;
 }
 
+export interface UpdateProfileData {
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;
+  phoneNumber?: string;
+  bio?: string;
+  avatarUrl?: string;
+  country?: string;
+  city?: string;
+}
+
 // ============================================
 // AUTH SERVICE
 // ============================================
@@ -238,6 +249,34 @@ export const authService = {
       console.log("✅ Email verified successfully");
     } catch (error: any) {
       console.error("❌ Email verification failed:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update user profile
+   */
+  updateProfile: async (
+    data: UpdateProfileData,
+    token: string
+  ): Promise<User> => {
+    try {
+      console.log("🔄 Updating user profile...");
+
+      const response = await apiClient.patch<User>("/users/me", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("✅ Profile updated successfully");
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Profile update failed:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       throw error;
     }
   },

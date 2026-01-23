@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { BaseModal } from "./BaseModal";
 import { Button } from "../ui/Button";
-import { X, Upload, Star, AlertCircle } from "lucide-react";
+import { X, Upload, Star, AlertCircle, Loader2 } from "lucide-react";
 import { portfolioService, Portfolio } from "@/services/portfolioService";
 import { usePortfolioStore } from "@/store/portfolioStore";
+import { uploadFileToSupabase } from "@/lib/storageService";
 
 interface AddPortfolioModalProps {
   isOpen: boolean;
@@ -21,7 +22,11 @@ interface ImagePreview {
   preview: string;
   isPrimary: boolean;
   isExisting: boolean;
+  uploadedUrl?: string; // Track uploaded URL for new images
+  uploadStatus?: "idle" | "uploading" | "success" | "error";
 }
+
+const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "uploads";
 
 export default function AddPortfolioModal({
   isOpen,
@@ -65,6 +70,7 @@ export default function AddPortfolioModal({
       preview: URL.createObjectURL(file),
       isPrimary: images.length === 0 && index === 0,
       isExisting: false,
+      uploadStatus: "idle",
     }));
 
     setImages([...images, ...newImages]);
@@ -113,51 +119,92 @@ export default function AddPortfolioModal({
     setError(null);
 
     try {
-      let portfolioId: string;
+      // Step 1: Upload new images to Supabase first
+      const updatedImages = [...images];
+      const newImages = updatedImages.filter(
+        (img) => img.file && !img.isExisting
+      );
 
+      console.log(`📤 Uploading ${newImages.length} new images to Supabase...`);
+
+      for (let i = 0; i < updatedImages.length; i++) {
+        const img = updatedImages[i];
+
+        // Only upload new images (those with file property)
+        if (img.file && !img.isExisting) {
+          try {
+            // Update status to uploading
+            updatedImages[i] = { ...img, uploadStatus: "uploading" };
+            setImages([...updatedImages]);
+
+            console.log(`⬆️ Uploading image ${i + 1}/${newImages.length}...`);
+
+            // Upload to Supabase
+            const result = await uploadFileToSupabase({
+              file: img.file,
+              bucket: bucketName,
+              folder: "portfolios",
+            });
+
+            console.log(`✅ Image uploaded:`, result.publicUrl);
+
+            // Update with uploaded URL
+            updatedImages[i] = {
+              ...img,
+              uploadedUrl: result.publicUrl || undefined,
+              uploadStatus: "success",
+            };
+            setImages([...updatedImages]);
+          } catch (uploadError) {
+            console.error(`❌ Failed to upload image ${i + 1}:`, uploadError);
+            updatedImages[i] = { ...img, uploadStatus: "error" };
+            setImages([...updatedImages]);
+            throw new Error(`Failed to upload image: ${img.file.name}`);
+          }
+        }
+      }
+
+      // Step 2: Prepare image data for backend
+      const imageUrls = updatedImages
+        .filter((img) => img.isExisting || img.uploadedUrl) // Include existing images and newly uploaded ones
+        .map((img) => ({
+          image_url: img.uploadedUrl || img.preview, // Use uploaded URL or existing URL
+          is_primary: img.isPrimary,
+        }));
+
+      console.log("📋 Prepared image URLs:", imageUrls);
+
+      // Step 3: Create or Update portfolio with image URLs
       if (editMode && portfolioToEdit) {
         // UPDATE MODE
         console.log("Updating portfolio:", portfolioToEdit.id);
 
-        // Update portfolio details
         await portfolioService.updatePortfolio(portfolioToEdit.id, {
           title: title.trim(),
           description: description.trim(),
+          images: imageUrls, // Send image URLs with update
         });
 
-        portfolioId = portfolioToEdit.id;
-
-        // Delete marked images
+        // Delete marked images from backend
         for (const imageId of imagesToDelete) {
           await portfolioService.deletePortfolioImage(imageId);
         }
 
-        console.log("Portfolio updated successfully");
+        console.log("✅ Portfolio updated successfully");
       } else {
         // CREATE MODE
-        console.log("Creating new portfolio");
+        console.log("Creating new portfolio with images");
 
-        const portfolioData = await portfolioService.createPortfolio({
+        await portfolioService.createPortfolio({
           title: title.trim(),
           description: description.trim(),
+          images: imageUrls, // Send image URLs with creation
         });
 
-        portfolioId = portfolioData.id;
-        console.log("Portfolio created:", portfolioData);
+        console.log("✅ Portfolio created successfully");
       }
 
-      // Upload new images (only those with file property)
-      const newImages = images.filter((img) => img.file);
-      for (const image of newImages) {
-        await portfolioService.uploadPortfolioImage(
-          portfolioId,
-          image.file!,
-          image.isPrimary
-        );
-      }
-
-      console.log("All images processed successfully");
-
+      // Refresh portfolio data
       if (onSaved) {
         await onSaved();
       } else {
@@ -165,7 +212,7 @@ export default function AddPortfolioModal({
         resetForm();
         onClose();
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Failed to save portfolio:", err);
       setError(
@@ -304,6 +351,25 @@ export default function AddPortfolioModal({
                     >
                       Set as Primary
                     </button>
+                  )}
+
+                  {/* Upload status indicators */}
+                  {image.uploadStatus === "uploading" && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                  )}
+
+                  {image.uploadStatus === "success" && (
+                    <div className="absolute bottom-2 right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded">
+                      Uploaded
+                    </div>
+                  )}
+
+                  {image.uploadStatus === "error" && (
+                    <div className="absolute bottom-2 right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded">
+                      Failed
+                    </div>
                   )}
 
                   {image.isExisting && (

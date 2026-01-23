@@ -32,6 +32,9 @@ export default function Profile() {
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(
     null
   );
+  const [portfolioToEdit, setPortfolioToEdit] = useState<Portfolio | null>(
+    null
+  );
 
   const [notifications, setNotifications] = useState({
     newMessages: true,
@@ -71,6 +74,10 @@ export default function Profile() {
   // Get portfolio title
   const portfolioTitle = portfolio?.title || null;
 
+  // Get portfolios array - use user.portfolios if available, otherwise wrap single portfolio in array
+  const portfolios: Portfolio[] =
+    user?.portfolios || (portfolio ? [portfolio] : []);
+
   // Calculate average rating from reviews
   const calculateAverageRating = (): string => {
     if (!user?.reviews_received || user.reviews_received.length === 0) {
@@ -88,13 +95,15 @@ export default function Profile() {
     setIsViewPortfolioOpen(true);
   };
 
-  const handleEditPortfolio = () => {
+  const handleEditPortfolio = (portfolioData: Portfolio) => {
     setIsEditMode(true);
+    setPortfolioToEdit(portfolioData);
     setIsAddPortfolioOpen(true);
   };
 
   const handleAddPortfolio = () => {
     setIsEditMode(false);
+    setPortfolioToEdit(null);
     setIsAddPortfolioOpen(true);
   };
 
@@ -102,6 +111,7 @@ export default function Profile() {
     console.log("Portfolio saved, refreshing data...");
     setIsAddPortfolioOpen(false);
     setIsEditMode(false);
+    setPortfolioToEdit(null);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -136,7 +146,7 @@ export default function Profile() {
 
         {/* Portfolio Section */}
         <PortfolioSection
-          portfolio={portfolio}
+          portfolios={portfolios}
           isLoading={portfolioLoading}
           onAddPortfolio={handleAddPortfolio}
           onEditPortfolio={handleEditPortfolio}
@@ -176,9 +186,10 @@ export default function Profile() {
         onClose={() => {
           setIsAddPortfolioOpen(false);
           setIsEditMode(false);
+          setPortfolioToEdit(null);
         }}
         editMode={isEditMode}
-        portfolioToEdit={isEditMode ? portfolio : null}
+        portfolioToEdit={portfolioToEdit}
         onSaved={handlePortfolioSaved}
       />
       <ViewPortfolioModal

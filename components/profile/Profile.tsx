@@ -18,7 +18,6 @@ import SkillsSection from "./Skillssection";
 export default function Profile() {
   const { user, checkAuth } = useAuthStore();
   const {
-    portfolio,
     isLoading: portfolioLoading,
     fetchPortfolio,
   } = usePortfolioStore();
@@ -29,6 +28,9 @@ export default function Profile() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isViewPortfolioOpen, setIsViewPortfolioOpen] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(
+    null
+  );
+  const [editingPortfolio, setEditingPortfolio] = useState<Portfolio | null>(
     null
   );
 
@@ -43,14 +45,11 @@ export default function Profile() {
       try {
         await checkAuth();
         await fetchPortfolio();
-        console.log("📊 Portfolio data loaded:", portfolio);
-        console.log("👤 User portfolios:", user?.portfolios);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
     };
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkAuth, fetchPortfolio]);
 
   const skills = [
@@ -66,7 +65,7 @@ export default function Profile() {
     "Measurement Taking",
   ];
 
-  const portfolioTitle = portfolio?.title || null;
+  const portfolios = user?.portfolios || [];
 
   const calculateAverageRating = (): string => {
     if (!user?.reviews_received || user.reviews_received.length === 0) {
@@ -84,31 +83,31 @@ export default function Profile() {
     setIsViewPortfolioOpen(true);
   };
 
-  const handleEditPortfolio = () => {
+  const handleEditPortfolio = (portfolioData: Portfolio) => {
+    setEditingPortfolio(portfolioData);
     setIsEditMode(true);
     setIsAddPortfolioOpen(true);
   };
 
   const handleAddPortfolio = () => {
+    setEditingPortfolio(null);
     setIsEditMode(false);
     setIsAddPortfolioOpen(true);
   };
 
   const handlePortfolioSaved = async () => {
-    console.log("Portfolio saved, refreshing data...");
     setIsAddPortfolioOpen(false);
     setIsEditMode(false);
+    setEditingPortfolio(null);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       await Promise.all([fetchPortfolio(), checkAuth()]);
-      console.log("✅ Data refreshed successfully");
     } catch (error) {
-      console.error("❌ Failed to refresh data:", error);
+      console.error("Failed to refresh data:", error);
     }
   };
 
-  // Show loading state
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -125,12 +124,12 @@ export default function Profile() {
       <div className="max-w-7xl mx-auto p-6">
         <ProfileHeader
           user={user}
-          portfolioTitle={portfolioTitle}
+          portfolioTitle={portfolios[0]?.title || null}
           onEdit={() => setIsEditProfileOpen(true)}
         />
 
         <PortfolioSection
-          portfolio={portfolio}
+          portfolios={portfolios}
           isLoading={portfolioLoading}
           onAddPortfolio={handleAddPortfolio}
           onEditPortfolio={handleEditPortfolio}
@@ -142,20 +141,17 @@ export default function Profile() {
           onEdit={() => setIsEditSkillsOpen(true)}
         />
 
-        
         <ReviewsSection
           reviews={user.reviews_received || []}
           averageRating={calculateAverageRating()}
         />
 
-        
         <Settings
           notifications={notifications}
           onNotificationsChange={setNotifications}
         />
       </div>
 
-      
       <EditProfileModal
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
@@ -169,9 +165,10 @@ export default function Profile() {
         onClose={() => {
           setIsAddPortfolioOpen(false);
           setIsEditMode(false);
+          setEditingPortfolio(null);
         }}
         editMode={isEditMode}
-        portfolioToEdit={isEditMode ? portfolio : null}
+        portfolioToEdit={editingPortfolio}
         onSaved={handlePortfolioSaved}
       />
       <ViewPortfolioModal

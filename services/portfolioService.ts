@@ -34,11 +34,13 @@ export interface Portfolio {
 export interface CreatePortfolioData {
   title: string;
   description: string;
+  images?: Array<{ image_url: string; is_primary: boolean }>;
 }
 
 export interface UpdatePortfolioData {
   title?: string;
   description?: string;
+  images?: Array<{ image_url: string; is_primary: boolean }>;
 }
 
 export const portfolioService = {
@@ -86,7 +88,7 @@ export const portfolioService = {
 
   /**
    * Update portfolio
-   * PUT /portfolio/:id
+   * PATCH /portfolio/:id
    */
   updatePortfolio: async (
     portfolioId: string,
@@ -95,7 +97,7 @@ export const portfolioService = {
     try {
       console.log("✏️ Updating portfolio:", portfolioId, data);
 
-      const response = await apiClient.put<Portfolio>(
+      const response = await apiClient.patch<Portfolio>(
         `/portfolio/${portfolioId}`,
         data
       );
@@ -123,41 +125,6 @@ export const portfolioService = {
     } catch (error) {
       const axiosError = error as AxiosError<ApiErrorResponse>;
       console.error("❌ Delete portfolio failed:", axiosError);
-      throw error;
-    }
-  },
-
-  /**
-   * Upload portfolio image
-   * POST /portfolio/:id/images
-   */
-  uploadPortfolioImage: async (
-    portfolioId: string,
-    imageFile: File,
-    isPrimary: boolean = false
-  ): Promise<PortfolioImage> => {
-    try {
-      console.log("📸 Uploading portfolio image...");
-
-      const formData = new FormData();
-      formData.append("image", imageFile);
-      formData.append("is_primary", String(isPrimary));
-
-      const response = await apiClient.post<PortfolioImage>(
-        `/portfolio/${portfolioId}/images`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      console.log("✅ Image uploaded:", response.data);
-      return response.data;
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("❌ Upload image failed:", axiosError);
       throw error;
     }
   },
