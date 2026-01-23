@@ -29,6 +29,8 @@ interface ImagePreview {
   uploadStatus?: UploadStatus;
 }
 
+const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "uploads";
+
 export default function AddPortfolioModal({
   isOpen,
   onClose,
