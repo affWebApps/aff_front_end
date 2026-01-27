@@ -66,7 +66,7 @@ export const facebookAuthService = {
    */
   exchangeOAuthCode: async (
     code: string,
-    provider: string = "facebook"
+    // provider: string = "facebook"
   ): Promise<OAuthExchangeResponse> => {
     try {
       console.log("🔄 Exchanging Facebook OAuth code for token...");
@@ -75,7 +75,7 @@ export const facebookAuthService = {
         "/auth/oauth-exchange",
         {
           code,
-          provider,
+          // provider,
         }
       );
 
