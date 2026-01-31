@@ -11,7 +11,7 @@ export type UploadResult = {
   publicUrl: string | null;
 };
 
-const defaultBucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "public";
+const defaultBucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "uploads";
 
 export const uploadFileToSupabase = async ({
   file,
@@ -37,8 +37,8 @@ export const uploadFileToSupabase = async ({
       objectPath,
       name: error.name,
       message: error.message,
-      statusCode: (error as any)?.statusCode,
-      cause: (error as any)?.cause,
+      statusCode: "statusCode" in error ? error.statusCode : undefined,
+      cause: "cause" in error ? error.cause : undefined,
     });
     throw error;
   }
@@ -49,7 +49,7 @@ export const uploadFileToSupabase = async ({
   console.log({
     path: objectPath,
     publicUrl: publicUrlData?.publicUrl ?? null,
-  })
+  });
   return {
     path: objectPath,
     publicUrl: publicUrlData?.publicUrl ?? null,

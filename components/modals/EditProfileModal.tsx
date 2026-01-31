@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useMemo, useState } from "react";
@@ -6,7 +7,7 @@ import { Button } from "../ui/Button";
 import { useAuthStore } from "@/store/authStore";
 import { Upload, Loader2 } from "lucide-react";
 import { authService } from "@/services/authServices";
-import { uploadFileToSupabase } from "../../lib/storageService";
+import { imageUploadService } from "@/services/imageUploadService";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -99,25 +100,31 @@ export default function EditProfileModal({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate image before uploading
+    const validation = imageUploadService.validateImage(file);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid image file");
+      return;
+    }
+
     try {
       setIsUploadingAvatar(true);
       setError(null);
 
-      // Upload to Supabase
-      const { publicUrl } = await uploadFileToSupabase({
+      // Upload using centralized service
+      const { publicUrl } = await imageUploadService.uploadSingleImage({
         file,
-        folder: "avatars",
+        folder: "public",
+        onProgress: (status) => {
+          console.log(`Avatar upload status: ${status}`);
+        },
       });
 
-      if (publicUrl) {
-        setFormData({ ...formData, avatarUrl: publicUrl });
-        console.log("✅ Avatar uploaded successfully:", publicUrl);
-      } else {
-        throw new Error("Failed to get public URL for uploaded avatar");
-      }
+      setFormData({ ...formData, avatarUrl: publicUrl });
+      console.log("✅ Avatar uploaded successfully:", publicUrl);
     } catch (error: any) {
       console.error("Failed to upload avatar:", error);
-      setError("Failed to upload avatar. Please try again.");
+      setError(error.message || "Failed to upload avatar. Please try again.");
     } finally {
       setIsUploadingAvatar(false);
     }

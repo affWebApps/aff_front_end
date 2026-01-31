@@ -31,16 +31,17 @@ export interface Portfolio {
   Image: PortfolioImage[];
 }
 
+// FIXED: Changed to camelCase to match the actual API requirements
 export interface CreatePortfolioData {
   title: string;
   description: string;
-  images?: Array<{ image_url: string; is_primary: boolean }>;
+  images?: Array<{ imageUrl: string; isPrimary: boolean }>; // Changed from image_url and is_primary
 }
 
 export interface UpdatePortfolioData {
   title?: string;
   description?: string;
-  images?: Array<{ image_url: string; is_primary: boolean }>;
+  images?: Array<{ imageUrl: string; isPrimary: boolean }>; // Changed from image_url and is_primary
 }
 
 export const portfolioService = {
@@ -112,16 +113,17 @@ export const portfolioService = {
   },
 
   /**
-   * Delete portfolio
-   * DELETE /portfolio/:id
+   * Delete user portfolio (deletes entire portfolio)
+   * DELETE /portfolio
    */
-  deletePortfolio: async (portfolioId: string): Promise<void> => {
+  deletePortfolio: async (): Promise<{ status: string }> => {
     try {
-      console.log("🗑️ Deleting portfolio:", portfolioId);
+      console.log("🗑️ Deleting user portfolio...");
 
-      await apiClient.delete(`/portfolio/${portfolioId}`);
+      const response = await apiClient.delete<{ status: string }>("/portfolio");
 
-      console.log("✅ Portfolio deleted");
+      console.log("✅ Portfolio deleted:", response.data);
+      return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiErrorResponse>;
       console.error("❌ Delete portfolio failed:", axiosError);
