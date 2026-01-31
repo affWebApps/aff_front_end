@@ -98,7 +98,7 @@ export const useOAuth = () => {
 
           console.log("✅ Redirecting to dashboard");
           // Redirect to dashboard
-          router.push("/dashboard");
+          router.push("/");
         } catch (error) {
           console.error(`❌ Failed to exchange ${provider} OAuth code:`, error);
 

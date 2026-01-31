@@ -4,6 +4,7 @@ import EditProfileModal from "../modals/EditProfileModal";
 import EditSkillsModal from "../modals/EditSkillsModal";
 import AddPortfolioModal from "../modals/AddPortfolioModal";
 import ViewPortfolioModal from "../modals/ViewPortfolioModal";
+import DeletePortfolioModal from "../modals/Deleteportfoliomodal";
 
 import Settings from "./Settings";
 import { useAuthStore } from "@/store/authStore";
@@ -29,10 +30,14 @@ export default function Profile() {
   const [isAddPortfolioOpen, setIsAddPortfolioOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isViewPortfolioOpen, setIsViewPortfolioOpen] = useState(false);
+  const [isDeletePortfolioOpen, setIsDeletePortfolioOpen] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(
     null
   );
   const [portfolioToEdit, setPortfolioToEdit] = useState<Portfolio | null>(
+    null
+  );
+  const [portfolioToDelete, setPortfolioToDelete] = useState<Portfolio | null>(
     null
   );
 
@@ -107,6 +112,11 @@ export default function Profile() {
     setIsAddPortfolioOpen(true);
   };
 
+  const handleDeletePortfolio = (portfolioData: Portfolio) => {
+    setPortfolioToDelete(portfolioData);
+    setIsDeletePortfolioOpen(true);
+  };
+
   const handlePortfolioSaved = async () => {
     console.log("Portfolio saved, refreshing data...");
     setIsAddPortfolioOpen(false);
@@ -117,6 +127,20 @@ export default function Profile() {
       await new Promise((resolve) => setTimeout(resolve, 500));
       await Promise.all([fetchPortfolio(), checkAuth()]);
       console.log("✅ Data refreshed successfully");
+    } catch (error) {
+      console.error("❌ Failed to refresh data:", error);
+    }
+  };
+
+  const handlePortfolioDeleted = async () => {
+    console.log("Portfolio deleted, refreshing data...");
+    setIsDeletePortfolioOpen(false);
+    setPortfolioToDelete(null);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await Promise.all([fetchPortfolio(), checkAuth()]);
+      console.log("✅ Data refreshed successfully after deletion");
     } catch (error) {
       console.error("❌ Failed to refresh data:", error);
     }
@@ -151,6 +175,7 @@ export default function Profile() {
           onAddPortfolio={handleAddPortfolio}
           onEditPortfolio={handleEditPortfolio}
           onPortfolioClick={handlePortfolioClick}
+          onDeletePortfolio={handleDeletePortfolio}
         />
 
         {/* Skills Section */}
@@ -196,6 +221,15 @@ export default function Profile() {
         isOpen={isViewPortfolioOpen}
         onClose={() => setIsViewPortfolioOpen(false)}
         portfolio={selectedPortfolio}
+      />
+      <DeletePortfolioModal
+        isOpen={isDeletePortfolioOpen}
+        onClose={() => {
+          setIsDeletePortfolioOpen(false);
+          setPortfolioToDelete(null);
+        }}
+        portfolio={portfolioToDelete}
+        onDeleted={handlePortfolioDeleted}
       />
     </div>
   );

@@ -14,23 +14,25 @@ import ProfileHeader from "./Profileheader";
 import PortfolioSection from "./Portfoliosection";
 import ReviewsSection from "./Reviewssection";
 import SkillsSection from "./Skillssection";
+import DeletePortfolioModal from "../modals/Deleteportfoliomodal";
 
 export default function Profile() {
   const { user, checkAuth } = useAuthStore();
-  const {
-    isLoading: portfolioLoading,
-    fetchPortfolio,
-  } = usePortfolioStore();
+  const { isLoading: portfolioLoading, fetchPortfolio } = usePortfolioStore();
 
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isEditSkillsOpen, setIsEditSkillsOpen] = useState(false);
   const [isAddPortfolioOpen, setIsAddPortfolioOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isViewPortfolioOpen, setIsViewPortfolioOpen] = useState(false);
+  const [isDeletePortfolioOpen, setIsDeletePortfolioOpen] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(
     null
   );
   const [editingPortfolio, setEditingPortfolio] = useState<Portfolio | null>(
+    null
+  );
+  const [deletingPortfolio, setDeletingPortfolio] = useState<Portfolio | null>(
     null
   );
 
@@ -95,10 +97,28 @@ export default function Profile() {
     setIsAddPortfolioOpen(true);
   };
 
+  const handleDeletePortfolio = (portfolioData: Portfolio) => {
+    setDeletingPortfolio(portfolioData);
+    setIsDeletePortfolioOpen(true);
+  };
+
   const handlePortfolioSaved = async () => {
     setIsAddPortfolioOpen(false);
     setIsEditMode(false);
     setEditingPortfolio(null);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await Promise.all([fetchPortfolio(), checkAuth()]);
+    } catch (error) {
+      console.error("Failed to refresh data:", error);
+    }
+  };
+  
+
+  const handlePortfolioDeleted = async () => {
+    setIsDeletePortfolioOpen(false);
+    setDeletingPortfolio(null);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -118,6 +138,7 @@ export default function Profile() {
       </div>
     );
   }
+console.log("Profile - handleDeletePortfolio:", handleDeletePortfolio);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,6 +155,7 @@ export default function Profile() {
           onAddPortfolio={handleAddPortfolio}
           onEditPortfolio={handleEditPortfolio}
           onPortfolioClick={handlePortfolioClick}
+          onDeletePortfolio={handleDeletePortfolio}
         />
 
         <SkillsSection
@@ -175,6 +197,15 @@ export default function Profile() {
         isOpen={isViewPortfolioOpen}
         onClose={() => setIsViewPortfolioOpen(false)}
         portfolio={selectedPortfolio}
+      />
+      <DeletePortfolioModal
+        isOpen={isDeletePortfolioOpen}
+        onClose={() => {
+          setIsDeletePortfolioOpen(false);
+          setDeletingPortfolio(null);
+        }}
+        portfolio={deletingPortfolio}
+        onDeleted={handlePortfolioDeleted}
       />
     </div>
   );

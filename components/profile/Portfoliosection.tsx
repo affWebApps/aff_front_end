@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState } from "react";
-import { Pencil, Briefcase } from "lucide-react";
+import { Pencil, Briefcase, Trash2 } from "lucide-react";
 import { Portfolio } from "@/services/portfolioService";
 import { Button } from "../ui/Button";
 
@@ -11,6 +11,7 @@ interface PortfolioSectionProps {
   onAddPortfolio: () => void;
   onEditPortfolio: (portfolio: Portfolio) => void;
   onPortfolioClick: (portfolio: Portfolio) => void;
+  onDeletePortfolio: (portfolio: Portfolio) => void;
 }
 
 export default function PortfolioSection({
@@ -19,8 +20,14 @@ export default function PortfolioSection({
   onAddPortfolio,
   onEditPortfolio,
   onPortfolioClick,
+  onDeletePortfolio,
 }: PortfolioSectionProps) {
   const [activeTab, setActiveTab] = useState("published");
+  console.log(
+    "onDeletePortfolio:",
+    typeof onDeletePortfolio,
+    onDeletePortfolio
+  );
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
@@ -109,16 +116,28 @@ export default function PortfolioSection({
                   <h3 className="text-base font-semibold text-gray-900 truncate flex-1">
                     {portfolio.title}
                   </h3>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditPortfolio(portfolio);
-                    }}
-                    className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors shrink-0"
-                    aria-label="Edit portfolio"
-                  >
-                    <Pencil className="w-4 h-4 text-gray-600" />
-                  </button>
+                  <div className="flex gap-1 shrink-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditPortfolio(portfolio);
+                      }}
+                      className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      aria-label="Edit portfolio"
+                    >
+                      <Pencil className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeletePortfolio(portfolio);
+                      }}
+                      className="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center hover:bg-red-100 transition-colors"
+                      aria-label="Delete portfolio"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
                 </div>
                 {portfolio.description && (
                   <p className="text-sm text-gray-500 mt-1 line-clamp-2">
