@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Edit2, Trash2, FileText, Users, ArrowLeft, Save } from "lucide-react";
+import TeamMembersView from "./Teammembersview";
+import BlogManagementView from "./Blogmanagementview";
+
 
 const ContentManagementSystem = () => {
   const [currentView, setCurrentView] = useState<string | null>(null);
@@ -30,10 +33,6 @@ const ContentManagementSystem = () => {
     "team-members": {
       title: "Team Members",
       content: "5 Team members added - Manage your team profiles and roles",
-    },
-    "blog-posts": {
-      title: "Blog Posts",
-      content: "6 Blogs online - Create and manage blog articles",
     },
   };
 
@@ -78,13 +77,21 @@ const ContentManagementSystem = () => {
       title: "Blog Posts",
       icon: FileText,
       time: "1 week ago",
-      preview: "6 Blogs online",
+      preview: "Manage blog articles and publications",
     },
   ];
 
   const handleCardClick = (id: string) => {
-    setCurrentView(id);
-    setEditData({ [id]: contentData[id as keyof typeof contentData].content });
+    if (id === "blog-posts") {
+      setCurrentView("blog-posts");
+    } else if (id === "team-members") {
+      setCurrentView("team-members");
+    } else {
+      setCurrentView(id);
+      setEditData({
+        [id]: contentData[id as keyof typeof contentData].content,
+      });
+    }
   };
 
   const handleBack = () => {
@@ -134,7 +141,7 @@ const ContentManagementSystem = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white ">
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
           {!currentView ? (
@@ -203,28 +210,35 @@ const ContentManagementSystem = () => {
                       >
                         <Edit2 size={18} className="text-gray-600" />
                       </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (
-                            confirm(
-                              `Are you sure you want to delete ${card.title}?`
-                            )
-                          ) {
-                            alert(`${card.title} deleted`);
-                          }
-                        }}
-                        className="p-2 hover:bg-gray-100 rounded transition-colors"
-                      >
-                        <Trash2 size={18} className="text-gray-600" />
-                      </motion.button>
+                      {card.id !== "blog-posts" &&
+                        card.id !== "team-members" && (
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (
+                                confirm(
+                                  `Are you sure you want to delete ${card.title}?`
+                                )
+                              ) {
+                                alert(`${card.title} deleted`);
+                              }
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded transition-colors"
+                          >
+                            <Trash2 size={18} className="text-gray-600" />
+                          </motion.button>
+                        )}
                     </div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
+          ) : currentView === "blog-posts" ? (
+            <BlogManagementView key="blog-posts" />
+          ) : currentView === "team-members" ? (
+            <TeamMembersView key="team-members" />
           ) : (
             <motion.div
               key="edit"
