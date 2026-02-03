@@ -16,7 +16,7 @@ export function AuthRedirect({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // If user is already authenticated, redirect to dashboard
     if (isAuthenticated && token) {
-      const redirect = searchParams.get("redirect") || "/dashboard";
+      const redirect = searchParams.get("redirect") || "/";
       console.log("✅ User already authenticated, redirecting to:", redirect);
       router.push(redirect);
     }

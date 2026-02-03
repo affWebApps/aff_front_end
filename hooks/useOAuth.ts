@@ -75,6 +75,7 @@ export const useOAuth = () => {
             email: authData.user.email,
             first_name: authData.user.firstName,
             last_name: authData.user.lastName,
+            bio: null,
             display_name: `${authData.user.firstName} ${authData.user.lastName}`,
             avatar_url: null,
             is_verified: true,
@@ -97,7 +98,7 @@ export const useOAuth = () => {
 
           console.log("✅ Redirecting to dashboard");
           // Redirect to dashboard
-          router.push("/dashboard");
+          router.push("/");
         } catch (error) {
           console.error(`❌ Failed to exchange ${provider} OAuth code:`, error);
 

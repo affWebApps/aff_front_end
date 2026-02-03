@@ -43,23 +43,24 @@ export const useGoogleAuth = () => {
 
           console.log("✅ OAuth exchange successful:", authData);
 
-         const user: User = {
-           id: authData.user.id,
-           email: authData.user.email,
-           first_name: authData.user.firstName,
-           last_name: authData.user.lastName,
-           display_name: `${authData.user.firstName} ${authData.user.lastName}`,
-           avatar_url: null,
-           is_verified: true,
-           is_active: true,
-           role: "user",
-           created_at: new Date().toISOString(),
-           updated_at: new Date().toISOString(),
-           reviews_received: [],
-           portfolios: [],
-           projects: [],
-           bids: [],
-         };
+          const user: User = {
+            id: authData.user.id,
+            email: authData.user.email,
+            first_name: authData.user.firstName,
+            last_name: authData.user.lastName,
+            bio: null,
+            display_name: `${authData.user.firstName} ${authData.user.lastName}`,
+            avatar_url: null,
+            is_verified: true,
+            is_active: true,
+            role: "user",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            reviews_received: [],
+            portfolios: [],
+            projects: [],
+            bids: [],
+          };
 
           setAuth(user, authData.access_token);
           setError(null);

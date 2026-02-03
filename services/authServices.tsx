@@ -11,6 +11,7 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
+  bio: string | null;
   display_name: string;
   avatar_url: string | null;
   is_verified: boolean;
@@ -48,6 +49,26 @@ export interface RegisterData {
 export interface AuthResponse {
   access_token: string;
   user: User;
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  status: string;
+}
+
+export interface UpdateProfileData {
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;
+  phoneNumber?: string;
+  bio?: string;
+  avatarUrl?: string;
+  country?: string;
+  city?: string;
 }
 
 // ============================================
@@ -150,6 +171,38 @@ export const authService = {
   },
 
   /**
+   * Change user password
+   */
+  changePassword: async (
+    data: ChangePasswordData,
+    token: string
+  ): Promise<ChangePasswordResponse> => {
+    try {
+      console.log("🔄 Changing password...");
+
+      const response = await apiClient.post<ChangePasswordResponse>(
+        "/auth/change-password",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("✅ Password changed successfully");
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Password change failed:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      throw error;
+    }
+  },
+
+  /**
    * Request password reset
    */
   requestPasswordReset: async (email: string): Promise<void> => {
@@ -196,6 +249,34 @@ export const authService = {
       console.log("✅ Email verified successfully");
     } catch (error: any) {
       console.error("❌ Email verification failed:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update user profile
+   */
+  updateProfile: async (
+    data: UpdateProfileData,
+    token: string
+  ): Promise<User> => {
+    try {
+      console.log("🔄 Updating user profile...");
+
+      const response = await apiClient.patch<User>("/users/me", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("✅ Profile updated successfully");
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Profile update failed:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       throw error;
     }
   },

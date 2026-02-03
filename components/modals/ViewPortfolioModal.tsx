@@ -1,7 +1,7 @@
 // components/modals/ViewPortfolioModal.tsx
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import React from "react";
-import Image from "next/image";
 import { Star } from "lucide-react";
 import { BaseModal } from "./BaseModal";
 import { Portfolio } from "@/services/portfolioService";
@@ -52,12 +52,10 @@ export default function ViewPortfolioModal({
             {portfolio.Image.map((image, index) => (
               <div key={image.id} className="relative">
                 <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden bg-gray-100">
-                  <Image
+                  <img
                     src={image.image_url}
                     alt={`${portfolio.title} - Image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 600px"
+                    className="w-full h-full object-cover"
                   />
                   {image.is_primary && (
                     <div className="absolute top-4 left-4 bg-[#FAB75B] text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium">

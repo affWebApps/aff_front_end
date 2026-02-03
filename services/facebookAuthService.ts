@@ -81,6 +81,7 @@ export const facebookAuthService = {
 
       console.log("✅ Facebook OAuth exchange successful");
       return response.data;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("❌ Facebook OAuth exchange failed:", {
         message: error.message,
@@ -96,13 +97,13 @@ export const facebookAuthService = {
    * Returns the URL user was on before OAuth, or dashboard as default
    */
   getRedirectUrl: (): string => {
-    if (typeof window === "undefined") return "/dashboard";
+    if (typeof window === "undefined") return "/";
 
     const savedUrl = sessionStorage.getItem("pre_oauth_url");
     sessionStorage.removeItem("pre_oauth_url");
     sessionStorage.removeItem("oauth_provider");
 
-    return savedUrl || "/dashboard";
+    return savedUrl || "/";
   },
 
   /**

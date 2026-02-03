@@ -1,4 +1,5 @@
-// services/googleAuthService.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import apiClient from "../lib/api/axios";
 
@@ -89,13 +90,13 @@ export const googleAuthService = {
    * Returns the URL user was on before OAuth, or dashboard as default
    */
   getRedirectUrl: (): string => {
-    if (typeof window === "undefined") return "/dashboard";
+    if (typeof window === "undefined") return "/";
 
     const savedUrl = sessionStorage.getItem("pre_oauth_url");
     sessionStorage.removeItem("pre_oauth_url");
     sessionStorage.removeItem("oauth_provider");
 
-    return savedUrl || "/dashboard";
+    return savedUrl || "/";
   },
 
   /**
