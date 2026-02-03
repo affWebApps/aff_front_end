@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,7 +8,6 @@ import { ArrowRight, Clock, Search, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { CustomSelect } from "../CustomSelect";
 import { Pagination } from "../ui/Pagination";
-import Image from "next/image";
 import { Button } from "../ui/Button";
 import { useBlogStore } from "@/store/blogStore";
 import { Blog } from "@/services/blogService";
@@ -38,7 +38,7 @@ const convertBlogToPost = (blog: Blog): BlogPost => {
   const wordCount = blog.content.split(/\s+/).length;
   const readTime = Math.ceil(wordCount / 200);
 
-  let imageUrl = "/images/blog2.jpg"; 
+  let imageUrl = "/images/blog2.jpg";
 
   if (blog.images && blog.images.length > 0) {
     const primaryImage = blog.images.find((img) => img.is_primary);
@@ -201,13 +201,10 @@ export const FashionBlogApp = () => {
           >
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative w-full h-64 md:h-full min-h-[300px]">
-                <Image
+                <img
                   src={featuredPost.image}
                   alt={featuredPost.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     console.error(
                       "Featured image failed to load:",
@@ -360,12 +357,10 @@ export const FashionBlogApp = () => {
                     }}
                   >
                     <div className="relative w-full h-48">
-                      <Image
+                      <img
                         src={post.image}
                         alt={post.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
                           console.error(
                             "Blog post image failed to load:",
