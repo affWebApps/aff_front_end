@@ -30,34 +30,46 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { logout, token } = useAuthStore();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  // const handleSignOut = async () => {
+  //   try {
+  //     setIsSigningOut(true);
+  //     console.log("🚪 Signing out...");
+
+  //     // Call backend logout with token
+  //     try {
+  //       if (token) {
+  //         await authService.logout(token);
+  //       }
+  //     } catch (error) {
+  //       console.warn("Backend logout failed, but continuing with local logout");
+  //     }
+
+  //     // Clear auth state from Zustand store (this also clears localStorage)
+  //     logout();
+
+  //     console.log("✅ Signed out successfully");
+
+  //     // Redirect to sign-in page
+  //     router.push("/sign-in");
+  //   } catch (error) {
+  //     console.error("❌ Sign out error:", error);
+  //     // Even if there's an error, we should still clear local state
+  //     logout();
+  //     router.push("/sign-in");
+  //   } finally {
+  //     setIsSigningOut(false);
+  //   }
+  // };
+
   const handleSignOut = async () => {
     try {
-      setIsSigningOut(true);
-      console.log("🚪 Signing out...");
-
-      // Call backend logout with token
-      try {
-        if (token) {
-          await authService.logout(token);
-        }
-      } catch (error) {
-        console.warn("Backend logout failed, but continuing with local logout");
-      }
-
-      // Clear auth state from Zustand store (this also clears localStorage)
-      logout();
-
-      console.log("✅ Signed out successfully");
-
-      // Redirect to sign-in page
-      router.push("/sign-in");
+      await logout();
+      // setShowProfileMenu(false);
+      router.push("/");
+      // setToast({ message: "Logged out successfully", type: "success" });
     } catch (error) {
-      console.error("❌ Sign out error:", error);
-      // Even if there's an error, we should still clear local state
-      logout();
-      router.push("/sign-in");
-    } finally {
-      setIsSigningOut(false);
+      console.error("Logout failed:", error);
+      // setToast({ message: "Logout failed", type: "error" });
     }
   };
 
@@ -73,9 +85,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 w-80 bg-[#5C4033] text-white flex flex-col z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`fixed lg:static inset-y-0 left-0 w-80 bg-[#5C4033] text-white flex flex-col z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         {/* Close button for mobile */}
         <button
@@ -149,11 +160,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <button
             onClick={handleSignOut}
             disabled={isSigningOut}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-              isSigningOut
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isSigningOut
                 ? "bg-amber-900 bg-opacity-30 cursor-not-allowed opacity-50"
                 : "hover:bg-amber-900 hover:bg-opacity-30"
-            }`}
+              }`}
           >
             <LogOut size={20} />
             <span className="font-medium">
