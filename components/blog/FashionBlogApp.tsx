@@ -38,14 +38,21 @@ const convertBlogToPost = (blog: Blog): BlogPost => {
   const wordCount = blog.content.split(/\s+/).length;
   const readTime = Math.ceil(wordCount / 200);
 
+  // Get the primary image or the first image if no primary is set
+  const primaryImage = blog.images?.find((img) => img.is_primary);
+  const imageUrl =
+    primaryImage?.image_url ||
+    blog.images?.[0]?.image_url ||
+    "/images/blog2.jpg";
+
   return {
     id: blog.id,
     title: blog.title,
     description,
-    author: "AFF Designer", 
+    author: "AFF Designer",
     readTime: `${readTime} min read`,
     category: "Tech in Fashion",
-    image: blog.images?.[0] || "/images/blog2.jpg", 
+    image: imageUrl,
     comments: [],
   };
 };
