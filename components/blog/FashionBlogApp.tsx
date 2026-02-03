@@ -38,14 +38,27 @@ const convertBlogToPost = (blog: Blog): BlogPost => {
   const wordCount = blog.content.split(/\s+/).length;
   const readTime = Math.ceil(wordCount / 200);
 
+  let imageUrl = "/images/blog2.jpg"; 
+
+  if (blog.images && blog.images.length > 0) {
+    const primaryImage = blog.images.find((img) => img.is_primary);
+    if (primaryImage && primaryImage.image_url) {
+      imageUrl = primaryImage.image_url;
+    } else if (blog.images[0] && blog.images[0].image_url) {
+      imageUrl = blog.images[0].image_url;
+    }
+  }
+
+  console.log(`Blog "${blog.title}" using image:`, imageUrl); // Debug log
+
   return {
     id: blog.id,
     title: blog.title,
     description,
-    author: "AFF Designer", 
+    author: "AFF Designer",
     readTime: `${readTime} min read`,
     category: "Tech in Fashion",
-    image: blog.images?.[0] || "/images/blog2.jpg", 
+    image: imageUrl,
     comments: [],
   };
 };
@@ -64,6 +77,19 @@ export const FashionBlogApp = () => {
   useEffect(() => {
     fetchBlogs();
   }, [fetchBlogs]);
+
+  useEffect(() => {
+    if (blogs.length > 0) {
+      console.log("📊 Blogs loaded:", blogs.length);
+      blogs.forEach((blog) => {
+        console.log(`Blog: "${blog.title}"`, {
+          id: blog.id,
+          images: blog.images,
+          imageCount: blog.images?.length || 0,
+        });
+      });
+    }
+  }, [blogs]);
 
   const apiBlogPosts = blogs
     .filter((blog) => blog.status === "published")
@@ -167,20 +193,30 @@ export const FashionBlogApp = () => {
 
           {/* Featured Post */}
           <motion.div
-            className="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            className="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-white"
             initial="hidden"
             animate="visible"
             variants={fadeInUp}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
             <div className="grid md:grid-cols-2 gap-0">
-              <Image
-                src={featuredPost.image}
-                alt={featuredPost.title}
-                className="w-full h-full object-cover"
-                width={400}
-                height={400}
-              />
+              <div className="relative w-full h-64 md:h-full min-h-[300px]">
+                <Image
+                  src={featuredPost.image}
+                  alt={featuredPost.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  priority
+                  onError={(e) => {
+                    console.error(
+                      "Featured image failed to load:",
+                      featuredPost.image
+                    );
+                    e.currentTarget.src = "/images/blog1.png";
+                  }}
+                />
+              </div>
               <div className="p-8 flex flex-col justify-center">
                 <h2 className="text-2xl font-bold text-gray-900 mb-3">
                   {featuredPost.title}
@@ -323,13 +359,22 @@ export const FashionBlogApp = () => {
                       delay: 0.3 + index * 0.1,
                     }}
                   >
-                    <Image
-                      src={post.image}
-                      alt={post.title}
-                      className="w-full h-48 object-cover"
-                      width={400}
-                      height={400}
-                    />
+                    <div className="relative w-full h-48">
+                      <Image
+                        src={post.image}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        onError={(e) => {
+                          console.error(
+                            "Blog post image failed to load:",
+                            post.image
+                          );
+                          e.currentTarget.src = "/images/blog2.jpg";
+                        }}
+                      />
+                    </div>
                     <div className="p-6">
                       <h3 className="text-lg font-bold text-gray-900 mb-2">
                         {post.title}
