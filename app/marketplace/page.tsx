@@ -1,6 +1,6 @@
 "use client";
 import { Search } from "@mui/icons-material";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import HomeLayout from "../(home)/layout";
 import ProductDetailPage from "./products/[id]/page";
@@ -11,11 +11,11 @@ import { Pagination } from "../../components/ui/Pagination";
 import ServiceDetailPage from "./services/[id]/page";
 
 
-interface Product {
-  id: number;
+export interface Product {
+  id: string;
   image: string;
   title: string;
-  price: string | number; // ✅ Changed from string to string | number
+  price: number | string;
   seller: string;
 }
 
@@ -49,69 +49,139 @@ export default function MarketplacePage() {
   const [size, setSize] = useState("");
   const [expertiseLevel, setExpertiseLevel] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); 
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showProductDetail, setShowProductDetail] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | null>(null); 
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showServiceDetail, setShowServiceDetail] = useState(false);
+  const fallbackProducts: Product[] = useMemo(
+    () => [
+      {
+        id: "1",
+        image: "/images/ankara-gown.jpg",
+        title: "Ready-to-wear ankara gown",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+      {
+        id: "2",
+        image: "/images/ankara-gown.jpg",
+        title: "Leopard-skin blouse",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+      {
+        id: "3",
+        image: "/images/ankara-gown.jpg",
+        title: "Leopard-skin blouse",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+      {
+        id: "4",
+        image: "/images/ankara-gown.jpg",
+        title: "Leopard-skin blouse",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+      {
+        id: "5",
+        image: "/images/ankara-gown.jpg",
+        title: "Ready-to-wear ankara gown",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+      {
+        id: "6",
+        image: "/images/ankara-gown.jpg",
+        title: "Leopard-skin blouse",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+      {
+        id: "7",
+        image: "/images/ankara-gown.jpg",
+        title: "Leopard-skin blouse",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+      {
+        id: "8",
+        image: "/images/ankara-gown.jpg",
+        title: "Leopard-skin blouse",
+        price: 19999,
+        seller: "@sellers_username",
+      },
+    ],
+    []
+  );
 
-  const products = [
-    {
-      id: 1,
-      image: "/images/ankara-gown.jpg",
-      title: "Ready-to-wear ankara gown",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-    {
-      id: 2,
-      image: "/images/ankara-gown.jpg",
-      title: "Leopard-skin blouse",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-    {
-      id: 3,
-      image: "/images/ankara-gown.jpg",
-      title: "Leopard-skin blouse",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-    {
-      id: 4,
-      image: "/images/ankara-gown.jpg",
-      title: "Leopard-skin blouse",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-    {
-      id: 5,
-      image: "/images/ankara-gown.jpg",
-      title: "Ready-to-wear ankara gown",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-    {
-      id: 6,
-      image: "/images/ankara-gown.jpg",
-      title: "Leopard-skin blouse",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-    {
-      id: 7,
-      image: "/images/ankara-gown.jpg",
-      title: "Leopard-skin blouse",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-    {
-      id: 8,
-      image: "/images/ankara-gown.jpg",
-      title: "Leopard-skin blouse",
-      price: "19,999",
-      seller: "@sellers_username",
-    },
-  ];
+  const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [productsError, setProductsError] = useState<string | null>(null);
+
+  const isDev = process.env.NODE_ENV === "development";
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!isDev) return;
+
+      const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      if (!backendUrl) {
+        setProductsError("Missing NEXT_PUBLIC_API_BASE_URL for dev fetch.");
+        return;
+      }
+
+      try {
+        setIsLoadingProducts(true);
+        setProductsError(null);
+
+        const params = {
+          page: 1,
+          limit: 5,
+          collection_id: null,
+        } as const;
+
+        const response = await fetch(
+          `${backendUrl}/store/products?page=${params.page}&limit=${params.limit}&collection_id=${params.collection_id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Request failed with ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data.product_results)) {
+          throw new Error("Unexpected response shape for products");
+        }
+
+        const mapped: Product[] = data.product_results.map((item: any) => ({
+          id: String(item.id),
+          image: item.thumbnail,
+          title: item.title,
+          price: item.price,
+        }));
+
+        setFetchedProducts(mapped);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+        setProductsError(
+          error instanceof Error ? error.message : "Failed to fetch products"
+        );
+        setFetchedProducts([]);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+  }, [isDev]);
 
   const services = [
     {
@@ -330,6 +400,14 @@ export default function MarketplacePage() {
     visible: { opacity: 1, y: 0 },
   };
 
+  let productsToShow
+  if (process.env.NODE_ENV == 'development') {
+    productsToShow = fetchedProducts;
+  } else {
+    productsToShow = fallbackProducts;
+  }
+
+
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
     setShowProductDetail(true);
@@ -394,11 +472,10 @@ export default function MarketplacePage() {
                 setActiveTab("products");
                 setCurrentPage(1);
               }}
-              className={`py-4 rounded-lg font-medium transition-all ${
-                activeTab === "products"
-                  ? "bg-white text-gray-800 shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+              className={`py-4 rounded-lg font-medium transition-all ${activeTab === "products"
+                ? "bg-white text-gray-800 shadow-md"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
             >
               Products
             </button>
@@ -407,11 +484,10 @@ export default function MarketplacePage() {
                 setActiveTab("services");
                 setCurrentPage(1);
               }}
-              className={`py-4 rounded-lg font-medium transition-all ${
-                activeTab === "services"
-                  ? "bg-white text-gray-800 shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+              className={`py-4 rounded-lg font-medium transition-all ${activeTab === "services"
+                ? "bg-white text-gray-800 shadow-md"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
             >
               Services
             </button>
@@ -495,9 +571,15 @@ export default function MarketplacePage() {
           </motion.div>
 
           {/* Content Grid */}
+          {productsError && (
+            <div className="max-w-4xl mx-auto mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {productsError}
+            </div>
+          )}
+
           {activeTab === "products" ? (
             <ProductsGrid
-              products={products}
+              products={productsToShow}
               onProductClick={handleProductClick}
             />
           ) : (
@@ -505,6 +587,12 @@ export default function MarketplacePage() {
               services={services}
               onServiceClick={handleServiceClick}
             />
+          )}
+
+          {isLoadingProducts && activeTab === "products" && (
+            <div className="text-center text-sm text-gray-500 mt-2">
+              Loading products...
+            </div>
           )}
 
           {/* Pagination */}

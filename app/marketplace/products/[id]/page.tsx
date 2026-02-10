@@ -12,6 +12,7 @@ interface ProductDetailPageProps {
     title: string;
     price: string | number;
     seller: string;
+    description?: string,
   };
   onBack?: () => void;
 }
@@ -30,7 +31,7 @@ export default function ProductDetailPage({
     oldPrice: "25,000",
     category: "Clothing",
     description:
-      "Turn heads in this stunning Velvet Mermaid Gown. Crafted from luxurious, soft-touch stretch velvet, this dress is designed to hug your curves and create a breathtaking silhouette. Perfect for a grand dinner party.",
+      product.description || "Turn heads in this stunning Velvet Mermaid Gown. Crafted from luxurious, soft-touch stretch velvet, this dress is designed to hug your curves and create a breathtaking silhouette. Perfect for a grand dinner party.",
     colors: [
       { name: "Emerald green", value: "#064E3B" },
       { name: "Royal blue", value: "#1E40AF" },
@@ -165,11 +166,10 @@ export default function ProductDetailPage({
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all relative ${
-                    selectedImage === idx
+                  className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all relative ${selectedImage === idx
                       ? "border-[#FAB75B]"
                       : "border-gray-200"
-                  }`}
+                    }`}
                 >
                   <Image
                     src={img}
@@ -229,11 +229,10 @@ export default function ProductDetailPage({
                   <button
                     key={idx}
                     onClick={() => setSelectedColor(idx)}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${
-                      selectedColor === idx
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor === idx
                         ? "border-gray-900 scale-110"
                         : "border-gray-300"
-                    }`}
+                      }`}
                     style={{ backgroundColor: color.value }}
                   />
                 ))}
@@ -249,11 +248,10 @@ export default function ProductDetailPage({
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                      selectedSize === size
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedSize === size
                         ? "bg-gray-900 text-white"
                         : "bg-white border border-gray-300 text-gray-700 hover:border-gray-400"
-                    }`}
+                      }`}
                   >
                     {size}
                   </button>
@@ -325,21 +323,19 @@ export default function ProductDetailPage({
             <div className="flex">
               <button
                 onClick={() => setActiveTab("reviews")}
-                className={`flex-1 py-4 px-6 font-medium transition-colors ${
-                  activeTab === "reviews"
+                className={`flex-1 py-4 px-6 font-medium transition-colors ${activeTab === "reviews"
                     ? "text-gray-900 border-b-2 border-[#FAB75B]"
                     : "text-gray-600 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 Customer&apos;s Reviews
               </button>
               <button
                 onClick={() => setActiveTab("seller")}
-                className={`flex-1 py-4 px-6 font-medium transition-colors ${
-                  activeTab === "seller"
+                className={`flex-1 py-4 px-6 font-medium transition-colors ${activeTab === "seller"
                     ? "text-gray-900 border-b-2 border-[#FAB75B]"
                     : "text-gray-600 hover:text-gray-900"
-                }`}
+                  }`}
               >
                 Seller&apos;s Information
               </button>
@@ -358,11 +354,10 @@ export default function ProductDetailPage({
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-5 h-5 ${
-                            i < Math.floor(productDetails.rating)
+                          className={`w-5 h-5 ${i < Math.floor(productDetails.rating)
                               ? "fill-[#FAB75B] text-[#FAB75B]"
                               : "text-gray-300"
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>
@@ -388,11 +383,10 @@ export default function ProductDetailPage({
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating
+                                className={`w-4 h-4 ${i < review.rating
                                     ? "fill-[#FAB75B] text-[#FAB75B]"
                                     : "text-gray-300"
-                                }`}
+                                  }`}
                               />
                             ))}
                           </div>

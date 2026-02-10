@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface Product {
-  id: number;
+  id: string;
   image: string;
   title: string;
   price: string | number;
@@ -22,15 +22,9 @@ export const ProductsGrid = ({
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
-
   return (
-    <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-      initial="hidden"
-      animate="visible"
-      transition={{ staggerChildren: 0.1 }}
-    >
-      {products.map((product) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {products.length > 0 && products.map((product) => (
         <motion.div
           key={product.id}
           variants={fadeInUp}
@@ -53,13 +47,13 @@ export const ProductsGrid = ({
             <div className="text-lg font-bold text-gray-900 mb-2">
               ₦ {product.price}
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-gray-300"></div>
               <span className="text-sm text-gray-600">{product.seller}</span>
-            </div>
+            </div> */}
           </div>
         </motion.div>
       ))}
-    </motion.div>
+    </div>
   );
 };
