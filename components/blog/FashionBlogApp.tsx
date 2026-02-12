@@ -107,7 +107,7 @@ export const FashionBlogApp = () => {
     comments: [],
   };
 
-  const blogPosts = apiBlogPosts.slice(1);
+  const blogPosts = apiBlogPosts;
 
   const filteredPosts = blogPosts.filter((post) => {
     const matchesCategory = !category || post.category === category;
@@ -119,6 +119,7 @@ export const FashionBlogApp = () => {
     return matchesCategory && matchesSearch;
   });
 
+  console.log('filtered post is', filteredPosts)
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     if (sortBy === "Popular") {
       return (b.comments?.length || 0) - (a.comments?.length || 0);

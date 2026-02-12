@@ -46,7 +46,7 @@ export const useBlogStore = create<BlogState>((set) => ({
   fetchBlogs: async () => {
     set({ isLoading: true, error: null });
     try {
-      const blogsData = await blogService.getAllBlogs();
+      const blogsData = await blogService.getPublishedBlogs();
       set({ blogs: blogsData, isLoading: false });
     } catch (error) {
       const axiosError = error as AxiosError<ApiErrorResponse>;
