@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../../../../components/ui/Button";
 import HomeLayout from "../../../(home)/layout";
+import { useAuthStore } from "@/store/authStore";
 
 type Variant = {
   id: string;
@@ -57,8 +58,10 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("reviews");
   const [isLoading, setIsLoading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fetchedProduct, setFetchedProduct] = useState<ProductApi | null>(null);
+  const { isAuthenticated, token } = useAuthStore();
 
   const effectiveProductId = routeParams?.id;
 
@@ -114,6 +117,7 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
         const data = await res.json();
         if (!data.product) throw new Error("Product not found");
         setFetchedProduct(data.product as ProductApi);
+        console.log("fetchedProduct is", data.product)
         const firstVariant = data.product.variants?.[0];
         setSelectedVariantId(firstVariant?.id ?? null);
         if (firstVariant?.options?.length) {
@@ -198,6 +202,11 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
   const selectedVariant =
     fetchedProduct?.variants?.find((v) => v.id === selectedVariantId) ?? null;
 
+  const maxQuantity =
+    selectedVariant?.inventory_quantity && selectedVariant.inventory_quantity > 0
+      ? selectedVariant.inventory_quantity
+      : Number.POSITIVE_INFINITY;
+
   const isOutOfStock = (() => {
     if (!selectedVariant) return true;
     if (selectedVariant.manage_inventory === false) return false;
@@ -262,15 +271,81 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
     router.push("/marketplace");
   };
 
-  const handleAddToCart = () => {
-    window.dispatchEvent(
-      new CustomEvent("showToast", {
-        detail: {
-          message: "Item added to cart successfully!",
-          type: "success",
+  const handleAddToCart = async () => {
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const redirectToSignIn = () => {
+      const redirect =
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : "/marketplace";
+      router.push(`/sign-in?redirect=${encodeURIComponent(redirect)}`);
+    };
+
+    if (!isAuthenticated || !token) {
+      redirectToSignIn();
+      return;
+    }
+
+    if (!backendUrl) {
+      window.dispatchEvent(
+        new CustomEvent("showToast", {
+          detail: { message: "Missing API base URL", type: "error" },
+        })
+      );
+      return;
+    }
+
+    if (!selectedVariantId || !fetchedProduct?.id) {
+      window.dispatchEvent(
+        new CustomEvent("showToast", {
+          detail: { message: "Please select a variant", type: "error" },
+        })
+      );
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+      const res = await fetch(`${backendUrl}/add_to_cart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      })
-    );
+        body: JSON.stringify({
+          product_id: fetchedProduct.id,
+          variant_id: selectedVariantId,
+          quantity,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Add to cart failed (${res.status})`);
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("showToast", {
+          detail: {
+            message: "Item added to cart successfully!",
+            type: "success",
+          },
+        })
+      );
+    } catch (err) {
+      window.dispatchEvent(
+        new CustomEvent("showToast", {
+          detail: {
+            message:
+              err instanceof Error
+                ? err.message
+                : "Could not add item to cart",
+            type: "error",
+          },
+        })
+      );
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   useEffect(() => {
@@ -449,17 +524,46 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
               <div className="mb-6">
                 <div className="flex items-center gap-4">
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={() =>
+                      setQuantity((prev) => Math.max(1, Math.min(maxQuantity, prev - 1)))
+                    }
                     className="w-10 h-10 rounded-lg bg-[#FAB75B] text-white flex items-center justify-center hover:bg-[#e9a548] transition-colors"
+                    type="button"
                   >
                     <Minus className="w-5 h-5" />
                   </button>
-                  <span className="text-lg font-medium text-gray-900 w-8 text-center">
-                    {quantity}
-                  </span>
+                  <input
+                    type="text"
+                    min={1}
+                    max={Number.isFinite(maxQuantity) ? maxQuantity : undefined}
+                    value={quantity}
+                    onChange={(e) => {
+                      const next = Number.parseInt(e.target.value, 10);
+                      setQuantity((prev) => {
+                        if (Number.isNaN(next)) return prev;
+                        return Math.max(1, Math.min(maxQuantity, next));
+                      });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "." || e.key === "e" || e.key === "E") {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="text-center text-lg font-medium text-gray-900 border border-gray-300 rounded-lg py-2  focus:outline-none focus:ring-2 focus:ring-[#FAB75B] transition-all appearance-none"
+                    style={{
+                      MozAppearance: "textfield",
+                      width: `${Math.max(String(quantity).length + 1, 5)}ch`,
+                      minWidth: "5ch",
+                    }}
+                  />
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() =>
+                      setQuantity((prev) =>
+                        Math.max(1, Math.min(maxQuantity, prev + 1))
+                      )
+                    }
                     className="w-10 h-10 rounded-lg bg-[#FAB75B] text-white flex items-center justify-center hover:bg-[#e9a548] transition-colors"
+                    type="button"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
@@ -471,9 +575,9 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
                 className="w-full "
                 variant="default"
                 size="large"
-                disabled={isOutOfStock}
+                disabled={isOutOfStock || isAdding}
               >
-                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                {isOutOfStock ? "Out of Stock" : isAdding ? "Adding..." : "Add to Cart"}
               </Button>
             </motion.div>
           </div>
