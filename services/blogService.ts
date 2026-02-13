@@ -66,6 +66,23 @@ export const blogService = {
     }
   },
 
+  getPublishedBlogs: async (): Promise<Blog[]> => {
+    try {
+      console.log("📂 Fetching all blogs...");
+      const response = await apiClient.get<Blog[]>("/blogs/");
+      console.log("✅ Blogs fetched:", response.data);
+      return response.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      console.error("❌ Get all blogs failed:", {
+        message: axiosError.message,
+        status: axiosError.response?.status,
+        url: axiosError.config?.url,
+      });
+      throw error;
+    }
+  },
+
   getBlogById: async (blogId: string): Promise<Blog> => {
     try {
       console.log("📂 Fetching blog:", blogId);

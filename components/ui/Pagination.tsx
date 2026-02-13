@@ -27,11 +27,10 @@ export const Pagination = ({
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-colors ${
-            currentPage === page
+          className={`w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-colors ${currentPage === page
               ? "bg-amber-900 text-white shadow-md"
               : "bg-white text-gray-700 hover:bg-gray-100"
-          }`}
+            }`}
         >
           {page}
         </button>

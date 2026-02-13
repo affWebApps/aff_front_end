@@ -3,12 +3,12 @@ import { Search } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import HomeLayout from "../(home)/layout";
-import ProductDetailPage from "./products/[id]/page";
 import { CustomSelect } from "../../components/CustomSelect";
 import { ProductsGrid } from "../../components/grid/ProductsGrid";
 import { ServicesGrid } from "../../components/grid/ServicesGrid";
 import { Pagination } from "../../components/ui/Pagination";
 import ServiceDetailPage from "./services/[id]/page";
+import { useRouter } from "next/navigation";
 
 
 export interface Product {
@@ -49,10 +49,9 @@ export default function MarketplacePage() {
   const [size, setSize] = useState("");
   const [expertiseLevel, setExpertiseLevel] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showServiceDetail, setShowServiceDetail] = useState(false);
+  const router = useRouter();
   const fallbackProducts: Product[] = useMemo(
     () => [
       {
@@ -118,6 +117,7 @@ export default function MarketplacePage() {
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [productsError, setProductsError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState<number>(1)
 
   const isDev = process.env.NODE_ENV === "development";
 
@@ -131,13 +131,17 @@ export default function MarketplacePage() {
         return;
       }
 
+      const limit =
+        Number.parseInt(process.env.NEXT_PUBLIC_PRODUCTS_PER_PAGE || "", 10) ||
+        12;
+
       try {
         setIsLoadingProducts(true);
         setProductsError(null);
 
         const params = {
-          page: 1,
-          limit: 5,
+          page: currentPage,
+          limit,
           collection_id: null,
         } as const;
 
@@ -169,6 +173,7 @@ export default function MarketplacePage() {
         }));
 
         setFetchedProducts(mapped);
+        setTotalPages(Math.ceil(data.count / limit))
       } catch (error) {
         console.error("Failed to fetch products", error);
         setProductsError(
@@ -181,7 +186,7 @@ export default function MarketplacePage() {
     };
 
     fetchProducts();
-  }, [isDev]);
+  }, [isDev, currentPage]);
 
   const services = [
     {
@@ -409,8 +414,7 @@ export default function MarketplacePage() {
 
 
   const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setShowProductDetail(true);
+    router.push(`/marketplace/products/${product.id}`);
   };
 
   const handleServiceClick = (service: Service) => {
@@ -418,28 +422,17 @@ export default function MarketplacePage() {
     setShowServiceDetail(true);
   };
 
-  const handleBackToMarketplace = () => {
-    setShowProductDetail(false);
-    setSelectedProduct(null);
+  const handleBackFromService = () => {
+    setShowServiceDetail(false);
+    setSelectedService(null);
   };
-
-  if (showProductDetail && selectedProduct) {
-    return (
-      <HomeLayout>
-        <ProductDetailPage
-          product={selectedProduct}
-          onBack={handleBackToMarketplace}
-        />
-      </HomeLayout>
-    );
-  }
 
   if (showServiceDetail && selectedService) {
     return (
       <HomeLayout>
         <ServiceDetailPage
           service={selectedService}
-          onBack={handleBackToMarketplace}
+          onBack={handleBackFromService}
         />
       </HomeLayout>
     );
@@ -598,7 +591,7 @@ export default function MarketplacePage() {
           {/* Pagination */}
           <Pagination
             currentPage={currentPage}
-            totalPages={3}
+            totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
         </div>

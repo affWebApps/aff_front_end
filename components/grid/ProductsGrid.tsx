@@ -33,7 +33,7 @@ export const ProductsGrid = ({
         >
           <div className="aspect-square bg-gray-200 relative overflow-hidden">
             <Image
-              src={product.image}
+              src={product.image || "/images/mid1.png"}
               alt={product.title}
               fill
               className="object-cover"
