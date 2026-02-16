@@ -8,6 +8,7 @@ import { Button } from "../../../../components/ui/Button";
 import HomeLayout from "../../../(home)/layout";
 import { useAuthStore } from "@/store/authStore";
 
+
 type Variant = {
   id: string;
   title: string;
@@ -40,6 +41,12 @@ type ProductApi = {
   }[];
 };
 
+type Vendor = {
+  vendorId: string;
+  vendorHandle: string;
+  vendorLogo: string;
+}
+
 interface ProductDetailPageProps {
   onBack?: () => void;
 }
@@ -61,6 +68,7 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fetchedProduct, setFetchedProduct] = useState<ProductApi | null>(null);
+  const [productVendor, setProductVendor] = useState<Vendor | null>(null);
   const { isAuthenticated, token } = useAuthStore();
 
   const effectiveProductId = routeParams?.id;
@@ -117,7 +125,9 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
         const data = await res.json();
         if (!data.product) throw new Error("Product not found");
         setFetchedProduct(data.product as ProductApi);
-        console.log("fetchedProduct is", data.product)
+        console.log("fetchedProduct is", data.product);
+        console.log("fetchedProduct vendor is", data.vendor);
+        setProductVendor(data.vendor as Vendor);
         const firstVariant = data.product.variants?.[0];
         setSelectedVariantId(firstVariant?.id ?? null);
         if (firstVariant?.options?.length) {
@@ -179,7 +189,7 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
       optionGroups,
       price,
       currency: selectedVariant?.calculated_price?.currency_code ?? "eur",
-      seller: "@store",
+      seller: productVendor?.vendorHandle || "@store",
       category: "Clothing",
       oldPrice: null,
     };
@@ -368,6 +378,41 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
     });
   }, [fetchedProduct?.options]);
 
+  if (isLoading) {
+    return (
+      <HomeLayout>
+        <div className="min-h-screen bg-linear-to-b from-orange-50 to-white">
+          <div className="container mx-auto px-4 py-10 space-y-8">
+            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div className="aspect-4/5 bg-gray-200 rounded-2xl animate-pulse" />
+                <div className="flex gap-3">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="w-20 h-20 rounded-lg bg-gray-200 animate-pulse"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="h-8 w-3/4 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                <div className="h-16 w-full bg-gray-200 rounded animate-pulse" />
+                <div className="h-10 w-40 bg-gray-200 rounded animate-pulse" />
+                <div className="h-10 w-56 bg-gray-200 rounded animate-pulse" />
+                <div className="h-12 w-full bg-gray-200 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </HomeLayout>
+    );
+  }
+
   return (
     <HomeLayout>
       <div className="min-h-screen bg-linear-to-b from-orange-50 to-white">
@@ -446,7 +491,11 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
               </h1>
 
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-full bg-gray-300" />
+                <div className="" />
+                {productVendor?.vendorLogo?.trim() && (
+                  <Image src={productVendor?.vendorLogo} className="rounded-full" alt="Product" width={46}
+                    height={46} />
+                )}
                 <span className="text-sm text-gray-600">
                   by {productDetails.seller}
                 </span>

@@ -149,6 +149,30 @@ export const FashionBlogApp = () => {
     visible: { opacity: 1, y: 0 },
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
+          <div className="h-8 w-60 bg-gray-200 rounded animate-pulse" />
+          <div className="grid md:grid-cols-2 gap-6">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3 animate-pulse"
+              >
+                <div className="h-40 w-full bg-gray-200 rounded-xl" />
+                <div className="h-4 w-3/4 bg-gray-200 rounded" />
+                <div className="h-4 w-1/2 bg-gray-200 rounded" />
+                <div className="h-3 w-1/3 bg-gray-200 rounded" />
+                <div className="h-10 w-full bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (currentView === "post" && selectedPost) {
     return (
       <>
