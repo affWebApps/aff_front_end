@@ -119,12 +119,8 @@ export default function MarketplacePage() {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState<number>(1)
 
-  const isDev = process.env.NODE_ENV === "development";
-
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!isDev) return;
-
       const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       if (!backendUrl) {
         setProductsError("Missing NEXT_PUBLIC_API_BASE_URL for dev fetch.");
@@ -160,12 +156,13 @@ export default function MarketplacePage() {
         }
 
         const data = await response.json();
+        console.log(data)
 
-        if (!Array.isArray(data.product_results)) {
+        if (!Array.isArray(data.products)) {
           throw new Error("Unexpected response shape for products");
         }
 
-        const mapped: Product[] = data.product_results.map((item: any) => ({
+        const mapped: Product[] = data.products.map((item: any) => ({
           id: String(item.id),
           image: item.thumbnail,
           title: item.title,
@@ -186,7 +183,7 @@ export default function MarketplacePage() {
     };
 
     fetchProducts();
-  }, [isDev, currentPage]);
+  }, [currentPage]);
 
   const services = [
     {
@@ -571,21 +568,31 @@ export default function MarketplacePage() {
           )}
 
           {activeTab === "products" ? (
-            <ProductsGrid
-              products={productsToShow}
-              onProductClick={handleProductClick}
-            />
+            isLoadingProducts ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {Array.from({ length: 8 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white rounded-xl shadow-md p-4 space-y-3 animate-pulse"
+                  >
+                    <div className="aspect-square bg-gray-200 rounded-lg" />
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-4 bg-gray-200 rounded w-1/2" />
+                    <div className="h-4 bg-gray-200 rounded w-2/3" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <ProductsGrid
+                products={productsToShow}
+                onProductClick={handleProductClick}
+              />
+            )
           ) : (
             <ServicesGrid
               services={services}
               onServiceClick={handleServiceClick}
             />
-          )}
-
-          {isLoadingProducts && activeTab === "products" && (
-            <div className="text-center text-sm text-gray-500 mt-2">
-              Loading products...
-            </div>
           )}
 
           {/* Pagination */}
