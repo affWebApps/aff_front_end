@@ -52,67 +52,67 @@ export default function MarketplacePage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showServiceDetail, setShowServiceDetail] = useState(false);
   const router = useRouter();
-  const fallbackProducts: Product[] = useMemo(
-    () => [
-      {
-        id: "1",
-        image: "/images/ankara-gown.jpg",
-        title: "Ready-to-wear ankara gown",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-      {
-        id: "2",
-        image: "/images/ankara-gown.jpg",
-        title: "Leopard-skin blouse",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-      {
-        id: "3",
-        image: "/images/ankara-gown.jpg",
-        title: "Leopard-skin blouse",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-      {
-        id: "4",
-        image: "/images/ankara-gown.jpg",
-        title: "Leopard-skin blouse",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-      {
-        id: "5",
-        image: "/images/ankara-gown.jpg",
-        title: "Ready-to-wear ankara gown",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-      {
-        id: "6",
-        image: "/images/ankara-gown.jpg",
-        title: "Leopard-skin blouse",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-      {
-        id: "7",
-        image: "/images/ankara-gown.jpg",
-        title: "Leopard-skin blouse",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-      {
-        id: "8",
-        image: "/images/ankara-gown.jpg",
-        title: "Leopard-skin blouse",
-        price: 19999,
-        seller: "@sellers_username",
-      },
-    ],
-    []
-  );
+  // const fallbackProducts: Product[] = useMemo(
+  //   () => [
+  //     {
+  //       id: "1",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Ready-to-wear ankara gown",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //     {
+  //       id: "2",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Leopard-skin blouse",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //     {
+  //       id: "3",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Leopard-skin blouse",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //     {
+  //       id: "4",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Leopard-skin blouse",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //     {
+  //       id: "5",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Ready-to-wear ankara gown",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //     {
+  //       id: "6",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Leopard-skin blouse",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //     {
+  //       id: "7",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Leopard-skin blouse",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //     {
+  //       id: "8",
+  //       image: "/images/ankara-gown.jpg",
+  //       title: "Leopard-skin blouse",
+  //       price: 19999,
+  //       seller: "@sellers_username",
+  //     },
+  //   ],
+  //   []
+  // );
 
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
@@ -402,12 +402,8 @@ export default function MarketplacePage() {
     visible: { opacity: 1, y: 0 },
   };
 
-  let productsToShow
-  if (process.env.NODE_ENV == 'development') {
-    productsToShow = fetchedProducts;
-  } else {
-    productsToShow = fallbackProducts;
-  }
+  let productsToShow = fetchedProducts;
+
 
 
   const handleProductClick = (product: Product) => {
