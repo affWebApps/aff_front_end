@@ -119,12 +119,8 @@ export default function MarketplacePage() {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState<number>(1)
 
-  const isDev = process.env.NODE_ENV === "development";
-
   useEffect(() => {
     const fetchProducts = async () => {
-      if (!isDev) return;
-
       const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       if (!backendUrl) {
         setProductsError("Missing NEXT_PUBLIC_API_BASE_URL for dev fetch.");
@@ -187,7 +183,7 @@ export default function MarketplacePage() {
     };
 
     fetchProducts();
-  }, [isDev, currentPage]);
+  }, [currentPage]);
 
   const services = [
     {
