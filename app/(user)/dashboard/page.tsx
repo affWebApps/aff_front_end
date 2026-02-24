@@ -63,8 +63,8 @@ export default function Dashboard() {
                 Total Services posted
               </span>
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">3</div>
-            <div className="text-sm text-gray-500">(1 new bid sent)</div>
+            <div className="text-4xl font-bold text-gray-900 mb-2">0</div>
+            {/* <div className="text-sm text-gray-500">(1 new bid sent)</div> */}
           </div>
 
           {/* Wallet Balance */}
@@ -74,9 +74,9 @@ export default function Dashboard() {
               <span className="text-gray-600 font-medium">Wallet Balance</span>
             </div>
             <div className="text-4xl font-bold text-gray-900 mb-2">
-              ₦350,000.00
+              ₦0.00
             </div>
-            <div className="text-sm text-green-600">+ ₦250,000 today</div>
+            {/* <div className="text-sm text-green-600">+ ₦250,000 today</div> */}
           </div>
         </div>
 
