@@ -7,6 +7,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../../../../components/ui/Button";
 import HomeLayout from "../../../(home)/layout";
 import { useAuthStore } from "@/store/authStore";
+import { useCartMutations } from "@/hooks/useCart";
 
 
 type Variant = {
@@ -69,7 +70,8 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [fetchedProduct, setFetchedProduct] = useState<ProductApi | null>(null);
   const [productVendor, setProductVendor] = useState<Vendor | null>(null);
-  const { isAuthenticated, token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
+  const { addItem } = useCartMutations();
 
   const effectiveProductId = routeParams?.id;
 
@@ -282,7 +284,6 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
   };
 
   const handleAddToCart = async () => {
-    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     const redirectToSignIn = () => {
       const redirect =
         typeof window !== "undefined"
@@ -291,17 +292,8 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
       router.push(`/sign-in?redirect=${encodeURIComponent(redirect)}`);
     };
 
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       redirectToSignIn();
-      return;
-    }
-
-    if (!backendUrl) {
-      window.dispatchEvent(
-        new CustomEvent("showToast", {
-          detail: { message: "Missing API base URL", type: "error" },
-        })
-      );
       return;
     }
 
@@ -316,22 +308,11 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
 
     try {
       setIsAdding(true);
-      const res = await fetch(`${backendUrl}/add_to_cart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          product_id: fetchedProduct.id,
-          variant_id: selectedVariantId,
-          quantity,
-        }),
+      await addItem.mutateAsync({
+        product_id: fetchedProduct.id,
+        variant_id: selectedVariantId,
+        quantity,
       });
-
-      if (!res.ok) {
-        throw new Error(`Add to cart failed (${res.status})`);
-      }
 
       window.dispatchEvent(
         new CustomEvent("showToast", {

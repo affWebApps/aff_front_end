@@ -148,10 +148,10 @@ const CartStep = ({
   formatPrice,
   setCurrentStep,
   fadeInUp,
-  subtotal, 
-  serviceFee, 
-  shippingFee, 
-  total, 
+  subtotal,
+  serviceFee,
+  shippingFee,
+  total,
 }: CartStepProps) => (
   <div className="min-h-screen bg-linear-to-b from-orange-50 to-white py-8">
     <div className="container mx-auto px-4">
@@ -512,11 +512,10 @@ const PaymentStep = ({
 
           <div className="space-y-4">
             <label
-              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                paymentMethod === "paystack"
+              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === "paystack"
                   ? "border-[#FAB75B] bg-orange-50"
                   : "border-gray-200 hover:border-gray-300"
-              }`}
+                }`}
             >
               <input
                 type="radio"
@@ -533,11 +532,10 @@ const PaymentStep = ({
             </label>
 
             <label
-              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                paymentMethod === "paypal"
+              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === "paypal"
                   ? "border-[#FAB75B] bg-orange-50"
                   : "border-gray-200 hover:border-gray-300"
-              }`}
+                }`}
             >
               <input
                 type="radio"
@@ -554,11 +552,10 @@ const PaymentStep = ({
             </label>
 
             <label
-              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                paymentMethod === "stripe"
+              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === "stripe"
                   ? "border-[#FAB75B] bg-orange-50"
                   : "border-gray-200 hover:border-gray-300"
-              }`}
+                }`}
             >
               <input
                 type="radio"
@@ -572,11 +569,10 @@ const PaymentStep = ({
             </label>
 
             <label
-              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${
-                paymentMethod === "opay"
+              className={`flex items-center gap-4 p-6 border-2 rounded-xl cursor-pointer transition-all ${paymentMethod === "opay"
                   ? "border-[#FAB75B] bg-orange-50"
                   : "border-gray-200 hover:border-gray-300"
-              }`}
+                }`}
             >
               <input
                 type="radio"

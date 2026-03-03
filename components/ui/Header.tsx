@@ -35,9 +35,8 @@ const Toast = ({
 
   return (
     <div
-      className={`fixed top-24 right-6 z-60 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in ${
-        type === "success" ? "bg-green-500" : "bg-red-500"
-      } text-white`}
+      className={`fixed top-24 right-6 z-60 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in ${type === "success" ? "bg-green-500" : "bg-red-500"
+        } text-white`}
     >
       {type === "success" ? (
         <CheckCircle className="h-5 w-5" />
@@ -184,11 +183,10 @@ export const Header: React.FC = () => {
                   <Link
                     key={index}
                     href={item.href}
-                    className={`text-[15px] font-medium transition-colors duration-200 ${
-                      pathname === item.href
-                        ? "text-[#FAB75B]"
-                        : "text-white/90 hover:text-white"
-                    }`}
+                    className={`text-[15px] font-medium transition-colors duration-200 ${pathname === item.href
+                      ? "text-[#FAB75B]"
+                      : "text-white/90 hover:text-white"
+                      }`}
                   >
                     {item.label}
                   </Link>
@@ -263,7 +261,7 @@ export const Header: React.FC = () => {
                                   </div>
                                   <div className="flex-1">
                                     <h4 className="text-sm font-semibold text-gray-900">
-                                      {item.title || "Item"}
+                                      {item.title || "Item"} ({item.variant_title || "title"})
                                     </h4>
                                     <p className="text-sm text-gray-600">
                                       Qty: {item.quantity}
@@ -411,11 +409,10 @@ export const Header: React.FC = () => {
                   <Link
                     key={index}
                     href={item.href}
-                    className={`text-[15px] font-medium transition-colors duration-200 ${
-                      pathname === item.href
-                        ? "text-[#FAB75B]"
-                        : "text-white/90 hover:text-white"
-                    }`}
+                    className={`text-[15px] font-medium transition-colors duration-200 ${pathname === item.href
+                      ? "text-[#FAB75B]"
+                      : "text-white/90 hover:text-white"
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}
