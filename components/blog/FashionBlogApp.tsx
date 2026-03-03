@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { CustomSelect } from "../CustomSelect";
 import { Pagination } from "../ui/Pagination";
 import { Button } from "../ui/Button";
-import { useBlogStore } from "@/store/blogStore";
+import { usePublishedBlogs } from "@/hooks/usePublishedBlogs";
 import { Blog } from "@/services/blogService";
 
 interface Comment {
@@ -72,24 +72,7 @@ export const FashionBlogApp = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { blogs, isLoading, error, fetchBlogs } = useBlogStore();
-
-  useEffect(() => {
-    fetchBlogs();
-  }, [fetchBlogs]);
-
-  useEffect(() => {
-    if (blogs.length > 0) {
-      console.log("📊 Blogs loaded:", blogs.length);
-      blogs.forEach((blog) => {
-        console.log(`Blog: "${blog.title}"`, {
-          id: blog.id,
-          images: blog.images,
-          imageCount: blog.images?.length || 0,
-        });
-      });
-    }
-  }, [blogs]);
+  const { data: blogs = [], isLoading, error } = usePublishedBlogs();
 
   const apiBlogPosts = blogs
     .filter((blog) => blog.status === "published")
@@ -167,6 +150,18 @@ export const FashionBlogApp = () => {
                 <div className="h-10 w-full bg-gray-200 rounded" />
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {(error as Error).message || "Failed to load blogs"}
           </div>
         </div>
       </div>
