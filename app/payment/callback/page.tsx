@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useCartMutations } from "@/hooks/useCart";
 import HomeLayout from "@/app/(home)/layout";
 
-export default function PaymentCallbackPage() {
+function PaymentCallbackInner() {
   const search = useSearchParams();
   const router = useRouter();
   const referenceParam = search.get("reference") || "";
@@ -233,5 +235,13 @@ export default function PaymentCallbackPage() {
         </div>
       </div>
     </HomeLayout>
+  );
+}
+
+export default function PaymentCallbackPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-center">Loading payment status...</div>}>
+      <PaymentCallbackInner />
+    </Suspense>
   );
 }

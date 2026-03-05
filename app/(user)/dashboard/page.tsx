@@ -12,6 +12,8 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { useAuthStore } from "../../../store/authStore";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api/axios";
 
 export default function Dashboard() {
   const { user } = useAuthStore();
@@ -20,6 +22,22 @@ export default function Dashboard() {
       const status = project?.status?.toLowerCase?.();
       return status === "open" || status === "in progress";
     }).length || 0;
+  const vendorId = (user as any)?.vendor_id || (user as any)?.vendorId;
+
+  const { data: vendorProducts, isLoading: productsLoading } = useQuery({
+    queryKey: ["vendor-products", vendorId],
+    queryFn: async () => {
+      const res = await apiClient.get(
+        `/store/products-by-vendor?vendor_id=${vendorId}`
+      );
+      return res.data;
+    },
+    enabled: Boolean(vendorId),
+  });
+
+  const totalProducts =
+    Array.isArray(vendorProducts) ? vendorProducts.length : vendorProducts?.products?.length || 0;
+  const totalServices = user?.projects?.length || 0;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -56,8 +74,12 @@ export default function Dashboard() {
                 Total Products listed
               </span>
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">12</div>
-            <div className="text-sm text-gray-500">(3 new this week)</div>
+            <div className="text-4xl font-bold text-gray-900 mb-2">
+              {productsLoading ? "…" : totalProducts}
+            </div>
+            <div className="text-sm text-gray-500">
+              {vendorId ? "Linked to your vendor profile" : "Vendor ID missing"}
+            </div>
           </div>
 
           {/* Total Services */}
@@ -68,8 +90,9 @@ export default function Dashboard() {
                 Total Services posted
               </span>
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">0</div>
-            {/* <div className="text-sm text-gray-500">(1 new bid sent)</div> */}
+            <div className="text-4xl font-bold text-gray-900 mb-2">
+              {totalServices}
+            </div>
           </div>
 
           {/* Wallet Balance */}
