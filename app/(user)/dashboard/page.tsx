@@ -15,6 +15,11 @@ import { useAuthStore } from "../../../store/authStore";
 
 export default function Dashboard() {
   const { user } = useAuthStore();
+  const activeProjects =
+    user?.projects?.filter((project: any) => {
+      const status = project?.status?.toLowerCase?.();
+      return status === "open" || status === "in progress";
+    }).length || 0;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -37,10 +42,10 @@ export default function Dashboard() {
               <FolderOpen className="w-5 h-5 text-gray-600 fill-gray-600" />
               <span className="text-gray-600 font-medium">Active Projects</span>
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">5</div>
-            <div className="text-sm text-gray-500">
-              (2 waiting for approval)
+            <div className="text-4xl font-bold text-gray-900 mb-2">
+              {activeProjects}
             </div>
+            <div className="text-sm text-gray-500">Based on your projects</div>
           </div>
 
           {/* Total Products */}

@@ -20,6 +20,9 @@ export interface Cart {
   shipping_total?: number;
   currency_code?: string;
   item_count?: number;
+  shipping_methods?: { shipping_option_id?: string }[];
+   shipping_address?: Record<string, any>;
+   billing_address?: Record<string, any>;
 }
 
 export interface CartResponse {
@@ -37,6 +40,9 @@ const endpoints = {
   options: "/store/cart/options",
   shippingMethod: "/store/cart/shipping-method",
   complete: "/store/cart/complete",
+  paymentSession: "/store/cart/payment-session",
+  paymentVerify: "/store/paystack-verify",
+  paymentProviders: "/store/payment-providers",
 };
 
 export const cartService = {
@@ -81,7 +87,31 @@ export const cartService = {
     shipping_address?: Record<string, any>;
     billing_address?: Record<string, any>;
   }): Promise<CartResponse> => {
-    const { data } = await apiClient.post<CartResponse>(endpoints.updateAddresses, payload);
+    const normalize = (addr?: Record<string, any>) => {
+      if (!addr) return addr;
+      const {
+        firstName,
+        lastName,
+        street,
+        apartment,
+        state,
+        postalCode,
+        ...rest
+      } = addr;
+      return {
+        ...rest,
+        ...(firstName ? { first_name: firstName } : {}),
+        ...(lastName ? { last_name: lastName } : {}),
+        ...(street || apartment ? { address_1: [street, apartment].filter(Boolean).join(" ").trim() } : {}),
+        ...(state ? { province: state } : {}),
+        ...(postalCode ? { postal_code: postalCode } : {}),
+      };
+    };
+    const { data } = await apiClient.post<CartResponse>(endpoints.updateAddresses, {
+      cart_id: payload.cart_id,
+      shipping_address: normalize(payload.shipping_address),
+      billing_address: normalize(payload.billing_address),
+    });
     return data;
   },
 
@@ -101,5 +131,25 @@ export const cartService = {
     const { data } = await apiClient.post(endpoints.complete, { cart_id });
     return data;
   },
-};
 
+  createPaymentSession: async (payload: { provider_id: string; cart_id: string }) => {
+    const { data } = await apiClient.post(endpoints.paymentSession, payload);
+    return data;
+  },
+
+  verifyPayment: async (payload: { reference: string; cart_id: string }) => {
+    const { data } = await apiClient.post(
+      `${endpoints.paymentVerify}?reference=${encodeURIComponent(payload.reference)}`,
+      { cart_id: payload.cart_id }
+    );
+    return data;
+  },
+
+  getPaymentProviders: async (region_id: string) => {
+    const { data } = await apiClient.get<{ payment_providers: { id: string; is_enabled: boolean }[] }>(
+      endpoints.paymentProviders,
+      { params: { region_id } }
+    );
+    return data.payment_providers;
+  },
+};
