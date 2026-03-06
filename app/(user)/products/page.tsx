@@ -1,5 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import ReusableTable from "../../../components/table/ReusableTable";
 import { Button } from "../../../components/ui/Button";
@@ -19,6 +20,7 @@ interface Product {
 
 const MyProductsPage = () => {
   const [activeTab, setActiveTab] = useState("listed");
+  const router = useRouter();
   const { user } = useAuthStore();
   const vendorId = (user as any)?.vendor_id || (user as any)?.vendorId;
 
@@ -76,7 +78,7 @@ const MyProductsPage = () => {
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 font-(family-name:--font-montserrat)">
           My Products
         </h1>
-        <Button size="small">
+        <Button size="small" onClick={() => router.push("/products/new")}>
           <Plus size={16} className="sm:w-5 sm:h-5" />
           <span className="hidden sm:inline">List Product</span>
         </Button>
