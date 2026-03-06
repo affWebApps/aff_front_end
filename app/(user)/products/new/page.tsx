@@ -323,9 +323,8 @@ export default function NewProductPage() {
       const res = await apiClient.post("/store/vendors/products", payload);
       console.log("Prepared payload for /store/vendors/products:", payload);
       console.log("Create product response", res.data);
-      alert("Product created successfully.");
       clearDraft();
-      router.push("/products");
+      router.push("/products/new/success");
     } catch (err: any) {
       console.error("Create product error", err?.response?.data || err);
       alert("Failed to create product. Please try again.");

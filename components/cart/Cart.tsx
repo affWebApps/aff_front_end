@@ -266,7 +266,10 @@ const CartStep = ({
         <div>
           <OrderSummary
             buttonText="Proceed to Checkout"
-            onButtonClick={() => setCurrentStep("shipping")}
+            onButtonClick={() => {
+              setCurrentStep("shipping");
+              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+            }}
             subtotal={subtotal}
             serviceFee={serviceFee}
             shippingFee={shippingFee}
@@ -374,7 +377,10 @@ const ShippingStep = ({
     <div className="min-h-screen bg-linear-to-b from-orange-50 to-white py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <button
-          onClick={() => setCurrentStep("cart")}
+            onClick={() => {
+              setCurrentStep("cart");
+              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+            }}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -395,7 +401,10 @@ const ShippingStep = ({
 
               <div className="flex gap-3 flex-col sm:flex-row">
                 <button
-                  onClick={onSkipExisting}
+                  onClick={() => {
+                    onSkipExisting();
+                    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+                  }}
                   className="w-full sm:w-1/2 py-4 border-2 border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors"
                 >
                   Continue with existing
@@ -775,7 +784,10 @@ const PaymentStep = ({
   <div className="min-h-screen bg-linear-to-b from-orange-50 to-white py-8">
     <div className="container mx-auto px-4">
       <button
-        onClick={() => setCurrentStep("shippingMethod")}
+        onClick={() => {
+          setCurrentStep("shippingMethod");
+          if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+        }}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -868,8 +880,8 @@ const PaymentStep = ({
             {isCreatingPayment
               ? "Redirecting to Paystack..."
               : paymentMethod
-              ? "Complete Order"
-              : "Select a payment method"}
+                ? "Complete Order"
+                : "Select a payment method"}
           </button>
         </div>
       </div>
@@ -902,7 +914,10 @@ const ShippingMethodStep = ({
     <div className="min-h-screen bg-linear-to-b from-orange-50 to-white py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <button
-          onClick={onBack}
+          onClick={() => {
+            onBack();
+            if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+          }}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -1333,16 +1348,21 @@ export default function CheckoutFlow() {
           key="shipping-method"
           cartId={cartData.cart.id}
           currentOption={cartData.cart.shipping_methods?.[0]?.shipping_option_id}
-          onBack={() => setCurrentStep("shipping")}
-          onConfirm={async (optionId) => {
-            const currentId = cartData.cart.shipping_methods?.[0]?.shipping_option_id;
-            if (currentId === optionId) {
-              setCurrentStep("payment");
-              return;
-            }
-            await addShipping.mutateAsync({ option_id: optionId, cart_id: cartData.cart!.id });
-            setCurrentStep("payment");
+          onBack={() => {
+            setCurrentStep("shipping");
+            if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
           }}
+          onConfirm={async (optionId) => {
+              const currentId = cartData.cart.shipping_methods?.[0]?.shipping_option_id;
+              if (currentId === optionId) {
+                setCurrentStep("payment");
+                if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+                return;
+              }
+              await addShipping.mutateAsync({ option_id: optionId, cart_id: cartData.cart!.id });
+              setCurrentStep("payment");
+              if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
+            }}
         />
       )}
       {currentStep === "payment" && (

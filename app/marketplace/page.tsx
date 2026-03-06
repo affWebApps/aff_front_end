@@ -79,8 +79,8 @@ export default function MarketplacePage() {
   }, [productsData]);
 
   useEffect(() => {
-    if (productsData?.total) {
-      setTotalPages(Math.max(1, Math.ceil(productsData.total / limit)));
+    if (productsData?.pagination) {
+      setTotalPages(Math.max(1, Math.ceil(productsData.pagination?.count / limit)));
     }
   }, [productsData, limit]);
 
@@ -302,6 +302,7 @@ export default function MarketplacePage() {
   };
 
   let productsToShow = fetchedProducts;
+  console.log("productsData to show are", productsData)
 
 
 

@@ -12,6 +12,7 @@ export type ProductListItem = {
 type ProductsResponse = {
   products: ProductListItem[];
   total?: number;
+  pagination?: any
 };
 
 const fetchProducts = async (page: number, limit: number) => {
