@@ -1,6 +1,7 @@
 import { Clock, MessageSquare, ThumbsUp } from "lucide-react";
 import { BackButton } from "../ui/BackNavigation";
 import Image from "next/image";
+import { BackTabButton } from "../ui/BackTabNavigation";
 
 interface Comment {
   avatar: string;
@@ -27,12 +28,12 @@ interface BlogPostViewProps {
   onOpenComments: () => void;
 }
 
-export const BlogPostView = ({ post, onOpenComments }: BlogPostViewProps) => {
+export const BlogPostView = ({ post, onBack, onOpenComments }: BlogPostViewProps) => {
   return (
     <div className="min-h-screen ">
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-4">
-          <BackButton />
+          <BackTabButton onBack={onBack} />
         </div>
 
         <div className="bg-white rounded-lg overflow-hidden">
