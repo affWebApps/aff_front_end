@@ -32,7 +32,11 @@ interface BlogPost {
   comments: Comment[];
 }
 
-const convertBlogToPost = (blog: Blog): BlogPost => {
+interface BlogPostCard extends BlogPost {
+  rawBlog: Blog;
+}
+
+const convertBlogToPost = (blog: Blog): BlogPostCard => {
   const description = blog.content.substring(0, 200) + "...";
 
   const wordCount = blog.content.split(/\s+/).length;
@@ -60,12 +64,14 @@ const convertBlogToPost = (blog: Blog): BlogPost => {
     category: "Tech in Fashion",
     image: imageUrl,
     comments: [],
+    rawBlog: blog,
   };
 };
 
 export const FashionBlogApp = () => {
   const [currentView, setCurrentView] = useState<"listing" | "post">("listing");
-  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [selectedPost, setSelectedPost] = useState<BlogPostCard | null>(null);
+  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false);
   const [category, setCategory] = useState("");
   const [sortBy, setSortBy] = useState("");
@@ -78,17 +84,33 @@ export const FashionBlogApp = () => {
     .filter((blog) => blog.status === "published")
     .map(convertBlogToPost);
 
-  const featuredPost: BlogPost = apiBlogPosts[0] || {
+  const fallbackBlog: Blog = {
+    id: "placeholder",
     title:
       "From Sketch to Stitch: How Digital Design Is Changing Fashion Creation",
-    description:
+    content:
       "Discover how AFF Designer empowers creators to translate 2D patterns into real-world garments — faster, smarter, and more sustainably.",
-    author: "Adaora James",
-    readTime: "5 min read",
-    category: "Design Tips",
-    image: "/images/blog1.png",
-    comments: [],
+    scheduled_for: "",
+    status: "published",
+    created_at: "",
+    updated_at: "",
+    images: [],
   };
+
+  const featuredPost: BlogPostCard =
+    apiBlogPosts[0] ||
+    convertBlogToPost({
+      ...fallbackBlog,
+      id: "featured-fallback",
+      images: [
+        {
+          id: "img",
+          blog_id: "featured-fallback",
+          image_url: "/images/blog1.png",
+          is_primary: true,
+        },
+      ],
+    });
 
   const blogPosts = apiBlogPosts;
 
@@ -117,8 +139,10 @@ export const FashionBlogApp = () => {
     currentPage * postsPerPage
   );
 
-  const handlePostClick = (post: BlogPost) => {
+  const handlePostClick = (post: BlogPostCard) => {
+    const matched = blogs.find((b) => b.id === post.id);
     setSelectedPost(post);
+    setSelectedBlog(matched || post.rawBlog || null);
     setCurrentView("post");
   };
 
@@ -168,19 +192,19 @@ export const FashionBlogApp = () => {
     );
   }
 
-  if (currentView === "post" && selectedPost) {
+  if (currentView === "post" && selectedBlog) {
     return (
       <>
         <BlogPostView
-          post={selectedPost}
+          blog={selectedBlog}
           onBack={handleBackToListing}
           onOpenComments={() => setIsCommentsModalOpen(true)}
         />
         <CommentsModal
           isOpen={isCommentsModalOpen}
           onClose={() => setIsCommentsModalOpen(false)}
-          comments={selectedPost.comments}
-          articleTitle={selectedPost.title}
+          comments={selectedPost?.comments || []}
+          articleTitle={selectedBlog.title}
         />
       </>
     );

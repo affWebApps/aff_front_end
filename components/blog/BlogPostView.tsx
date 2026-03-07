@@ -2,6 +2,7 @@ import { Clock, MessageSquare, ThumbsUp } from "lucide-react";
 import { BackButton } from "../ui/BackNavigation";
 import Image from "next/image";
 import { BackTabButton } from "../ui/BackTabNavigation";
+import { Blog, BlogImage } from "@/services/blogService";
 
 interface Comment {
   avatar: string;
@@ -23,12 +24,27 @@ interface BlogPost {
 }
 
 interface BlogPostViewProps {
-  post: BlogPost;
+  blog: Blog;
   onBack?: () => void;
   onOpenComments: () => void;
 }
 
-export const BlogPostView = ({ post, onBack, onOpenComments }: BlogPostViewProps) => {
+const getPrimaryImage = (images: BlogImage[] | undefined): string => {
+  if (!images || images.length === 0) return "/images/blog1.png";
+  const primary = images.find((img) => img.is_primary);
+  return primary?.image_url || images[0].image_url || "/images/blog1.png";
+};
+
+export const BlogPostView = ({ blog, onBack, onOpenComments }: BlogPostViewProps) => {
+  const readTime = `${Math.max(
+    1,
+    Math.ceil((blog.content?.split(/\s+/).length || 0) / 200)
+  )} min read`;
+
+  const image = getPrimaryImage(blog.images);
+
+  const comments: Comment[] = [];
+
   return (
     <div className="min-h-screen ">
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -43,20 +59,22 @@ export const BlogPostView = ({ post, onBack, onOpenComments }: BlogPostViewProps
                 1440 × 100
               </span>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                {post.title}
+                {blog.title}
               </h1>
-              <p className="text-gray-600 mb-6">{post.description}</p>
+              <p className="text-gray-600 mb-6">
+                {blog.content?.substring(0, 250)}...
+              </p>
 
               <div className="flex items-center gap-6 text-sm text-gray-600 mb-6">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white text-xs font-semibold">
                     A
                   </div>
-                  <span>By {post.author}</span>
+                  <span>By AFF Designer</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock size={16} />
-                  <span>{post.readTime}</span>
+                  <span>{readTime}</span>
                 </div>
                 <span>Dec 20, 2024</span>
               </div>
@@ -73,97 +91,29 @@ export const BlogPostView = ({ post, onBack, onOpenComments }: BlogPostViewProps
               </div>
 
               <span className="inline-block bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-xs">
-                {post.category}
+                Tech in Fashion
               </span>
             </div>
 
             <Image
-              src={post.image}
-              alt={post.title}
+              src={image}
+              alt={blog.title}
               width={1200}
               height={600}
               className="w-full rounded-lg mb-8"
             />
 
-            <div className="prose max-w-none">
-              <h2 className="text-2xl font-bold mb-4">
-                The Future of Fashion Is Digital
-              </h2>
-              <p className="text-gray-700 mb-6">
-                Fashion has always been about creativity and craftsmanship — the
-                art of turning ideas into beautiful, wearable expressions. But
-                today, the process from sketch to stitch is no longer confined
-                to the physical world. The fashion industry is undergoing a
-                transformation, blending technology with creativity to make the
-                journey from concept to creation faster, smarter, and more
-                sustainable.
-              </p>
-
-              <h3 className="text-xl font-bold mb-3">
-                1. Digital Sketching: The New Canvas
-              </h3>
-              <p className="text-gray-700 mb-6">
-                Traditional paper sketches are being replaced by digital tools
-                like CLO 3D and Adobe Illustrator. Designers can now visualize
-                their ideas in 3D, experiment with fabrics, and adjust details
-                instantly — saving time and materials.
-              </p>
-
-              <h3 className="text-xl font-bold mb-3">
-                2. Virtual Prototypes, Real Impact
-              </h3>
-              <p className="text-gray-700 mb-6">
-                Instead of sewing multiple samples, designers create virtual
-                prototypes to test fit, style, and texture. This reduces waste,
-                speeds up production, and supports sustainability — a growing
-                priority in modern fashion.
-              </p>
-
-              <h3 className="text-xl font-bold mb-3">
-                3. Connecting Designers and Tailors
-              </h3>
-              <p className="text-gray-700 mb-6">
-                Digital design bridges the gap between creativity and
-                craftsmanship. A designer&apos;s 3D file can easily be shared
-                with tailors, ensuring precision, faster collaboration, and
-                smoother transitions from concept to garment.
-              </p>
-
-              <h3 className="text-xl font-bold mb-3">
-                4. Personalized and Inclusive Fashion
-              </h3>
-              <p className="text-gray-700 mb-6">
-                With 3D body scanning and virtual fittings, digital design
-                supports custom-made clothing for all body types. It promotes
-                inclusivity and helps brands deliver perfect fits without
-                overproduction.
-              </p>
-
-              <h3 className="text-xl font-bold mb-3">
-                5. Fashion Beyond Fabric
-              </h3>
-              <p className="text-gray-700 mb-6">
-                Digital fashion is also making its mark in the metaverse — where
-                virtual outfits exist only online. This new form of
-                self-expression shows that fashion&apos;s future isn&apos;t just
-                wearable, but also digital.
-              </p>
-
-              <h3 className="text-xl font-bold mb-3">Final Thought</h3>
-              <p className="text-gray-700 mb-6">
-                From sketch to stitch, digital design is reshaping how fashion
-                is imagined, created, and shared. It&apos;s not replacing
-                creativity — it&apos;s redefining it.
-              </p>
+            <div className="prose max-w-none whitespace-pre-line">
+              {blog.content}
             </div>
           </div>
 
           <div className="border-t p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold">Comments (12)</h3>
+              <h3 className="text-xl font-semibold">Comments (0)</h3>
             </div>
 
-            {post.comments.slice(0, 2).map((comment, index) => (
+            {comments.slice(0, 2).map((comment, index) => (
               <div key={index} className="mb-6 pb-6 border-b last:border-b-0">
                 <div className="flex items-start gap-3">
                   <Image
