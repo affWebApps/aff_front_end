@@ -92,6 +92,7 @@ export const Header: React.FC = () => {
     { label: "Marketplace", href: "/marketplace" },
     { label: "Blog", href: "/blog" },
     { label: "Contact", href: "/contact" },
+    { label: "AI Studio", href: "/studio" },
   ];
 
   const formatPrice = (price: number) => {

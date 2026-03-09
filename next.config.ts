@@ -13,6 +13,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/ai-studio2/:path*',
+        destination: 'https://ai-design-studio-blush.vercel.app/:path*', // The actual URL of your studio
+      },
+    ]
+  },
 };
 
 export default nextConfig;
