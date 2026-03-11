@@ -5,9 +5,9 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import Link from "next/link";
 
-import styles from "@/app/styles/login.module.css";
-import { Button } from "../../components/ui/Button";
-import { StatusMessage } from "../../components/ui/StatusMessage";
+import styles from "@/styles/login.module.css";
+import { Button } from "../../../components/ui/Button";
+import { StatusMessage } from "../../../components/ui/StatusMessage";
 
 const validationSchema = Yup.object({
   email: Yup.string()

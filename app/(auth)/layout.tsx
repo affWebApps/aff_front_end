@@ -1,9 +1,12 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import styles from "@/app/styles/login.module.css";
+import styles from "@/styles/login.module.css";
+import QueryProvider from "../../providers/query-provider";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -43,49 +46,57 @@ const authImages = {
 export default function AuthLayout({ children }: AuthLayoutProps) {
   const pathname = usePathname();
 
+  // If on callback page, render children without the decorative layout
+  // The callback route has its own minimal layout
+  if (pathname?.startsWith("/auth/callback")) {
+    return <QueryProvider>{children}</QueryProvider>;
+  }
+
   const images =
     authImages[pathname as keyof typeof authImages] || authImages.default;
 
   return (
-    <div className="min-h-screen flex flex-col xl:flex-row xl:p-4 xl:gap-6 bg-[#fff8ef]">
-      <div
-        className={`xl:w-1/2 relative overflow-hidden w-full ${styles.slideInLeft}`}
-      >
-        <div className="absolute top-4 left-4 xl:top-8 xl:left-4 z-10 w-[60px] h-10 xl:w-[76px] xl:h-[46px]">
-          <Image
-            src="/images/logo.svg"
-            alt="logo"
-            width={76}
-            height={46}
-            className="rounded-lg w-full h-full object-contain"
-          />
+    <QueryProvider>
+      <div className="min-h-screen flex flex-col xl:flex-row xl:p-4 xl:gap-6 bg-[#fff8ef]">
+        <div
+          className={`xl:w-1/2 relative overflow-hidden w-full ${styles.slideInLeft}`}
+        >
+          <div className="absolute top-4 left-4 xl:top-8 xl:left-4 z-10 w-[60px] h-10 xl:w-[76px] xl:h-[46px]">
+            <Image
+              src="/images/logo.svg"
+              alt="logo"
+              width={76}
+              height={46}
+              className="rounded-lg w-full h-full object-contain"
+            />
+          </div>
+
+          <div className="h-80 md:h-[550px] lg:h-[600px] xl:h-full xl:min-h-screen w-full relative">
+            <Image
+              src={images.mobile}
+              alt=""
+              fill
+              style={{ objectFit: "cover", objectPosition: "center" }}
+              className="md:hidden rounded-md"
+              priority
+            />
+            <Image
+              src={images.large}
+              alt=""
+              fill
+              style={{ objectFit: "cover", objectPosition: "center" }}
+              className="hidden md:block rounded-md"
+              priority
+            />
+          </div>
         </div>
 
-        <div className="h-80 md:h-[550px] lg:h-[600px] xl:h-full xl:min-h-screen w-full relative">
-          <Image
-            src={images.mobile}
-            alt=""
-            fill
-            style={{ objectFit: "cover", objectPosition: "center" }}
-            className="md:hidden rounded-md"
-            priority
-          />
-          <Image
-            src={images.large}
-            alt=""
-            fill
-            style={{ objectFit: "cover", objectPosition: "center" }}
-            className="hidden md:block rounded-md"
-            priority
-          />
+        <div
+          className={`xl:w-1/2 bg-[#fff8ef] flex items-center justify-center p-6 xl:p-8 ${styles.slideInRight}`}
+        >
+          <div className="w-full max-w-md space-y-2 ">{children}</div>
         </div>
       </div>
-
-      <div
-        className={`xl:w-1/2 bg-[#fff8ef] flex items-center justify-center p-6 xl:p-8 ${styles.slideInRight}`}
-      >
-        <div className="w-full max-w-md space-y-2 ">{children}</div>
-      </div>
-    </div>
+    </QueryProvider>
   );
 }

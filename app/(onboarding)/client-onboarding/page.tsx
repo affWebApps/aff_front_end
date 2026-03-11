@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "../../components/ui/Button";
+import { Button } from "../../../components/ui/Button";
 import { NavigationHeader } from "../components/NavigationHeader";
 import { ProgressBar } from "../components/ProgressBar";
 import { FormInput } from "../components/FormInput";
@@ -10,7 +10,7 @@ import { FormSelect } from "../components/FormSelect";
 import { FileUpload } from "../components/FileUpload";
 import { MultiSelectButtons } from "../components/MultiSelectButtons";
 import { CompletionStep } from "../components/CompletionStep";
-import { countryOptions, fabricTypes, FormDataClient, garmentTypes } from "../../types/onboadingTypes";
+import { countryOptions, fabricTypes, FormDataClient, garmentTypes } from "../../../types/onboadingTypes";
 
 
 

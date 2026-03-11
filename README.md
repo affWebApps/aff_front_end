@@ -63,3 +63,8 @@ Lorem Ipsum
 
 ### Links
 Lorem Ipsum
+
+## Uploads to Supabase
+- Add your Supabase credentials to a `.env.local` file using the keys in `.env.example`.
+- The upload UI lives at `/upload` and uses `NEXT_PUBLIC_SUPABASE_BUCKET` (defaults to `uploads`) for storage uploads.
+- We use `@supabase/supabase-js` on the client; ensure the bucket has public read access or adjust RLS accordingly.

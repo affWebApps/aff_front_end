@@ -1,5 +1,5 @@
 import React from "react";
-import { BackButton } from "../../components/ui/BackNavigation";
+import { BackButton } from "../../../components/ui/BackNavigation";
 
 interface NavigationHeaderProps {
   currentStep: number;

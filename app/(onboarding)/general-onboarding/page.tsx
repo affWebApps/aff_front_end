@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { BackButton } from "../../components/ui/BackNavigation";
-import { Button } from "../../components/ui/Button";
+import { BackButton } from "../../../components/ui/BackNavigation";
+import { Button } from "../../../components/ui/Button";
 import { useRouter } from "next/navigation";
 import { cardVariants, containerVariants, itemVariants } from "../styles";
-import { roles } from "../../types/onboadingTypes";
+import { roles } from "../../../types/onboadingTypes";
 
 const RoleSelectionPage = () => {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);

@@ -2,7 +2,7 @@
 import { useState, ChangeEvent } from "react";
 import { motion } from "framer-motion";
 import HomeLayout from "../(home)/layout";
-import { Button } from "../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 
 interface FormData {
   name: string;

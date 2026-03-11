@@ -3,11 +3,11 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import HomeLayout from "../(home)/layout";
-import { CustomSelect } from "../components/CustomSelect";
-import { Pagination } from "../components/ui/Pagination";
-import { BackButton } from "../components/ui/BackNavigation";
+import { CustomSelect } from "../../components/CustomSelect";
+import { Pagination } from "../../components/ui/Pagination";
+import { BackButton } from "../../components/ui/BackNavigation";
 import Image from "next/image";
-import { DesignModal } from "../components/modals/DesignModal";
+import { DesignModal } from "../../components/modals/DesignModal";
 
 interface Design {
   id: number;
