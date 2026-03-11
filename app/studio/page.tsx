@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import HomeLayout from "../(home)/layout";
 
-const aiStudioUrl = process.env.AI_STUDIO_URL || "https://ai-design-studio-blush.vercel.app/";
+const aiStudioUrl = process.env.AI_STUDIO_URL || "http://localhost:8080";
 
 const AIStudio = () => {
     const [isHovered, setIsHovered] = useState(false);
