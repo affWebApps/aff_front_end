@@ -29,7 +29,8 @@ export default function EditProfileModal({
       lastName: user?.last_name || "",
       displayName: user?.display_name || "",
       email: user?.email || "",
-      location: "Lagos, NG",
+      city: user?.city || "",
+      country: user?.country || "Nigeria",
       pricing: "NGN 20,000",
       bio: user?.bio || "",
       avatarUrl: user?.avatar_url || "",
@@ -60,11 +61,6 @@ export default function EditProfileModal({
       setIsSubmitting(true);
       setError(null);
 
-      // Parse location into city and country
-      const [city, country] = formData.location
-        .split(", ")
-        .map((s) => s.trim());
-
       // Call the API to update profile
       const updatedUser = await authService.updateProfile(
         {
@@ -73,8 +69,8 @@ export default function EditProfileModal({
           displayName: formData.displayName,
           bio: formData.bio,
           avatarUrl: formData.avatarUrl,
-          city: city || "",
-          country: country || "",
+          city: formData.city || "",
+          country: formData.country || "",
         },
         token
       );
@@ -88,8 +84,8 @@ export default function EditProfileModal({
       console.error("Failed to update profile:", error);
       setError(
         error.response?.data?.message ||
-          error.message ||
-          "Failed to update profile"
+        error.message ||
+        "Failed to update profile"
       );
     } finally {
       setIsSubmitting(false);
@@ -175,9 +171,8 @@ export default function EditProfileModal({
             </div>
             <label
               htmlFor="avatar-upload"
-              className={`absolute bottom-0 right-0 w-6 h-6 bg-[#FAB75B] rounded-full border-2 border-white flex items-center justify-center cursor-pointer hover:bg-amber-500 transition-colors ${
-                isUploadingAvatar ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`absolute bottom-0 right-0 w-6 h-6 bg-[#FAB75B] rounded-full border-2 border-white flex items-center justify-center cursor-pointer hover:bg-amber-500 transition-colors ${isUploadingAvatar ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {isUploadingAvatar ? (
                 <Loader2 className="w-3 h-3 text-white animate-spin" />
@@ -274,16 +269,34 @@ export default function EditProfileModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Location (City, Country)
+              Country
             </label>
             <input
               type="text"
-              value={formData.location}
+              value={formData.country}
               onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
+                setFormData({ ...formData, country: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B]"
-              placeholder="e.g., Lagos, NG"
+              placeholder="e.g., Nigeria"
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              City
+            </label>
+            <input
+              type="text"
+              value={formData.city}
+              onChange={(e) =>
+                setFormData({ ...formData, city: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FAB75B]"
+              placeholder="e.g., Lagos"
               disabled={isSubmitting}
             />
           </div>
@@ -305,7 +318,7 @@ export default function EditProfileModal({
         </div>
 
         {/* Pricing */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Pricing{" "}
             <span className="text-gray-400 text-xs">(starting price)</span>
@@ -320,10 +333,10 @@ export default function EditProfileModal({
             placeholder="e.g., NGN 20,000"
             disabled={isSubmitting}
           />
-        </div>
+        </div> */}
 
         {/* Availability */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-4">
             Availability
           </label>
@@ -375,7 +388,7 @@ export default function EditProfileModal({
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Save Button */}
         <Button

@@ -7,6 +7,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../../../../components/ui/Button";
 import HomeLayout from "../../../(home)/layout";
 import { useAuthStore } from "@/store/authStore";
+import { useCartMutations } from "@/hooks/useCart";
 
 
 type Variant = {
@@ -69,7 +70,8 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [fetchedProduct, setFetchedProduct] = useState<ProductApi | null>(null);
   const [productVendor, setProductVendor] = useState<Vendor | null>(null);
-  const { isAuthenticated, token } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
+  const { addItem } = useCartMutations();
 
   const effectiveProductId = routeParams?.id;
 
@@ -204,14 +206,36 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
           (opt) => selectedOptions[opt.option_id] === opt.id
         )
       ) ?? null;
-    if (match && match.id !== selectedVariantId) {
-      setSelectedVariantId(match.id);
+    const allSelected =
+      fetchedProduct.options &&
+      fetchedProduct.options.length > 0 &&
+      fetchedProduct.options.every((opt) => selectedOptions[opt.id]);
+
+    if (match) {
+      if (match.id !== selectedVariantId) {
+        setSelectedVariantId(match.id);
+      }
+    } else if (allSelected) {
+      if (selectedVariantId !== null) setSelectedVariantId(null);
     }
-  }, [fetchedProduct?.variants, selectedOptions, selectedVariantId]);
+  }, [fetchedProduct?.variants, fetchedProduct?.options, selectedOptions, selectedVariantId]);
+
+  const hasAllSelections =
+    fetchedProduct?.options?.every((opt) => selectedOptions[opt.id]) ?? false;
+
+  const matchedByOptions =
+    hasAllSelections && fetchedProduct?.variants
+      ? fetchedProduct.variants.find((v) =>
+        v.options?.every((opt) => selectedOptions[opt.option_id] === opt.id)
+      ) ?? null
+      : null;
 
   const selectedVariant =
-    fetchedProduct?.variants?.find((v) => v.id === selectedVariantId) ?? null;
+    matchedByOptions ||
+    fetchedProduct?.variants?.find((v) => v.id === selectedVariantId) ||
+    (!hasAllSelections ? fetchedProduct?.variants?.[0] ?? null : null);
 
+  const variantExists = Boolean(selectedVariant);
   const maxQuantity =
     selectedVariant?.inventory_quantity && selectedVariant.inventory_quantity > 0
       ? selectedVariant.inventory_quantity
@@ -224,6 +248,8 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
     if (qty > 0) return false;
     return !selectedVariant.allow_backorder;
   })();
+  const hasVariantQuantity =
+    selectedVariant && selectedVariant.inventory_quantity !== undefined;
 
   const relatedProducts = [
     {
@@ -282,7 +308,6 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
   };
 
   const handleAddToCart = async () => {
-    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     const redirectToSignIn = () => {
       const redirect =
         typeof window !== "undefined"
@@ -291,17 +316,8 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
       router.push(`/sign-in?redirect=${encodeURIComponent(redirect)}`);
     };
 
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       redirectToSignIn();
-      return;
-    }
-
-    if (!backendUrl) {
-      window.dispatchEvent(
-        new CustomEvent("showToast", {
-          detail: { message: "Missing API base URL", type: "error" },
-        })
-      );
       return;
     }
 
@@ -316,22 +332,11 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
 
     try {
       setIsAdding(true);
-      const res = await fetch(`${backendUrl}/add_to_cart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          product_id: fetchedProduct.id,
-          variant_id: selectedVariantId,
-          quantity,
-        }),
+      await addItem.mutateAsync({
+        product_id: fetchedProduct.id,
+        variant_id: selectedVariantId,
+        quantity,
       });
-
-      if (!res.ok) {
-        throw new Error(`Add to cart failed (${res.status})`);
-      }
 
       window.dispatchEvent(
         new CustomEvent("showToast", {
@@ -450,7 +455,7 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
                       src={productDetails.images[selectedImage]}
                       alt={productDetails.title}
                       fill
-                      className="object-cover"
+                      className="object-contain bg-white"
                     />
                   ) : (
                     <div className="text-gray-500 text-sm">No image available</div>
@@ -472,7 +477,7 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
                         src={img}
                         alt={`${productDetails.title} view ${idx + 1}`}
                         fill
-                        className="object-cover"
+                        className="object-contain bg-white"
                       />
                     </button>
                   ))}
@@ -513,10 +518,11 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3">
                   <span className="text-3xl font-bold text-gray-900">
-                    {productDetails.price !== null &&
+                    {variantExists &&
+                      productDetails.price !== null &&
                       productDetails.price !== undefined
                       ? `₦ ${productDetails.price}`
-                      : "Price unavailable"}
+                      : "---Not Available---"}
                   </span>
                 </div>
               </div>
@@ -624,9 +630,17 @@ export default function ProductDetailPage({ onBack }: ProductDetailPageProps) {
                 className="w-full "
                 variant="default"
                 size="large"
-                disabled={isOutOfStock || isAdding}
+                disabled={isOutOfStock || isAdding || !hasVariantQuantity || !variantExists}
               >
-                {isOutOfStock ? "Out of Stock" : isAdding ? "Adding..." : "Add to Cart"}
+                {isOutOfStock
+                  ? "Out of Stock"
+                  : !variantExists
+                    ? "Unavailable"
+                    : !hasVariantQuantity
+                      ? "Unavailable"
+                      : isAdding
+                        ? "Adding..."
+                        : "Add to Cart"}
               </Button>
             </motion.div>
           </div>

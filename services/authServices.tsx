@@ -23,6 +23,11 @@ export interface User {
   portfolios: any[];
   projects: any[];
   bids: any[];
+  customer_id?: string;
+  vendor_id?: string;
+  city?: string;
+  country?: string;
+  phone_number?: string;
 }
 
 export interface Review {

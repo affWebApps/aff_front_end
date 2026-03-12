@@ -1,5 +1,5 @@
 "use client";
-import { Mail, MapPin, Pencil, User, Briefcase } from "lucide-react";
+import { Mail, MapPin, Pencil, User, Briefcase, Phone } from "lucide-react";
 import { User as UserType } from "@/services/authServices";
 
 interface ProfileHeaderProps {
@@ -18,11 +18,13 @@ export default function ProfileHeader({
     `${user?.first_name || ""} ${user?.last_name || ""}`.trim() ||
     "User";
 
+  const fullName = `${user?.first_name || ""} ${user?.last_name || ""}`.trim();
+
   const username = user?.email?.split("@")[0] || "user";
 
-  const userBio = user?.bio 
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    "No bio available. Click the edit button to add your professional bio.";
+  const userBio = user?.bio
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  "No bio available. Click the edit button to add your professional bio.";
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
@@ -45,6 +47,9 @@ export default function ProfileHeader({
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
             <p className="text-gray-500">@{username}</p>
+            {fullName && (
+              <p className="text-sm text-gray-600 mt-1">{fullName}</p>
+            )}
             {portfolioTitle && (
               <div className="flex items-center gap-1 mt-1">
                 <Briefcase className="w-3 h-3 text-[#FAB75B]" />
@@ -71,7 +76,11 @@ export default function ProfileHeader({
           </h2>
           <p className="text-gray-700 text-sm leading-relaxed">{userBio}</p>
 
-          <h2 className="text-sm font-semibold text-gray-500 uppercase mt-6 mb-3">
+
+        </div>
+
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase mb-3">
             Contact Information
           </h2>
           <div className="space-y-2">
@@ -81,13 +90,17 @@ export default function ProfileHeader({
             </div>
             <div className="flex items-center gap-2 text-gray-700 text-sm">
               <MapPin className="w-4 h-4 text-gray-400" />
-              <span>Lagos, NG</span>
+              <span>
+                {[user?.city, user?.country].filter(Boolean).join(", ") || "Location unavailable"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-700 text-sm">
+              <Phone className="w-4 h-4 text-gray-400" />
+              <span>{user.phone_number || "---"}</span>
             </div>
           </div>
-        </div>
-
-        <div>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase mb-3">
+          {/* Availability & Pricing temporarily hidden */}
+          {/* <h2 className="text-sm font-semibold text-gray-500 uppercase mb-3">
             Availability
           </h2>
           <div className="space-y-2 mb-6">
@@ -113,7 +126,7 @@ export default function ProfileHeader({
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <span className="text-gray-400">₦</span>
             <span>Starting from NGN 20,000</span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

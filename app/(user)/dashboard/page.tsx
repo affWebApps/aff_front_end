@@ -12,9 +12,32 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { useAuthStore } from "../../../store/authStore";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/lib/api/axios";
 
 export default function Dashboard() {
   const { user } = useAuthStore();
+  const activeProjects =
+    user?.projects?.filter((project: any) => {
+      const status = project?.status?.toLowerCase?.();
+      return status === "open" || status === "in progress";
+    }).length || 0;
+  const vendorId = (user as any)?.vendor_id || (user as any)?.vendorId;
+
+  const { data: vendorProducts, isLoading: productsLoading } = useQuery({
+    queryKey: ["vendor-products", vendorId],
+    queryFn: async () => {
+      const res = await apiClient.get(
+        `/store/products-by-vendor?vendor_id=${vendorId}`
+      );
+      return res.data;
+    },
+    enabled: Boolean(vendorId),
+  });
+
+  const totalProducts =
+    Array.isArray(vendorProducts) ? vendorProducts.length : vendorProducts?.products?.length || 0;
+  const totalServices = user?.projects?.length || 0;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -37,10 +60,10 @@ export default function Dashboard() {
               <FolderOpen className="w-5 h-5 text-gray-600 fill-gray-600" />
               <span className="text-gray-600 font-medium">Active Projects</span>
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">5</div>
-            <div className="text-sm text-gray-500">
-              (2 waiting for approval)
+            <div className="text-4xl font-bold text-gray-900 mb-2">
+              {activeProjects}
             </div>
+            <div className="text-sm text-gray-500">Based on your projects</div>
           </div>
 
           {/* Total Products */}
@@ -51,8 +74,12 @@ export default function Dashboard() {
                 Total Products listed
               </span>
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">12</div>
-            <div className="text-sm text-gray-500">(3 new this week)</div>
+            <div className="text-4xl font-bold text-gray-900 mb-2">
+              {productsLoading ? "…" : totalProducts}
+            </div>
+            <div className="text-sm text-gray-500">
+              {vendorId ? "Linked to your vendor profile" : "Vendor ID missing"}
+            </div>
           </div>
 
           {/* Total Services */}
@@ -63,8 +90,9 @@ export default function Dashboard() {
                 Total Services posted
               </span>
             </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">3</div>
-            <div className="text-sm text-gray-500">(1 new bid sent)</div>
+            <div className="text-4xl font-bold text-gray-900 mb-2">
+              {totalServices}
+            </div>
           </div>
 
           {/* Wallet Balance */}
@@ -74,9 +102,9 @@ export default function Dashboard() {
               <span className="text-gray-600 font-medium">Wallet Balance</span>
             </div>
             <div className="text-4xl font-bold text-gray-900 mb-2">
-              ₦350,000.00
+              ₦0.00
             </div>
-            <div className="text-sm text-green-600">+ ₦250,000 today</div>
+            {/* <div className="text-sm text-green-600">+ ₦250,000 today</div> */}
           </div>
         </div>
 

@@ -9,6 +9,7 @@ import {
   Wallet,
   Wrench,
   X,
+  Undo2
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { NavItem } from "./NavItem";
@@ -151,6 +152,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             href="/analytics"
             onClick={onClose}
           />
+          <NavItem
+            icon={<Undo2 size={20} />}
+            label="Leave Console"
+            active={pathname === "/"}
+            href="/"
+            onClick={onClose}
+          />
         </nav>
 
         <div className="border-t border-amber-900 border-opacity-40 mx-4 my-2"></div>
@@ -161,8 +169,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             onClick={handleSignOut}
             disabled={isSigningOut}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isSigningOut
-                ? "bg-amber-900 bg-opacity-30 cursor-not-allowed opacity-50"
-                : "hover:bg-amber-900 hover:bg-opacity-30"
+              ? "bg-amber-900 bg-opacity-30 cursor-not-allowed opacity-50"
+              : "hover:bg-amber-900 hover:bg-opacity-30"
               }`}
           >
             <LogOut size={20} />

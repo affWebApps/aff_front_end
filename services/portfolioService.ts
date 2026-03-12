@@ -116,11 +116,11 @@ export const portfolioService = {
    * Delete user portfolio (deletes entire portfolio)
    * DELETE /portfolio
    */
-  deletePortfolio: async (): Promise<{ status: string }> => {
+  deletePortfolio: async (portfolioId: string): Promise<{ status: string }> => {
     try {
       console.log("🗑️ Deleting user portfolio...");
 
-      const response = await apiClient.delete<{ status: string }>("/portfolio");
+      const response = await apiClient.delete<{ status: string }>(`/portfolio/${portfolioId}`);
 
       console.log("✅ Portfolio deleted:", response.data);
       return response.data;

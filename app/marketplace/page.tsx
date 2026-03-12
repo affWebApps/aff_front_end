@@ -9,6 +9,7 @@ import { ServicesGrid } from "../../components/grid/ServicesGrid";
 import { Pagination } from "../../components/ui/Pagination";
 import ServiceDetailPage from "./services/[id]/page";
 import { useRouter } from "next/navigation";
+import { useProducts } from "@/hooks/useProducts";
 
 
 export interface Product {
@@ -52,138 +53,36 @@ export default function MarketplacePage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showServiceDetail, setShowServiceDetail] = useState(false);
   const router = useRouter();
-  // const fallbackProducts: Product[] = useMemo(
-  //   () => [
-  //     {
-  //       id: "1",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Ready-to-wear ankara gown",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //     {
-  //       id: "2",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Leopard-skin blouse",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //     {
-  //       id: "3",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Leopard-skin blouse",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //     {
-  //       id: "4",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Leopard-skin blouse",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //     {
-  //       id: "5",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Ready-to-wear ankara gown",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //     {
-  //       id: "6",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Leopard-skin blouse",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //     {
-  //       id: "7",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Leopard-skin blouse",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //     {
-  //       id: "8",
-  //       image: "/images/ankara-gown.jpg",
-  //       title: "Leopard-skin blouse",
-  //       price: 19999,
-  //       seller: "@sellers_username",
-  //     },
-  //   ],
-  //   []
-  // );
 
-  const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
-  const [productsError, setProductsError] = useState<string | null>(null);
+
   const [totalPages, setTotalPages] = useState<number>(1)
 
+  const limit =
+    Number.parseInt(process.env.NEXT_PUBLIC_PRODUCTS_PER_PAGE || "", 10) ||
+    12;
+
+  const {
+    data: productsData,
+    isLoading: isLoadingProducts,
+    error: productsError,
+  } = useProducts(currentPage, limit);
+
+  const fetchedProducts: Product[] = useMemo(() => {
+    if (!productsData?.products) return [];
+    return productsData.products.map((item) => ({
+      id: String(item.id),
+      image: item.thumbnail || "/images/ankara-gown.jpg",
+      title: item.title,
+      price: item.price,
+      seller: "@store",
+    }));
+  }, [productsData]);
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      if (!backendUrl) {
-        setProductsError("Missing NEXT_PUBLIC_API_BASE_URL for dev fetch.");
-        return;
-      }
-
-      const limit =
-        Number.parseInt(process.env.NEXT_PUBLIC_PRODUCTS_PER_PAGE || "", 10) ||
-        12;
-
-      try {
-        setIsLoadingProducts(true);
-        setProductsError(null);
-
-        const params = {
-          page: currentPage,
-          limit,
-          collection_id: null,
-        } as const;
-
-        const response = await fetch(
-          `${backendUrl}/store/products?page=${params.page}&limit=${params.limit}&collection_id=${params.collection_id}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            cache: "no-store",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Request failed with ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log(data)
-
-        if (!Array.isArray(data.products)) {
-          throw new Error("Unexpected response shape for products");
-        }
-
-        const mapped: Product[] = data.products.map((item: any) => ({
-          id: String(item.id),
-          image: item.thumbnail,
-          title: item.title,
-          price: item.price,
-        }));
-
-        setFetchedProducts(mapped);
-        setTotalPages(Math.ceil(data.count / limit))
-      } catch (error) {
-        console.error("Failed to fetch products", error);
-        setProductsError(
-          error instanceof Error ? error.message : "Failed to fetch products"
-        );
-        setFetchedProducts([]);
-      } finally {
-        setIsLoadingProducts(false);
-      }
-    };
-
-    fetchProducts();
-  }, [currentPage]);
+    if (productsData?.pagination) {
+      setTotalPages(Math.max(1, Math.ceil(productsData.pagination?.count / limit)));
+    }
+  }, [productsData, limit]);
 
   const services = [
     {
@@ -403,6 +302,7 @@ export default function MarketplacePage() {
   };
 
   let productsToShow = fetchedProducts;
+  console.log("productsData to show are", productsData)
 
 
 
@@ -559,7 +459,7 @@ export default function MarketplacePage() {
           {/* Content Grid */}
           {productsError && (
             <div className="max-w-4xl mx-auto mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              {productsError}
+              {productsError instanceof Error ? productsError.message : String(productsError)}
             </div>
           )}
 

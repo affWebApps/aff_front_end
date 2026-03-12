@@ -28,7 +28,7 @@ export default function DeletePortfolioModal({
     setError(null);
 
     try {
-      await portfolioService.deletePortfolio();
+      await portfolioService.deletePortfolio(portfolio.id);
 
       console.log("✅ Portfolio deleted successfully");
 
@@ -42,8 +42,8 @@ export default function DeletePortfolioModal({
       console.error("Failed to delete portfolio:", err);
       setError(
         err.response?.data?.message ||
-          err.message ||
-          "Failed to delete portfolio. Please try again."
+        err.message ||
+        "Failed to delete portfolio. Please try again."
       );
     } finally {
       setIsDeleting(false);
