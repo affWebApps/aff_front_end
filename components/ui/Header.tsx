@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "./Button";
 import Image from "next/image";
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { useCart } from "@/hooks/useCart";
 
 // Toast Component
 const Toast = ({
@@ -34,9 +35,8 @@ const Toast = ({
 
   return (
     <div
-      className={`fixed top-24 right-6 z-60 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in ${
-        type === "success" ? "bg-green-500" : "bg-red-500"
-      } text-white`}
+      className={`fixed top-24 right-6 z-60 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in ${type === "success" ? "bg-green-500" : "bg-red-500"
+        } text-white`}
     >
       {type === "success" ? (
         <CheckCircle className="h-5 w-5" />
@@ -67,23 +67,24 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const { data: cartData, isLoading: isCartLoading } = useCart({
+    enabled: isAuthenticated,
+  });
 
-  // This would come from your global state/context
-  const cartItems = [
-    {
-      id: 1,
-      title: "Dinner party gown",
-      price: 19999,
-      quantity: 1,
-      image: "/api/placeholder/80/100",
-    },
-  ];
+  const cartItems = useMemo(() => cartData?.cart?.items ?? [], [cartData]);
+  const cartCount = useMemo(() => {
+    if (cartData?.cart?.item_count != null) return cartData.cart.item_count;
+    if (cartData?.item_count != null) return cartData.item_count;
+    return cartItems.reduce((sum, item) => sum + (item.quantity ?? 0), 0);
+  }, [cartData, cartItems]);
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const cartTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const cartTotal = useMemo(() => {
+    if (cartData?.cart?.total != null) return cartData.cart.total;
+    return cartItems.reduce(
+      (sum, item) => sum + (item.quantity ?? 0) * (item.unit_price ?? 0),
+      0
+    );
+  }, [cartData, cartItems]);
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -91,6 +92,7 @@ export const Header: React.FC = () => {
     { label: "Marketplace", href: "/marketplace" },
     { label: "Blog", href: "/blog" },
     { label: "Contact", href: "/contact" },
+    { label: "AI Studio", href: "/studio" },
   ];
 
   const formatPrice = (price: number) => {
@@ -182,11 +184,10 @@ export const Header: React.FC = () => {
                   <Link
                     key={index}
                     href={item.href}
-                    className={`text-[15px] font-medium transition-colors duration-200 ${
-                      pathname === item.href
-                        ? "text-[#FAB75B]"
-                        : "text-white/90 hover:text-white"
-                    }`}
+                    className={`text-[15px] font-medium transition-colors duration-200 ${pathname === item.href
+                      ? "text-[#FAB75B]"
+                      : "text-white/90 hover:text-white"
+                      }`}
                   >
                     {item.label}
                   </Link>
@@ -240,7 +241,9 @@ export const Header: React.FC = () => {
                           </button>
                         </div>
 
-                        {cartItems.length > 0 ? (
+                        {isCartLoading ? (
+                          <div className="py-6 text-center text-gray-500">Loading cart…</div>
+                        ) : cartItems.length > 0 ? (
                           <>
                             <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
                               {cartItems.map((item) => (
@@ -250,8 +253,8 @@ export const Header: React.FC = () => {
                                 >
                                   <div className="w-16 h-20 bg-gray-200 rounded overflow-hidden shrink-0">
                                     <Image
-                                      src={item.image}
-                                      alt={item.title}
+                                      src={item.thumbnail || "/images/ankara-gown.jpg"}
+                                      alt={item.title || "Cart item"}
                                       width={80}
                                       height={100}
                                       className="w-full h-full object-cover"
@@ -259,13 +262,13 @@ export const Header: React.FC = () => {
                                   </div>
                                   <div className="flex-1">
                                     <h4 className="text-sm font-semibold text-gray-900">
-                                      {item.title}
+                                      {item.title || "Item"} ({item.variant_title || "title"})
                                     </h4>
                                     <p className="text-sm text-gray-600">
                                       Qty: {item.quantity}
                                     </p>
                                     <p className="text-sm font-bold text-gray-900">
-                                      ₦{formatPrice(item.price)}
+                                      ₦{formatPrice(item.unit_price ?? 0)}
                                     </p>
                                   </div>
                                 </div>
@@ -407,11 +410,10 @@ export const Header: React.FC = () => {
                   <Link
                     key={index}
                     href={item.href}
-                    className={`text-[15px] font-medium transition-colors duration-200 ${
-                      pathname === item.href
-                        ? "text-[#FAB75B]"
-                        : "text-white/90 hover:text-white"
-                    }`}
+                    className={`text-[15px] font-medium transition-colors duration-200 ${pathname === item.href
+                      ? "text-[#FAB75B]"
+                      : "text-white/90 hover:text-white"
+                      }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}

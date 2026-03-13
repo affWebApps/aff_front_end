@@ -158,7 +158,7 @@ export default function AddPortfolioModal({
 
       const uploadedResults = await imageUploadService.uploadMultipleImages(
         imagesToUpload,
-        "public",
+        "public/portfolio",
         (index, status) => {
           // Update upload status for the image
           const updatedImages = [...images];
@@ -200,9 +200,8 @@ export default function AddPortfolioModal({
         err instanceof Error ? err.message : "Unknown error occurred";
       setError(
         errorMessage ||
-          `Failed to ${
-            editMode ? "update" : "create"
-          } portfolio. Please try again.`
+        `Failed to ${editMode ? "update" : "create"
+        } portfolio. Please try again.`
       );
     } finally {
       setIsSubmitting(false);
@@ -436,8 +435,8 @@ export default function AddPortfolioModal({
               ? "Updating..."
               : "Publishing..."
             : editMode
-            ? "Update Portfolio"
-            : "Publish"}
+              ? "Update Portfolio"
+              : "Publish"}
         </Button>
       </div>
     </BaseModal>

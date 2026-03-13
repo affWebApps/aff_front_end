@@ -62,17 +62,22 @@ function ReusableTable<T extends TableRow>({
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "In stock":
-      case "Completed":
+    const normalized = (status || "").toLowerCase();
+    switch (normalized) {
+      case "published":
+      case "in stock":
+      case "completed":
         return "bg-green-100 text-green-700";
-      case "Low in stock":
-      case "In Progress":
+      case "draft":
+      case "low in stock":
+      case "in progress":
         return "bg-yellow-100 text-yellow-700";
-      case "Out of stock":
-      case "Cancelled":
+      case "rejected":
+      case "out of stock":
+      case "cancelled":
         return "bg-red-100 text-red-700";
-      case "Open to bids":
+      case "proposed":
+      case "open to bids":
         return "bg-blue-100 text-blue-700";
       default:
         return "bg-gray-100 text-gray-700";

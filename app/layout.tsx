@@ -7,6 +7,7 @@ import {
   Roboto,
 } from "next/font/google";
 import "./globals.css";
+import QueryProvider from "../providers/query-provider";
 
 
 
@@ -53,10 +54,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${roboto.variable} ${montserrat.variable} font-roboto antialiased`}
       >
-        <main className="min-h-screen">{children}</main>
+        <QueryProvider>
+          <main className="min-h-screen">{children}</main>
+        </QueryProvider>
       </body>
     </html>
   );
 }
-
 
