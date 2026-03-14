@@ -81,10 +81,15 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized - token expired or invalid
     if (error.response?.status === 401) {
-      const logout = useAuthStore.getState().logout;
-      logout();
+      const { clearAuth } = useAuthStore.getState();
+      clearAuth();
+
       if (typeof window !== "undefined") {
-        window.location.href = "/sign-in";
+        const isOnSignInPage = window.location.pathname.startsWith("/sign-in");
+        if (!isOnSignInPage) {
+          const redirect = `${window.location.pathname}${window.location.search}`;
+          window.location.replace(`/sign-in?redirect=${encodeURIComponent(redirect)}`);
+        }
       }
     }
 

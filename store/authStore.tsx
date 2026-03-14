@@ -8,6 +8,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   setAuth: (user: User, token: string) => void;
+  clearAuth: () => void;
   logout: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
   checkAuth: () => Promise<void>;
@@ -32,6 +33,15 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
+      clearAuth: () => {
+        console.log("🔄 Clearing auth state...");
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+        });
+      },
+
       logout: async () => {
         const token = get().token;
 
@@ -46,12 +56,7 @@ export const useAuthStore = create<AuthState>()(
         }
 
         // Clear auth state (this will automatically clear localStorage via zustand persist)
-        console.log("🔄 Clearing auth state and localStorage...");
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-        });
+        get().clearAuth();
 
         console.log("✅ Logout complete");
       },
@@ -86,11 +91,7 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error("❌ Auth check failed:", error);
           // Clear auth state if token is invalid
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-          });
+          get().clearAuth();
           throw error;
         }
       },
