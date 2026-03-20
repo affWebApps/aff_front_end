@@ -5,7 +5,7 @@ import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import { uploadFileToSupabase } from "@/lib/storageService";
-import apiClient from "@/lib/api/axios";
+import { CreateVendorProductPayload, useCreateVendorProduct } from "@/hooks/useProducts";
 
 const defaultColourOptions = ["Blue", "Black", "Green", "Red", "Grey"];
 const defaultSizeOptions = ["S", "M", "L", "XL"];
@@ -23,7 +23,12 @@ type UploadCache = Record<string, string>; // fileKey -> publicUrl
 
 export default function NewProductPage() {
   const router = useRouter();
+  const createVendorProduct = useCreateVendorProduct();
   const draftKey = "draft:new-product";
+  const defaultShippingProfileId =
+    process.env.NEXT_PUBLIC_DEFAULT_SHIPPING_PROFILE_ID ??
+    process.env.DEFAULT_SHIPPING_PROFILE_ID ??
+    "";
 
   const loadDraft = (): {
     form?: FormState;
@@ -237,6 +242,10 @@ export default function NewProductPage() {
       alert("Please add at least one product image.");
       return;
     }
+    if (!defaultShippingProfileId) {
+      alert("Default shipping profile is not configured.");
+      return;
+    }
 
     let imageUrls: string[] = [];
     try {
@@ -307,12 +316,13 @@ export default function NewProductPage() {
         .trim()
         .replace(/\s+/g, "-");
 
-    const payload = {
+    const payload: CreateVendorProductPayload = {
       variants: variantsPayload,
       title: form.name,
       status: "published",
       description: form.description,
       handle: slugify(form.name),
+      shipping_profile_id: defaultShippingProfileId,
       thumbnail,
       images: imageUrls.map((url) => ({ url })),
       options: optionsArray,
@@ -320,9 +330,9 @@ export default function NewProductPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await apiClient.post("/store/vendors/products", payload);
+      const res = await createVendorProduct.mutateAsync(payload);
       console.log("Prepared payload for /store/vendors/products:", payload);
-      console.log("Create product response", res.data);
+      console.log("Create product response", res);
       clearDraft();
       router.push("/products/new/success");
     } catch (err: any) {
