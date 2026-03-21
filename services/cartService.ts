@@ -40,6 +40,7 @@ const endpoints = {
   options: "/store/cart/options",
   shippingMethod: "/store/cart/shipping-method",
   complete: "/store/cart/complete",
+  completeFromReference: "/store/cart/complete-from-reference",
   paymentSession: "/store/cart/payment-session",
   paymentVerify: "/store/paystack-verify",
   paymentProviders: "/store/payment-providers",
@@ -132,15 +133,22 @@ export const cartService = {
     return data;
   },
 
+  completeCartFromReference: async (reference: string) => {
+    const { data } = await apiClient.post(endpoints.completeFromReference, {
+      reference,
+    });
+    return data;
+  },
+
   createPaymentSession: async (payload: { provider_id: string; cart_id: string }) => {
     const { data } = await apiClient.post(endpoints.paymentSession, payload);
     return data;
   },
 
-  verifyPayment: async (payload: { reference: string; cart_id: string }) => {
+  verifyPayment: async (payload: { reference: string; cart_id?: string }) => {
     const { data } = await apiClient.post(
       `${endpoints.paymentVerify}?reference=${encodeURIComponent(payload.reference)}`,
-      { cart_id: payload.cart_id }
+      payload.cart_id ? { cart_id: payload.cart_id } : {}
     );
     return data;
   },

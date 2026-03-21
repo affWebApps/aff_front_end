@@ -87,12 +87,6 @@ export default function OrderViewPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="font-semibold text-gray-900">Raw JSON</div>
-                <pre className="bg-gray-900 text-gray-100 text-xs p-3 rounded-lg overflow-auto max-h-96">
-                  {JSON.stringify(order, null, 2)}
-                </pre>
-              </div>
             </div>
           )}
         </div>

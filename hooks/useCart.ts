@@ -75,7 +75,8 @@ export const useCartMutations = () => {
   });
 
   const completeCart = useMutation({
-    mutationFn: (cart_id: string) => cartService.completeCart(cart_id),
+    mutationFn: (reference: string) =>
+      cartService.completeCartFromReference(reference),
     onSuccess: invalidate,
   });
 

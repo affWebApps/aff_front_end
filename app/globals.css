@@ -23,6 +23,16 @@ body {
   font-family: var(--font-roboto), Arial, Helvetica, sans-serif;
 }
 
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 @layer components {
   .header-large {
     font-family: var(--font-montserrat);
@@ -77,5 +87,4 @@ body {
 
 }
 /* class="font-roboto font-semibold text-[16px] leading-[24px] tracking-[0px] text-[#B28241]" */
-
 
