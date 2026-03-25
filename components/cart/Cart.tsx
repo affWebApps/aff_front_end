@@ -162,7 +162,7 @@ const OrderSummary = ({
     {showButton && (
       <button
         onClick={onButtonClick}
-        className="w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors"
+        className="w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors cursor-pointer"
       >
         {buttonText}
       </button>
@@ -186,7 +186,7 @@ const CartStep = ({
     <div className="container mx-auto px-4">
       <button
         onClick={() => console.log("Go back", process.env.NODE_ENV === "development")}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors cursor-pointer"
       >
         <ChevronLeft className="w-5 h-5" />
         Back
@@ -228,7 +228,7 @@ const CartStep = ({
                   </div>
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
+                    className="text-red-500 hover:text-red-700 transition-colors cursor-pointer"
                     title="Remove item"
                   >
                     <X className="w-5 h-5" />
@@ -243,7 +243,7 @@ const CartStep = ({
                     <button
                       onClick={() => updateQuantity(item.id, -1)}
                       disabled={item.quantity <= 1}
-                      className="w-8 h-8 rounded-lg bg-[#FAB75B] text-white flex items-center justify-center hover:bg-[#e9a548] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-8 h-8 rounded-lg bg-[#FAB75B] text-white flex items-center justify-center hover:bg-[#e9a548] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Decrease quantity"
                     >
                       <Minus className="w-4 h-4" />
@@ -253,7 +253,7 @@ const CartStep = ({
                     </span>
                     <button
                       onClick={() => updateQuantity(item.id, 1)}
-                      className="w-8 h-8 rounded-lg bg-[#FAB75B] text-white flex items-center justify-center hover:bg-[#e9a548] transition-colors"
+                      className="w-8 h-8 rounded-lg bg-[#FAB75B] text-white flex items-center justify-center hover:bg-[#e9a548] transition-colors cursor-pointer"
                       title="Increase quantity"
                     >
                       <Plus className="w-4 h-4" />
@@ -383,7 +383,7 @@ const ShippingStep = ({
             setCurrentStep("cart");
             if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
           }}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5" />
           Back
@@ -407,13 +407,13 @@ const ShippingStep = ({
                     onSkipExisting();
                     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
                   }}
-                  className="w-full sm:w-1/2 py-4 border-2 border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors"
+                  className="w-full sm:w-1/2 py-4 border-2 border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors cursor-pointer"
                 >
                   Continue with existing
                 </button>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="w-full sm:w-1/2 py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors"
+                  className="w-full sm:w-1/2 py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors cursor-pointer"
                 >
                   {isEditing ? "Close Address Form" : "Edit addresses"}
                 </button>
@@ -595,7 +595,7 @@ const ShippingStep = ({
                   <h2 className="text-2xl font-bold text-gray-900">Billing address</h2>
                   <button
                     onClick={() => setBillingInfo({ ...shippingInfo })}
-                    className="text-sm text-[#FAB75B] font-semibold hover:text-[#e9a548]"
+                    className="text-sm text-[#FAB75B] font-semibold hover:text-[#e9a548] cursor-pointer"
                   >
                     Same as shipping
                   </button>
@@ -757,7 +757,7 @@ const ShippingStep = ({
             <button
               onClick={onSaveAddresses}
               disabled={!isFormValid() || savingAddresses}
-              className="w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {savingAddresses ? "Saving..." : hasSavedAddresses ? "Update addresses" : "Select Shipping Method"}
             </button>
@@ -790,7 +790,7 @@ const PaymentStep = ({
           setCurrentStep("shippingMethod");
           if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
         }}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors cursor-pointer"
       >
         <ChevronLeft className="w-5 h-5" />
         Back
@@ -877,7 +877,7 @@ const PaymentStep = ({
           <button
             onClick={onPaymentCreated}
             disabled={!paymentMethod || !cartId || isCreatingPayment}
-            className="mt-4 w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-4 w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isCreatingPayment
               ? "Redirecting to Paystack..."
@@ -920,7 +920,7 @@ const ShippingMethodStep = ({
             onBack();
             if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" });
           }}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5" />
           Back to addresses
@@ -976,7 +976,7 @@ const ShippingMethodStep = ({
           <button
             onClick={() => selected && onConfirm(selected)}
             disabled={!selected}
-            className="mt-6 w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-6 w-full py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Continue to Payment
           </button>
@@ -1102,7 +1102,7 @@ const ConfirmationStep = ({
       </motion.div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <button className="py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors">
+        <button className="py-4 bg-[#FAB75B] text-white font-semibold rounded-lg hover:bg-[#e9a548] transition-colors cursor-pointer">
           Download receipt
         </button>
         <button
@@ -1121,7 +1121,7 @@ const ConfirmationStep = ({
               country_code: "",
             });
           }}
-          className="py-4 border-2 border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors"
+          className="py-4 border-2 border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors cursor-pointer"
         >
           Continue Shopping
         </button>
@@ -1302,7 +1302,7 @@ export default function CheckoutFlow() {
           <p className="text-gray-600">Add products from the marketplace to see them here.</p>
           <button
             onClick={() => router.push("/marketplace")}
-            className="px-6 py-3 bg-[#FAB75B] text-white rounded-lg font-semibold hover:bg-[#e9a548] transition-colors"
+            className="px-6 py-3 bg-[#FAB75B] text-white rounded-lg font-semibold hover:bg-[#e9a548] transition-colors cursor-pointer"
           >
             Go to Marketplace
           </button>

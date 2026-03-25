@@ -7,6 +7,8 @@ import { Button } from "../../../components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api/axios";
+import { BaseModal } from "@/components/modals/BaseModal";
+import { useDeleteVendorProduct } from "@/hooks/useProducts";
 
 interface Product {
   id: string;
@@ -20,9 +22,12 @@ interface Product {
 
 const MyProductsPage = () => {
   const [activeTab, setActiveTab] = useState("listed");
+  const [productPendingDelete, setProductPendingDelete] = useState<Product | null>(null);
+  const [deleteStep, setDeleteStep] = useState<"idle" | "confirm" | "final">("idle");
   const router = useRouter();
   const { user } = useAuthStore();
   const vendorId = (user as any)?.vendor_id || (user as any)?.vendorId;
+  const deleteProduct = useDeleteVendorProduct();
 
   const columns = [
     { key: "image", label: "Product Image" },
@@ -64,11 +69,33 @@ const MyProductsPage = () => {
   };
 
   const handleEdit = (product: Product) => {
-    console.log("Edit:", product);
+    router.push(`/products/${product.id}/edit`);
   };
 
   const handleDelete = (product: Product) => {
-    console.log("Delete:", product);
+    setProductPendingDelete(product);
+    setDeleteStep("confirm");
+  };
+
+  const closeDeleteFlow = () => {
+    if (deleteProduct.isPending) return;
+    setDeleteStep("idle");
+    setProductPendingDelete(null);
+  };
+
+  const confirmFirstDeleteStep = () => {
+    setDeleteStep("final");
+  };
+
+  const handleFinalDelete = async () => {
+    if (!productPendingDelete?.id) return;
+    try {
+      await deleteProduct.mutateAsync(String(productPendingDelete.id));
+      closeDeleteFlow();
+    } catch (error) {
+      console.error("Delete product failed:", error);
+      alert("Failed to delete product. Please try again.");
+    }
   };
 
   return (
@@ -90,32 +117,13 @@ const MyProductsPage = () => {
           <button
             onClick={() => setActiveTab("listed")}
             className={`pb-3 px-1 whitespace-nowrap ${activeTab === "listed"
-                ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
-                : "text-gray-500"
+              ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
+              : "text-gray-500"
               }`}
           >
             Listed Products
           </button>
-          <button
-            onClick={() => setActiveTab("ordered")}
-            className={`pb-3 px-1 whitespace-nowrap ${activeTab === "ordered"
-                ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
-                : "text-gray-500"
-              }`}
-          >
-            Ordered Products
-          </button>
         </div>
-      </div>
-
-      {/* Total and View All */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
-        <h2 className="text-lg sm:text-xl font-medium text-gray-800">
-          {isLoading ? "Loading products…" : `${products.length} Total Products`}
-        </h2>
-        <button className="text-[#E9A556] hover:underline text-sm font-medium">
-          View all orders
-        </button>
       </div>
 
       {/* Table */}
@@ -127,6 +135,70 @@ const MyProductsPage = () => {
         onDelete={handleDelete}
         itemsPerPage={10}
       />
+
+      <BaseModal
+        isOpen={deleteStep === "confirm"}
+        onClose={closeDeleteFlow}
+        title="Delete product?"
+        subtitle="This action cannot be reversed."
+        maxWidth="md"
+      >
+        <div className="p-6 space-y-6">
+          <p className="text-sm text-gray-700">
+            You are about to delete
+            <span className="font-semibold"> {productPendingDelete?.name || "this product"}</span>.
+            Once deleted, it will be removed from your storefront and cannot be recovered.
+          </p>
+          <div className="flex flex-col-reverse sm:flex-row gap-3">
+            <button
+              onClick={closeDeleteFlow}
+              disabled={deleteProduct.isPending}
+              className="w-full py-3 border border-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmFirstDeleteStep}
+              disabled={deleteProduct.isPending}
+              className="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </BaseModal>
+
+      <BaseModal
+        isOpen={deleteStep === "final"}
+        onClose={closeDeleteFlow}
+        title="Final confirmation"
+        subtitle="This action cannot be undone."
+        maxWidth="md"
+      >
+        <div className="p-6 space-y-6">
+          <p className="text-sm text-gray-700">
+            Please confirm that you want to permanently delete
+            <span className="font-semibold"> {productPendingDelete?.name || "this product"}</span>.
+            This is the last confirmation before the product is removed.
+          </p>
+          <div className="flex flex-col-reverse sm:flex-row gap-3">
+            <button
+              onClick={() => setDeleteStep("confirm")}
+              disabled={deleteProduct.isPending}
+              className="w-full py-3 border border-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Go back
+            </button>
+            <button
+              onClick={handleFinalDelete}
+              disabled={deleteProduct.isPending}
+              className="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {deleteProduct.isPending ? "Deleting..." : "Delete permanently"}
+            </button>
+          </div>
+        </div>
+      </BaseModal>
     </div>
   );
 };

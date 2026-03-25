@@ -1,11 +1,11 @@
 "use client";
 
-import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useMemo, useState } from "react";
+import { DragEvent, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useMemo, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import { uploadFileToSupabase } from "@/lib/storageService";
-import apiClient from "@/lib/api/axios";
+import { CreateVendorProductPayload, useCreateVendorProduct } from "@/hooks/useProducts";
 
 const defaultColourOptions = ["Blue", "Black", "Green", "Red", "Grey"];
 const defaultSizeOptions = ["S", "M", "L", "XL"];
@@ -21,9 +21,22 @@ type VariantOverride = { price?: string; quantity?: string };
 type VariantCombo = { key: string; label: string; pairs: { name: string; value: string }[] };
 type UploadCache = Record<string, string>; // fileKey -> publicUrl
 
+const moveItem = <T,>(items: T[], from: number, to: number) => {
+  if (to < 0 || to >= items.length || from === to) return items;
+  const next = [...items];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+};
+
 export default function NewProductPage() {
   const router = useRouter();
+  const createVendorProduct = useCreateVendorProduct();
   const draftKey = "draft:new-product";
+  const defaultShippingProfileId =
+    process.env.NEXT_PUBLIC_DEFAULT_SHIPPING_PROFILE_ID ??
+    process.env.DEFAULT_SHIPPING_PROFILE_ID ??
+    "";
 
   const loadDraft = (): {
     form?: FormState;
@@ -94,6 +107,7 @@ export default function NewProductPage() {
   );
   const [uploadCache, setUploadCache] = useState<UploadCache>(draft?.uploadCache ?? {});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [draggedFileIndex, setDraggedFileIndex] = useState<number | null>(null);
 
   const variantCombosRaw: VariantCombo[] = useMemo(() => {
     // Build attribute sets from selected colour/size and saved custom options
@@ -194,6 +208,20 @@ export default function NewProductPage() {
     setFiles((prev) => [...prev, ...incoming]);
   };
 
+  const handleImageDragStart = (index: number) => {
+    setDraggedFileIndex(index);
+  };
+
+  const handleImageDrop = (targetIndex: number) => {
+    if (draggedFileIndex === null) return;
+    setFiles((prev) => moveItem(prev, draggedFileIndex, targetIndex));
+    setDraggedFileIndex(null);
+  };
+
+  const handleImageDragEnd = () => {
+    setDraggedFileIndex(null);
+  };
+
   // Generate object URLs for previews
   useEffect(() => {
     if (!files.length) {
@@ -224,7 +252,7 @@ export default function NewProductPage() {
       return;
     }
     const missingVariant = variantCombos.find(
-      (v) =>
+      (v: VariantCombo) =>
         !variantOverrides[v.key]?.price ||
         !variantOverrides[v.key]?.quantity ||
         Number(variantOverrides[v.key]?.price) <= 0
@@ -235,6 +263,10 @@ export default function NewProductPage() {
     }
     if (!files.length) {
       alert("Please add at least one product image.");
+      return;
+    }
+    if (!defaultShippingProfileId) {
+      alert("Default shipping profile is not configured.");
       return;
     }
 
@@ -281,11 +313,11 @@ export default function NewProductPage() {
     const variantsPayload = variantCombos.map((v) => {
       const override = variantOverrides[v.key] || {};
       const opts: Record<string, string> = {};
-      v.pairs.forEach((p) => {
+      v.pairs.forEach((p: { name: string; value: string }) => {
         opts[p.name] = p.value;
       });
       return {
-        title: v.pairs.map((p) => p.value).join(", "),
+        title: v.pairs.map((p: { name: string; value: string }) => p.value).join(", "),
         manage_inventory: true,
         allow_backorder: false,
         options: opts,
@@ -307,12 +339,13 @@ export default function NewProductPage() {
         .trim()
         .replace(/\s+/g, "-");
 
-    const payload = {
+    const payload: CreateVendorProductPayload = {
       variants: variantsPayload,
       title: form.name,
       status: "published",
       description: form.description,
       handle: slugify(form.name),
+      shipping_profile_id: defaultShippingProfileId,
       thumbnail,
       images: imageUrls.map((url) => ({ url })),
       options: optionsArray,
@@ -320,9 +353,9 @@ export default function NewProductPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await apiClient.post("/store/vendors/products", payload);
+      const res = await createVendorProduct.mutateAsync(payload);
       console.log("Prepared payload for /store/vendors/products:", payload);
-      console.log("Create product response", res.data);
+      console.log("Create product response", res);
       clearDraft();
       router.push("/products/new/success");
     } catch (err: any) {
@@ -640,6 +673,9 @@ export default function NewProductPage() {
               <h2 className="font-semibold text-gray-900">Attachments</h2>
               <div className="space-y-2">
                 <label className="text-sm text-gray-700">Product images</label>
+                <p className="text-xs text-gray-500">
+                  Drag images to reorder. The first image will be used as the thumbnail.
+                </p>
                 <label className="border border-dashed border-gray-300 rounded-xl w-full h-48 flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-300 transition">
                   <ImageIcon className="w-6 h-6 text-gray-500 mb-2" />
                   <span className="text-sm text-gray-700">
@@ -656,46 +692,63 @@ export default function NewProductPage() {
                 </label>
                 {files.length > 0 && (
                   <div className="space-y-2">
+                    <div className="text-[11px] text-gray-500">
+                      Reorder the images to control which one appears first.
+                    </div>
                     <div className="text-xs text-gray-600">
                       {files.length} file(s) selected
                     </div>
                     {filePreviews.length > 0 && (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {filePreviews.map((p) => {
+                        {filePreviews.map((p, index) => {
                           const isImage = p.type?.startsWith("image/");
                           return (
                             <div
                               key={p.url}
-                              className="border border-gray-200 rounded-lg p-2 flex flex-col gap-2"
+                              draggable
+                              onDragStart={() => handleImageDragStart(index)}
+                              onDragOver={(e: DragEvent<HTMLDivElement>) => e.preventDefault()}
+                              onDrop={() => handleImageDrop(index)}
+                              onDragEnd={handleImageDragEnd}
+                              className={`border rounded-lg p-2 flex flex-col gap-2 bg-white ${
+                                draggedFileIndex === index
+                                  ? "border-amber-400 opacity-60"
+                                  : "border-gray-200"
+                              }`}
                             >
-                              {isImage ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={p.url}
-                                  alt={p.name}
-                                  className="w-full h-28 object-cover rounded-md"
-                                />
-                              ) : (
-                                <div className="w-full h-28 rounded-md bg-gray-100 flex items-center justify-center text-xs text-gray-600">
-                                  {p.type || "file"}
-                                </div>
-                              )}
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-[11px] text-gray-700 truncate" title={p.name}>
-                                  {p.name}
+                              <div className="relative">
+                                {isImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={p.url}
+                                    alt={p.name}
+                                    className="w-full h-28 object-cover rounded-md"
+                                  />
+                                ) : (
+                                  <div className="w-full h-28 rounded-md bg-gray-100 flex items-center justify-center text-xs text-gray-600">
+                                    {p.type || "file"}
+                                  </div>
+                                )}
+                                <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full bg-[#4B2F23] text-white text-[11px] font-semibold flex items-center justify-center shadow-sm">
+                                  {index + 1}
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    setFiles((prev) =>
-                                      prev.filter((f) => f.name !== p.name || f.type !== p.type)
-                                    );
+                                    setFiles((prev) => prev.filter((_, fileIndex) => fileIndex !== index));
                                   }}
-                                  className="text-red-500 hover:text-red-700 text-xs"
+                                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/90 text-red-500 hover:text-red-700 flex items-center justify-center shadow-sm"
                                   aria-label={`Remove ${p.name}`}
                                 >
-                                  Remove
+                                  <X size={14} />
                                 </button>
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
+                                  <div className="text-[11px] text-gray-700 truncate" title={p.name}>
+                                    {p.name}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           );
@@ -749,7 +802,7 @@ export default function NewProductPage() {
               </p>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {variantCombos.map((v) => (
+                  {variantCombos.map((v: VariantCombo) => (
                   <div
                     key={v.key}
                     className="border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-800 space-y-2"

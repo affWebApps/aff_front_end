@@ -59,15 +59,23 @@ function PaymentCallbackInner() {
     [cart_id, storedCartId, cartData?.cart?.id]
   );
 
+  const isProcessing =
+    manualLoading ||
+    status === "pending" ||
+    verifyStatus === "pending" ||
+    completeStatus === "pending";
+
   const processPayment = async () => {
-    if (!reference || !effectiveCartId) return null;
+    if (!reference) return null;
     setStatus("pending");
     setVerifyStatus("pending");
     setVerifyMessage("");
     setCompleteStatus("idle");
     setCompleteMessage("");
     try {
-      const res = await verifyPayment.mutateAsync({ reference, cart_id: effectiveCartId });
+      const res = await verifyPayment.mutateAsync(
+        effectiveCartId ? { reference, cart_id: effectiveCartId } : { reference }
+      );
       const success = res?.status === true && res?.data?.status === "success";
       setVerifyStatus(success ? "success" : "failed");
       const msg = success ? "Payment verified successfully." : "Payment verification failed.";
@@ -81,15 +89,19 @@ function PaymentCallbackInner() {
       setCompleteStatus("pending");
       setCompleteMessage("Completing order...");
       try {
-        const orderRes = await completeCart.mutateAsync(effectiveCartId);
-        setOrder(orderRes?.order ?? orderRes);
+        const orderRes = await completeCart.mutateAsync(reference);
+        const resolvedOrder =
+          orderRes?.completion?.order ??
+          orderRes?.order ??
+          orderRes;
+        setOrder(resolvedOrder);
         setCompleteStatus("success");
         setCompleteMessage("Order completed successfully.");
         setStatus("success");
         localStorage.removeItem("pendingReference");
         localStorage.removeItem("pendingCartId");
         setMessage("Payment verified and order completed.");
-        return orderRes?.order ?? orderRes;
+        return resolvedOrder;
       } catch (err: any) {
         setCompleteStatus("failed");
         const cMsg = "Order completion failed. Please contact support.";
@@ -113,10 +125,11 @@ function PaymentCallbackInner() {
 
   useEffect(() => {
     const run = async () => {
-      if (!reference || !effectiveCartId) return;
+      if (!reference) return;
       if (hasAttempted.current) return;
       hasAttempted.current = true;
-      await processPayment();
+      const ord = await processPayment();
+      if (ord) persistOrderAndRedirect(ord);
     };
     run();
   }, [reference, effectiveCartId]);
@@ -154,7 +167,6 @@ function PaymentCallbackInner() {
         <div className="max-w-2xl w-full bg-white shadow-lg rounded-2xl p-6 space-y-6 text-center">
           <h1 className="text-2xl font-bold text-gray-900">Payment Status</h1>
           <p className="text-sm text-gray-600">Reference: {reference || "(missing)"}</p>
-          <p className="text-sm text-gray-600">Cart: {effectiveCartId || "(unknown)"}</p>
 
           <div className="space-y-2 text-left">
             <div className="flex items-center gap-2">
@@ -276,27 +288,36 @@ function PaymentCallbackInner() {
             >
               Return to Cart
             </button>
-            <button
-              disabled={manualLoading || !effectiveCartId}
-              onClick={async () => {
-                if (!effectiveCartId) return;
-                try {
-                  setManualLoading(true);
-                  const ord = await processPayment();
-                  if (ord) persistOrderAndRedirect(ord);
-                } catch (err: any) {
-                  const msg = err?.message || "Payment verification failed";
-                  setStatus("failed");
-                  setMessage(msg);
-                  showToast(msg, "error");
-                } finally {
-                  setManualLoading(false);
-                }
-              }}
-              className="w-full py-3 border border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {manualLoading ? "Completing..." : "I have paid"}
-            </button>
+            {order?.id ? (
+              <button
+                onClick={() => persistOrderAndRedirect(order)}
+                className="w-full py-3 border border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors"
+              >
+                View Order
+              </button>
+            ) : (
+              <button
+                disabled={isProcessing || !reference}
+                onClick={async () => {
+                  if (!reference || isProcessing) return;
+                  try {
+                    setManualLoading(true);
+                    const ord = await processPayment();
+                    if (ord) persistOrderAndRedirect(ord);
+                  } catch {
+                    const msg = "Payment verification failed.";
+                    setStatus("failed");
+                    setMessage(msg);
+                    showToast(msg, "error");
+                  } finally {
+                    setManualLoading(false);
+                  }
+                }}
+                className="w-full py-3 border border-[#FAB75B] text-[#FAB75B] font-semibold rounded-lg hover:bg-orange-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isProcessing ? "Checking payment..." : "I have paid"}
+              </button>
+            )}
             <button
               onClick={() => router.push("/")}
               className="w-full py-3 border border-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
