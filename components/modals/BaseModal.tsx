@@ -48,12 +48,12 @@ export const BaseModal = ({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 flex md:items-center md:justify-center items-end justify-center p-0 md:p-4 z-50"
+          className="fixed inset-0 flex md:items-center md:justify-center items-end justify-center p-0 md:p-4 z-50 overflow-y-auto"
           style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
           onClick={onClose}
         >
           <motion.div
-            className={`bg-white md:rounded-2xl rounded-t-2xl ${maxWidthClasses[maxWidth]} w-full shadow-2xl ${className}`}
+            className={`bg-white md:rounded-2xl rounded-t-2xl ${maxWidthClasses[maxWidth]} w-full shadow-2xl max-h-[90vh] overflow-y-auto ${className}`}
             initial={isMobile ? { y: "100%" } : { opacity: 0, scale: 0.9 }}
             animate={isMobile ? { y: 0 } : { opacity: 1, scale: 1 }}
             exit={isMobile ? { y: "100%" } : { opacity: 0, scale: 0.9 }}

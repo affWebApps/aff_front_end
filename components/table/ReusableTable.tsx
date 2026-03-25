@@ -22,6 +22,10 @@ interface ReusableTableProps<T extends TableRow = TableRow> {
   showActions?: boolean;
   showCheckbox?: boolean;
   customActionColumn?: (row: T) => React.ReactNode;
+  currentPage?: number;
+  totalPages?: number;
+  totalItems?: number;
+  onPageChange?: (page: number) => void;
 }
 
 function ReusableTable<T extends TableRow>({
@@ -34,16 +38,36 @@ function ReusableTable<T extends TableRow>({
   showActions = true,
   showCheckbox = true,
   customActionColumn,
+  currentPage: controlledCurrentPage,
+  totalPages: controlledTotalPages,
+  totalItems: controlledTotalItems,
+  onPageChange,
 }: ReusableTableProps<T>) {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [selectedItems, setSelectedItems] = useState<Array<string | number>>(
     []
   );
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const isControlled =
+    typeof controlledCurrentPage === "number" &&
+    typeof controlledTotalPages === "number" &&
+    typeof onPageChange === "function";
+
+  const currentPage = controlledCurrentPage ?? internalCurrentPage;
+  const totalPages =
+    controlledTotalPages ?? Math.max(1, Math.ceil(data.length / itemsPerPage));
+  const totalItems = controlledTotalItems ?? data.length;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentData = data.slice(startIndex, endIndex);
+  const currentData = isControlled ? data : data.slice(startIndex, endIndex);
+
+  const setPage = (page: number) => {
+    if (isControlled) {
+      onPageChange?.(page);
+      return;
+    }
+    setInternalCurrentPage(page);
+  };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
@@ -67,14 +91,17 @@ function ReusableTable<T extends TableRow>({
       case "published":
       case "in stock":
       case "completed":
+      case "successful":
         return "bg-green-100 text-green-700";
       case "draft":
       case "low in stock":
       case "in progress":
+      case "pending":
         return "bg-yellow-100 text-yellow-700";
       case "rejected":
       case "out of stock":
       case "cancelled":
+      case "failed":
         return "bg-red-100 text-red-700";
       case "proposed":
       case "open to bids":
@@ -308,12 +335,12 @@ function ReusableTable<T extends TableRow>({
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-gray-200 gap-4">
         <p className="text-sm text-gray-600">
-          Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of{" "}
-          {data.length} results
+          Showing {totalItems === 0 ? 0 : startIndex + 1} to{" "}
+          {Math.min(endIndex, totalItems)} of {totalItems} results
         </p>
         <div className="flex gap-2">
           <button
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            onClick={() => setPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
             className="p-2 rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
             aria-label="Previous page"
@@ -324,7 +351,7 @@ function ReusableTable<T extends TableRow>({
           {[...Array(totalPages)].map((_, i) => (
             <button
               key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
+              onClick={() => setPage(i + 1)}
               className={`px-3 py-1 rounded ${
                 currentPage === i + 1
                   ? "bg-[#5C4033] text-white"
@@ -337,9 +364,7 @@ function ReusableTable<T extends TableRow>({
             </button>
           ))}
           <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-            }
+            onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages}
             className="p-2 rounded bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200"
             aria-label="Next page"

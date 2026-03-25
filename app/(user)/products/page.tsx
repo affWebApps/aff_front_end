@@ -117,32 +117,13 @@ const MyProductsPage = () => {
           <button
             onClick={() => setActiveTab("listed")}
             className={`pb-3 px-1 whitespace-nowrap ${activeTab === "listed"
-                ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
-                : "text-gray-500"
+              ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
+              : "text-gray-500"
               }`}
           >
             Listed Products
           </button>
-          <button
-            onClick={() => setActiveTab("ordered")}
-            className={`pb-3 px-1 whitespace-nowrap ${activeTab === "ordered"
-                ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
-                : "text-gray-500"
-              }`}
-          >
-            Ordered Products
-          </button>
         </div>
-      </div>
-
-      {/* Total and View All */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
-        <h2 className="text-lg sm:text-xl font-medium text-gray-800">
-          {isLoading ? "Loading products…" : `${products.length} Total Products`}
-        </h2>
-        <button className="text-[#E9A556] hover:underline text-sm font-medium">
-          View all orders
-        </button>
       </div>
 
       {/* Table */}

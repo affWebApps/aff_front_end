@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   ArrowDownLeft,
@@ -10,106 +11,200 @@ import {
 } from "lucide-react";
 import ReusableTable from "../../../components/table/ReusableTable";
 import { Button } from "../../../components/ui/Button";
+import apiClient from "@/lib/api/axios";
+import { BaseModal } from "@/components/modals/BaseModal";
+
+type WalletOrder = {
+  id: string;
+  display_id: number;
+  status: string;
+  total: number;
+  created_at: string;
+  items?: Array<{
+    id: string;
+    title?: string;
+    subtitle?: string | null;
+    thumbnail?: string | null;
+    quantity?: number;
+    total?: number;
+  }>;
+};
+
+type OrdersResponse = {
+  orders: WalletOrder[];
+  count: number;
+  page: number;
+  limit: number;
+  offset: number;
+};
+
+const ORDERS_PER_PAGE = 10;
+const TRANSACTIONS_PER_PAGE = 10;
+
+type WalletTransaction = {
+  id: string;
+  order_id: string;
+  version: number;
+  amount: number;
+  currency_code: string;
+  reference: string;
+  reference_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type TransactionsResponse = {
+  transactions: WalletTransaction[];
+  count: number;
+  page: number;
+  limit: number;
+  offset: number;
+};
+
+type WalletTableRow = {
+  id: string | number;
+  date: string;
+  transactionId?: string;
+  type?: string;
+  typeIcon?: string;
+  orderId?: string;
+  items?: string;
+  amount: string;
+  status: string;
+  rawOrder?: WalletOrder;
+  rawTransaction?: WalletTransaction;
+};
 
 const MyWalletPage = () => {
   const router = useRouter();
-  const transactions = [
-    {
-      id: 1,
-      date: "October 28, 2025",
-      transactionId: "TRX-1A2B3C4D",
-      type: "Payment to Olivia Chen",
-      typeIcon: "payment",
-      amount: "₦70,000",
+  const [activeTab, setActiveTab] = useState<"transactions" | "orders">(
+    "transactions"
+  );
+  const [transactionsPage, setTransactionsPage] = useState(1);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState<WalletOrder | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<WalletTransaction | null>(null);
+
+  const {
+    data: transactionsResponse,
+    isLoading: transactionsLoading,
+    error: transactionsError,
+  } = useQuery<TransactionsResponse>({
+    queryKey: ["wallet-transactions", transactionsPage, TRANSACTIONS_PER_PAGE],
+    queryFn: async () => {
+      const res = await apiClient.get(
+        `/store/order-transactions?page=${transactionsPage}&limit=${TRANSACTIONS_PER_PAGE}`
+      );
+      return res.data;
+    },
+  });
+
+  const {
+    data: ordersResponse,
+    isLoading: ordersLoading,
+    error: ordersError,
+  } = useQuery<OrdersResponse>({
+    queryKey: ["wallet-orders", ordersPage, ORDERS_PER_PAGE],
+    queryFn: async () => {
+      const res = await apiClient.get(
+        `/store/orders?page=${ordersPage}&limit=${ORDERS_PER_PAGE}`
+      );
+      return res.data;
+    },
+  });
+
+  const toTitleCase = (value: string) =>
+    value
+      .split(/[_-\s]+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+
+  const getTransactionTypeIcon = (reference: string) => {
+    const normalized = reference.toLowerCase();
+    if (normalized.includes("refund")) return "withdrawal";
+    if (normalized.includes("deposit")) return "deposit";
+    if (normalized.includes("escrow")) return "escrow";
+    return "payment";
+  };
+
+  const formatMoney = (value?: number) => {
+    if (value == null) return "₦0";
+    return `₦${value.toLocaleString()}`;
+  };
+
+  const formatDate = (value?: string) => {
+    if (!value) return "—";
+    const date = new Date(value);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const openOrderFromTransaction = async (orderId: string) => {
+    const existingOrder = ordersResponse?.orders?.find(
+      (order) => order.id === orderId
+    );
+
+    if (existingOrder) {
+      setSelectedTransaction(null);
+      setSelectedOrder(existingOrder);
+      return;
+    }
+
+    try {
+      const res = await apiClient.get(`/store/orders/${orderId}`);
+      const fetchedOrder = res.data?.order ?? res.data;
+      if (fetchedOrder?.id) {
+        setSelectedTransaction(null);
+        setSelectedOrder(fetchedOrder);
+      }
+    } catch (error) {
+      console.error("Failed to load order details", error);
+    }
+  };
+
+  const transactions: WalletTableRow[] =
+    transactionsResponse?.transactions?.map((transaction) => ({
+      id: transaction.id,
+      date: formatDate(transaction.created_at),
+      transactionId: transaction.id.replace(/^ordtrx_/, ""),
+      type: toTitleCase(transaction.reference),
+      typeIcon: getTransactionTypeIcon(transaction.reference),
+      amount: `₦${transaction.amount.toLocaleString()}`,
       status: "Successful",
-    },
-    {
-      id: 2,
-      date: "October 26, 2025",
-      transactionId: "TRX-5E7W665I",
-      type: "Deposit",
-      typeIcon: "deposit",
-      amount: "₦100,000",
-      status: "Failed",
-    },
-    {
-      id: 3,
-      date: "October 23, 2025",
-      transactionId: "TRX-7S0D5V2M",
-      type: "Withdrawal",
-      typeIcon: "withdrawal",
-      amount: "₦500,000",
-      status: "Successful",
-    },
-    {
-      id: 4,
-      date: "October 18, 2025",
-      transactionId: "TRX-2U4B8K0D",
-      type: "Payment to Benita Jones",
-      typeIcon: "payment",
-      amount: "₦30,000",
-      status: "Pending",
-    },
-    {
-      id: 5,
-      date: "October 18, 2025",
-      transactionId: "TRX-3M0A7V4X",
-      type: "Payment into Escrow",
-      typeIcon: "escrow",
-      amount: "₦30,000",
-      status: "Successful",
-    },
-    {
-      id: 6,
-      date: "October 15, 2025",
-      transactionId: "TRX-9K3L5M2N",
-      type: "Withdrawal",
-      typeIcon: "withdrawal",
-      amount: "₦150,000",
-      status: "Successful",
-    },
-    {
-      id: 7,
-      date: "October 12, 2025",
-      transactionId: "TRX-4P7Q8R1S",
-      type: "Deposit",
-      typeIcon: "deposit",
-      amount: "₦200,000",
-      status: "Successful",
-    },
-    {
-      id: 8,
-      date: "October 10, 2025",
-      transactionId: "TRX-6T2U9V3W",
-      type: "Payment to Sarah Smith",
-      typeIcon: "payment",
-      amount: "₦45,000",
-      status: "Failed",
-    },
-    {
-      id: 9,
-      date: "October 08, 2025",
-      transactionId: "TRX-1X5Y7Z8A",
-      type: "Withdrawal",
-      typeIcon: "withdrawal",
-      amount: "₦80,000",
-      status: "Pending",
-    },
-    {
-      id: 10,
-      date: "October 05, 2025",
-      transactionId: "TRX-3B4C6D2E",
-      type: "Payment into Escrow",
-      typeIcon: "escrow",
-      amount: "₦120,000",
-      status: "Successful",
-    },
-  ];
+      rawTransaction: transaction,
+    })) || [];
+
+  const orders: WalletTableRow[] =
+    ordersResponse?.orders?.map((order) => {
+      const itemCount = order.items?.length ?? 0;
+      return {
+        id: order.id,
+        date: formatDate(order.created_at),
+        orderId: order.id.replace(/^order_/, ""),
+        items: `${itemCount} ${itemCount === 1 ? "item" : "items"}`,
+        amount: `₦${order.total.toLocaleString()}`,
+        status:
+          order.status.charAt(0).toUpperCase() + order.status.slice(1),
+        rawOrder: order,
+      };
+    }) || [];
 
   const columns = [
     { key: "date", label: "Date" },
     { key: "transactionId", label: "Transaction ID" },
     { key: "type", label: "Type" },
+    { key: "amount", label: "Amount" },
+    { key: "status", label: "Status" },
+  ];
+
+  const orderColumns = [
+    { key: "date", label: "Date" },
+    { key: "orderId", label: "Order ID" },
+    { key: "items", label: "Items" },
     { key: "amount", label: "Amount" },
     { key: "status", label: "Status" },
   ];
@@ -130,10 +225,10 @@ const MyWalletPage = () => {
   };
 
   // Custom render for type column to include icon
-  const renderTypeColumn = (row: any) => {
+  const renderTypeColumn = (row: WalletTableRow) => {
     return (
       <div className="flex items-center gap-2">
-        {getTypeIcon(row.typeIcon)}
+        {getTypeIcon(row.typeIcon || "")}
         <span>{row.type}</span>
       </div>
     );
@@ -201,22 +296,98 @@ const MyWalletPage = () => {
       </div>
 
       {/* Transaction History */}
-      <div className="mb-4">
+      <div className="mb-4 space-y-4">
+        <div className="flex gap-6 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("transactions")}
+            className={`pb-3 text-sm sm:text-base font-medium transition-colors ${activeTab === "transactions"
+              ? "text-gray-900 border-b-2 border-[#5C4033]"
+              : "text-gray-500"
+              }`}
+          >
+            Transaction History
+          </button>
+          <button
+            onClick={() => setActiveTab("orders")}
+            className={`pb-3 text-sm sm:text-base font-medium transition-colors ${activeTab === "orders"
+              ? "text-gray-900 border-b-2 border-[#5C4033]"
+              : "text-gray-500"
+              }`}
+          >
+            Orders
+          </button>
+        </div>
         <h2 className="text-xl sm:text-2xl font-normal text-gray-800 font-(family-name:--font-montserrat)">
-          Transaction History
+          {activeTab === "transactions" ? "Transaction History" : "Orders"}
         </h2>
       </div>
 
       {/* Reusable Table */}
+      {activeTab === "transactions" && transactionsError ? (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {transactionsError instanceof Error
+            ? transactionsError.message
+            : "Failed to load transactions"}
+        </div>
+      ) : null}
+      {activeTab === "orders" && ordersError ? (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {ordersError instanceof Error
+            ? ordersError.message
+            : "Failed to load orders"}
+        </div>
+      ) : null}
       <ReusableTable
-        columns={modifiedColumns}
-        data={transactions}
-        itemsPerPage={5}
+        columns={activeTab === "transactions" ? modifiedColumns : orderColumns}
+        data={activeTab === "transactions" ? transactions : orders}
+        itemsPerPage={
+          activeTab === "transactions"
+            ? transactionsResponse?.limit ?? TRANSACTIONS_PER_PAGE
+            : ordersResponse?.limit ?? ORDERS_PER_PAGE
+        }
+        currentPage={
+          activeTab === "transactions" ? transactionsPage : ordersPage
+        }
+        totalPages={
+          activeTab === "transactions"
+            ? Math.max(
+              1,
+              Math.ceil(
+                (transactionsResponse?.count ?? 0) /
+                (transactionsResponse?.limit ?? TRANSACTIONS_PER_PAGE)
+              )
+            )
+            : Math.max(
+              1,
+              Math.ceil(
+                (ordersResponse?.count ?? 0) /
+                (ordersResponse?.limit ?? ORDERS_PER_PAGE)
+              )
+            )
+        }
+        totalItems={
+          activeTab === "transactions"
+            ? transactionsResponse?.count
+            : ordersResponse?.count
+        }
+        onPageChange={
+          activeTab === "transactions" ? setTransactionsPage : setOrdersPage
+        }
         showCheckbox={false}
         showActions={false}
         customActionColumn={(row) => (
           <div className="flex gap-2">
-            <button className="text-gray-600 hover:text-gray-800 p-2">
+            <button
+              onClick={() => {
+                if (activeTab === "transactions" && row.rawTransaction) {
+                  setSelectedTransaction(row.rawTransaction);
+                }
+                if (activeTab === "orders" && row.rawOrder) {
+                  setSelectedOrder(row.rawOrder);
+                }
+              }}
+              className="text-gray-600 hover:text-gray-800 p-2"
+            >
               <Eye size={18} />
             </button>
             <button className="text-gray-600 hover:text-gray-800 p-2">
@@ -225,6 +396,207 @@ const MyWalletPage = () => {
           </div>
         )}
       />
+      {activeTab === "transactions" && transactionsLoading ? (
+        <p className="mt-3 text-sm text-gray-500">Loading transactions...</p>
+      ) : null}
+      {activeTab === "orders" && ordersLoading ? (
+        <p className="mt-3 text-sm text-gray-500">Loading orders...</p>
+      ) : null}
+
+      <BaseModal
+        isOpen={Boolean(selectedTransaction)}
+        onClose={() => setSelectedTransaction(null)}
+        title="Transaction details"
+        subtitle={
+          selectedTransaction
+            ? `Transaction ${selectedTransaction.id.replace(/^ordtrx_/, "")}`
+            : undefined
+        }
+        maxWidth="xl"
+      >
+        {selectedTransaction && (
+          <div className="p-6 space-y-6">
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Amount
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {formatMoney(selectedTransaction.amount)}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Reference
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {toTitleCase(selectedTransaction.reference)}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Date
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {formatDate(selectedTransaction.created_at)}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Transaction ID
+                </div>
+                <div className="font-semibold text-gray-900 break-all">
+                  {selectedTransaction.id}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Order ID
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openOrderFromTransaction(selectedTransaction.order_id)
+                  }
+                  className="font-semibold text-[#E9A556] break-all text-left hover:underline"
+                >
+                  {selectedTransaction.order_id}
+                </button>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Reference ID
+                </div>
+                <div className="font-semibold text-gray-900 break-all">
+                  {selectedTransaction.reference_id}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Currency
+                </div>
+                <div className="font-semibold text-gray-900 uppercase">
+                  {selectedTransaction.currency_code}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Version
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {selectedTransaction.version}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Updated
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {formatDate(selectedTransaction.updated_at)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </BaseModal>
+
+      <BaseModal
+        isOpen={Boolean(selectedOrder)}
+        onClose={() => setSelectedOrder(null)}
+        title="Order details"
+        subtitle={
+          selectedOrder
+            ? `Order ${selectedOrder.id.replace(/^order_/, "")}`
+            : undefined
+        }
+        maxWidth="2xl"
+      >
+        {selectedOrder && (
+          <div className="p-6 space-y-6">
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Status
+                </div>
+                <div className="font-semibold text-gray-900 capitalize">
+                  {selectedOrder.status}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Total
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {formatMoney(selectedOrder.total)}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-200 p-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                  Date
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {formatDate(selectedOrder.created_at)}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                Order ID
+              </div>
+              <div className="font-semibold text-gray-900 break-all">
+                {selectedOrder.id}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-gray-900">Items</h3>
+              {selectedOrder.items?.length ? (
+                <div className="space-y-3">
+                  {selectedOrder.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="border rounded-lg p-3 flex gap-3 items-start"
+                    >
+                      {item.thumbnail ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.thumbnail}
+                          alt={item.title || "Order item"}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded bg-gray-100 shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900">
+                          {item.title || "Item"}
+                        </div>
+                        {item.subtitle ? (
+                          <div className="text-sm text-gray-600">
+                            {item.subtitle}
+                          </div>
+                        ) : null}
+                        <div className="text-sm text-gray-700">
+                          Qty: {item.quantity ?? 0}
+                        </div>
+                      </div>
+                      <div className="text-sm font-semibold text-gray-900">
+                        {formatMoney(item.total)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500">No items found.</div>
+              )}
+            </div>
+          </div>
+        )}
+      </BaseModal>
     </div>
   );
 };
