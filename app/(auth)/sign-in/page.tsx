@@ -5,7 +5,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import styles from "@/styles/login.module.css";
@@ -27,6 +27,7 @@ function SignInContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setAuth } = useAuthStore();
   const { loginWithGoogle, loginWithFacebook } = useOAuth();
 
@@ -61,6 +62,7 @@ function SignInContent() {
         }
 
         setAuth(userData, loginResponse.access_token);
+        const redirectTarget = searchParams.get("redirect") || "/hub";
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("showToast", {
@@ -72,7 +74,7 @@ function SignInContent() {
           );
         }
 
-        router.push("/");
+        router.push(redirectTarget);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("❌ Login error:", error);

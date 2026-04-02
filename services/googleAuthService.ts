@@ -87,16 +87,16 @@ export const googleAuthService = {
 
   /**
    * Get redirect URL after successful OAuth
-   * Returns the URL user was on before OAuth, or dashboard as default
+   * Returns the URL user was on before OAuth, or hub as default
    */
   getRedirectUrl: (): string => {
-    if (typeof window === "undefined") return "/";
+    if (typeof window === "undefined") return "/hub";
 
     const savedUrl = sessionStorage.getItem("pre_oauth_url");
     sessionStorage.removeItem("pre_oauth_url");
     sessionStorage.removeItem("oauth_provider");
 
-    return savedUrl || "/";
+    return savedUrl || "/hub";
   },
 
   /**

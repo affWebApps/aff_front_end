@@ -154,7 +154,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           />
           <NavItem
             icon={<Undo2 size={20} />}
-            label="Leave Console"
+            label="Leave Dashboard"
             active={pathname === "/"}
             href="/"
             onClick={onClose}

@@ -14,9 +14,9 @@ export function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, token } = useAuthStore();
 
   useEffect(() => {
-    // If user is already authenticated, redirect to dashboard
+    // If user is already authenticated, redirect away from auth pages
     if (isAuthenticated && token) {
-      const redirect = searchParams.get("redirect") || "/";
+      const redirect = searchParams.get("redirect") || "/hub";
       console.log("✅ User already authenticated, redirecting to:", redirect);
       router.push(redirect);
     }
