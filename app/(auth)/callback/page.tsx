@@ -108,7 +108,7 @@ export default function OAuthCallbackPage() {
         console.log("✅ OAuth authentication complete");
 
         const redirectUrl =
-          sessionStorage.getItem("pre_oauth_url") || "/";
+          sessionStorage.getItem("pre_oauth_url") || "/hub";
 
         sessionStorage.removeItem("oauth_provider");
         sessionStorage.removeItem("pre_oauth_url");

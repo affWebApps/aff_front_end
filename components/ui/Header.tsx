@@ -92,8 +92,47 @@ export const Header: React.FC = () => {
     { label: "Marketplace", href: "/marketplace" },
     { label: "Blog", href: "/blog" },
     { label: "Contact", href: "/contact" },
-    { label: "AI Studio", href: "/studio" },
+    {
+      label: "Studio",
+      href: process.env.NEXT_PUBLIC_STUDIO_URL,
+      target: "_blank",
+      external: true,
+    },
   ];
+
+  const renderNavItem = (
+    item: (typeof navItems)[number],
+    key: React.Key,
+    onClick?: () => void
+  ) => {
+    if (!item.href) return null;
+
+    const className = `text-[15px] font-medium transition-colors duration-200 ${!item.external && pathname === item.href
+      ? "text-[#FAB75B]"
+      : "text-white/90 hover:text-white"
+      }`;
+
+    if (item.external) {
+      return (
+        <a
+          key={key}
+          href={item.href}
+          target={item.target ?? "_blank"}
+          rel="noopener noreferrer"
+          className={className}
+          onClick={onClick}
+        >
+          {item.label}
+        </a>
+      );
+    }
+
+    return (
+      <Link key={key} href={item.href} className={className} onClick={onClick}>
+        {item.label}
+      </Link>
+    );
+  };
 
   const formatPrice = (price: number) => {
     return price.toLocaleString();
@@ -180,18 +219,7 @@ export const Header: React.FC = () => {
 
               {/* Navigation */}
               <nav className="hidden lg:flex items-center space-x-8">
-                {navItems.map((item, index) => (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    className={`text-[15px] font-medium transition-colors duration-200 ${pathname === item.href
-                      ? "text-[#FAB75B]"
-                      : "text-white/90 hover:text-white"
-                      }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {navItems.map((item, index) => renderNavItem(item, index))}
               </nav>
             </div>
 
@@ -206,7 +234,7 @@ export const Header: React.FC = () => {
                       size="medium"
                       className="bg-[#FAB75B] hover:bg-[#e9a548] text-white font-medium px-6"
                     >
-                      Go to console
+                      Go to Dashboard
                     </Button>
                   </Link>
 
@@ -353,7 +381,7 @@ export const Header: React.FC = () => {
                           onClick={() => setShowProfileMenu(false)}
                         >
                           <LayoutDashboard className="h-4 w-4" />
-                          Go to Console
+                          Go to Dashboard
                         </Link>
 
                         <button
@@ -406,19 +434,9 @@ export const Header: React.FC = () => {
           {isMenuOpen && (
             <div className="lg:hidden pb-4 border-t border-white/10">
               <nav className="flex flex-col space-y-4 pt-4">
-                {navItems.map((item, index) => (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    className={`text-[15px] font-medium transition-colors duration-200 ${pathname === item.href
-                      ? "text-[#FAB75B]"
-                      : "text-white/90 hover:text-white"
-                      }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {navItems.map((item, index) =>
+                  renderNavItem(item, index, () => setIsMenuOpen(false))
+                )}
                 <div className="flex flex-col gap-3 pt-4 border-t border-white/10">
                   {isAuthenticated && user ? (
                     <>
@@ -452,7 +470,7 @@ export const Header: React.FC = () => {
                           className="w-full justify-center bg-[#FAB75B] hover:bg-[#e9a548]"
                         >
                           <LayoutDashboard className="h-4 w-4 mr-2" />
-                          Go to Console
+                          Go to Dashboard
                         </Button>
                       </Link>
                       <button
