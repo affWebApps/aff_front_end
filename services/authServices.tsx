@@ -243,15 +243,19 @@ export const authService = {
   },
 
   /**
-   * Verify email with token
+   * Verify email with token — returns access_token (and optionally user) from the backend
    */
-  verifyEmail: async (token: string): Promise<void> => {
+  verifyEmail: async (token: string): Promise<{ access_token: string; user?: User }> => {
     try {
       console.log("🔄 Verifying email...");
 
-      await apiClient.post("/auth/verify-email", { token });
+      const response = await apiClient.post<{ access_token: string; user?: User }>(
+        "/auth/verify-email",
+        { token }
+      );
 
       console.log("✅ Email verified successfully");
+      return response.data;
     } catch (error: any) {
       console.error("❌ Email verification failed:", error);
       throw error;
