@@ -2,42 +2,26 @@
 import { motion } from "framer-motion";
 import HomeLayout from "../(home)/layout";
 import Image from "next/image";
+import { useTeamMembers } from "@/hooks/useTeamMembers";
 
-interface TeamMember {
-  name: string;
-  role: string;
-  image: string;
-}
+const FALLBACK_MEMBERS = [
+  { id: "1", name: "HOSELITA IKOLI", role: "President and CEO", photo_url: "/images/about-4.jpg", display_order: 1, is_active: true },
+  { id: "2", name: "SAMUEL IKOLI", role: "CTO and Managing Director", photo_url: "/images/about-3.jpg", display_order: 2, is_active: true },
+  { id: "3", name: "ANGEL IKOLI", role: "Managing Director", photo_url: "/images/about-2.jpg", display_order: 3, is_active: true },
+  { id: "4", name: "MIETEI IKOLI", role: "Managing Director", photo_url: "/images/about-1.jpg", display_order: 4, is_active: true },
+];
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function AboutPage() {
-  const teamMembers: TeamMember[] = [
-    {
-      name: "HOSELITA IKOLI",
-      role: "President and CEO",
-      image: "/images/about-4.jpg",
-    },
-    {
-      name: "SAMUEL IKOLI",
-      role: "CTO and Managing Director",
-      image: "/images/about-3.jpg",
-    },
-    {
-      name: "ANGEL IKOLI",
-      role: "Managing Director",
-      image: "/images/about-2.jpg",
-    },
-    {
-      name: "MIETEI IKOLI",
-      role: "Managing Director",
-      image: "/images/about-1.jpg",
-    },
-  ];
-
-  // Simplified animation variants
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
+  const { data: apiMembers, isError } = useTeamMembers(true);
+  const raw = (isError || !apiMembers || apiMembers.length === 0)
+    ? FALLBACK_MEMBERS
+    : apiMembers;
+  const members = [...raw].sort((a, b) => a.display_order - b.display_order);
 
   return (
     <HomeLayout>
@@ -45,7 +29,6 @@ export default function AboutPage() {
         {/* About Us Section */}
         <section className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 max-w-6xl mx-auto">
-            {/* Logo */}
             <div className="w-full lg:w-1/3 flex justify-center">
               <Image
                 src="/images/about-us.png"
@@ -56,7 +39,6 @@ export default function AboutPage() {
               />
             </div>
 
-            {/* About Content */}
             <motion.div
               className="w-full lg:w-2/3 text-center lg:text-left"
               initial="hidden"
@@ -120,11 +102,11 @@ export default function AboutPage() {
               Meet Our <span className="text-[#FAB75B]">Team</span>
             </motion.h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {teamMembers.map((member, index) => (
+            <div className="flex flex-wrap justify-center gap-8">
+              {members.map((member, index) => (
                 <motion.div
-                  key={index}
-                  className="flex flex-col items-center"
+                  key={member.id}
+                  className="flex flex-col items-center w-56"
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true }}
@@ -133,13 +115,19 @@ export default function AboutPage() {
                   whileHover={{ scale: 1.05 }}
                 >
                   <div className="w-full aspect-square rounded-lg overflow-hidden shadow-lg mb-4 bg-linear-to-br from-gray-700 to-gray-900">
-                    <Image
-                      src={member.image}
-                      alt={member.name}
-                      width={300}
-                      height={300}
-                      className="w-full h-full object-cover"
-                    />
+                    {member.photo_url ? (
+                      <Image
+                        src={member.photo_url}
+                        alt={member.name}
+                        width={300}
+                        height={300}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-300">
+                        {member.name.charAt(0)}
+                      </div>
+                    )}
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 text-center">
                     {member.name}

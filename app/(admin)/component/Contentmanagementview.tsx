@@ -1,14 +1,33 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Edit2, Trash2, FileText, Users, ArrowLeft, Save } from "lucide-react";
 import BlogsView from "./Blogsview";
 import UsersView from "./Userview";
+import { blogService } from "@/services/blogService";
+import { teamMemberService } from "@/services/teamMemberService";
 
 type ViewState = null | "blogs" | "users" | string;
 
 const ContentManagementSystem = () => {
   const [currentView, setCurrentView] = useState<ViewState>(null);
   const [editData, setEditData] = useState<Record<string, string>>({});
+
+  const { data: blogs } = useQuery({
+    queryKey: ["admin-blogs"],
+    queryFn: blogService.getAllBlogs,
+    staleTime: 60_000,
+  });
+
+  const { data: teamMembers } = useQuery({
+    queryKey: ["team-members", false],
+    queryFn: () => teamMemberService.getAll(),
+    staleTime: 60_000,
+  });
+
+  const blogPreview = blogs
+    ? `${blogs.length} total · ${blogs.filter((b) => b.status === "published").length} published · ${blogs.filter((b) => b.status === "scheduled").length} scheduled · ${blogs.filter((b) => b.status === "draft").length} drafts`
+    : "Loading…";
 
   const contentData: Record<string, { title: string; content: string }> = {
     "about-us": {
@@ -67,14 +86,14 @@ const ContentManagementSystem = () => {
       title: "Team Members",
       icon: Users,
       time: "2 hours ago",
-      preview: "5 Team members added",
+      preview: teamMembers ? `${teamMembers.length} team members` : "Loading…",
     },
     {
       id: "blog-posts",
       title: "Blog Posts",
       icon: FileText,
       time: "1 week ago",
-      preview: "6 Blogs online",
+      preview: blogPreview,
     },
   ];
 
