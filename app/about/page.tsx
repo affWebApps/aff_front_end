@@ -3,6 +3,13 @@ import { motion } from "framer-motion";
 import HomeLayout from "../(home)/layout";
 import Image from "next/image";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
+import { useSiteContent } from "@/hooks/useSiteContent";
+
+const FALLBACK_ABOUT_US =
+  "African Fashion Fusion is a revolutionary digital platform connecting skilled African tailors with fashion enthusiasts who create their designs worldwide. We blend traditional African craftsmanship with contemporary design through our innovative online marketplace and custom design tools.";
+
+const FALLBACK_OUR_STORY =
+  "African Fashion Fusion emerged from a passion to merge the vibrant heritage of African fashion with global trends. Originating from The heart of nigeria, we partner with skilled artisans across Africa to create contemporary garments that honor traditional craftsmanship. Our brand aims to share the rich stories embedded in each piece, celebrating cultural diversity and empowering local communities. We believe fashion is a powerful bridge between cultures, and through our designs, we invite you to experience the authentic beauty and timeless elegance of African style.";
 
 const FALLBACK_MEMBERS = [
   { id: "1", name: "HOSELITA IKOLI", role: "President and CEO", photo_url: "/images/about-4.jpg", display_order: 1, is_active: true },
@@ -17,6 +24,12 @@ const fadeIn = {
 };
 
 export default function AboutPage() {
+  const { data: aboutUsData, isError: aboutUsError } = useSiteContent("about_us");
+  const { data: ourStoryData, isError: ourStoryError } = useSiteContent("our_story");
+
+  const aboutUsText = (aboutUsError || !aboutUsData?.body) ? FALLBACK_ABOUT_US : aboutUsData.body;
+  const ourStoryText = (ourStoryError || !ourStoryData?.body) ? FALLBACK_OUR_STORY : ourStoryData.body;
+
   const { data: apiMembers, isError } = useTeamMembers(true);
   const raw = (isError || !apiMembers || apiMembers.length === 0)
     ? FALLBACK_MEMBERS
@@ -50,13 +63,7 @@ export default function AboutPage() {
               <h2 className="homeH1 mb-6 text-[#5C4033] lg:text-start">
                 About <span className="text-[#FAB75B]">Us</span>
               </h2>
-              <p className="text-gray-700 text-lg leading-relaxed">
-                African Fashion Fusion is a revolutionary digital platform
-                connecting skilled African tailors with fashion enthusiasts who
-                create their designs worldwide. We blend traditional African
-                craftsmanship with contemporary design through our innovative
-                online marketplace and custom design tools.
-              </p>
+              <p className="text-gray-700 text-lg leading-relaxed">{aboutUsText}</p>
             </motion.div>
           </div>
         </section>
@@ -74,17 +81,7 @@ export default function AboutPage() {
             <h2 className="homeH1 mb-8 text-[#5C4033]">
               Our <span className="text-[#FAB75B]">Story</span>
             </h2>
-            <p className="text-gray-700 text-lg leading-relaxed">
-              African Fashion Fusion emerged from a passion to merge the vibrant
-              heritage of African fashion with global trends. Originating from
-              The heart of nigeria, we partner with skilled artisans across
-              Africa to create contemporary garments that honor traditional
-              craftsmanship. Our brand aims to share the rich stories embedded
-              in each piece, celebrating cultural diversity and empowering local
-              communities. We believe fashion is a powerful bridge between
-              cultures, and through our designs, we invite you to experience the
-              authentic beauty and timeless elegance of African style.
-            </p>
+            <p className="text-gray-700 text-lg leading-relaxed">{ourStoryText}</p>
           </motion.div>
         </section>
 

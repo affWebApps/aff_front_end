@@ -6,6 +6,8 @@ import BlogsView from "./Blogsview";
 import UsersView from "./Userview";
 import { blogService } from "@/services/blogService";
 import { teamMemberService } from "@/services/teamMemberService";
+import { siteContentService } from "@/services/siteContentService";
+import { useUpdateSiteContent } from "@/hooks/useSiteContent";
 
 type ViewState = null | "blogs" | "users" | string;
 
@@ -29,25 +31,30 @@ const ContentManagementSystem = () => {
     ? `${blogs.length} total · ${blogs.filter((b) => b.status === "published").length} published · ${blogs.filter((b) => b.status === "scheduled").length} scheduled · ${blogs.filter((b) => b.status === "draft").length} drafts`
     : "Loading…";
 
+  const { data: aboutUsApi } = useQuery({ queryKey: ["site-content", "about_us"], queryFn: () => siteContentService.getByKey("about_us"), staleTime: 60_000, retry: false });
+  const { data: ourStoryApi } = useQuery({ queryKey: ["site-content", "our_story"], queryFn: () => siteContentService.getByKey("our_story"), staleTime: 60_000, retry: false });
+  const { data: ourMissionApi } = useQuery({ queryKey: ["site-content", "our_mission"], queryFn: () => siteContentService.getByKey("our_mission"), staleTime: 60_000, retry: false });
+  const { data: ourVisionApi } = useQuery({ queryKey: ["site-content", "our_vision"], queryFn: () => siteContentService.getByKey("our_vision"), staleTime: 60_000, retry: false });
+
   const contentData: Record<string, { title: string; content: string }> = {
     "about-us": {
       title: "About Us",
-      content:
+      content: aboutUsApi?.body ||
         "African Fashion Fusion is a revolutionary digital platform connecting skilled African tailors with fashion enthusiasts who create their designs worldwide. We blend traditional African craftsmanship with contemporary design through our innovative online marketplace and custom design tools.",
     },
     "our-story": {
       title: "Our Story",
-      content:
+      content: ourStoryApi?.body ||
         "African Fashion Fusion emerged from a passion to merge the vibrant heritage of African fashion with global trends. Originating from The heart of nigeria, we partner with skilled artisans across Africa to create contemporary garments that honor traditional craftsmanship. Our brand aims to share the rich stories embedded in each piece, celebrating cultural diversity and empowering local communities. We believe fashion is a powerful bridge between cultures, and through our designs, we invite you to experience the authentic beauty and timeless elegance of African style.",
     },
     "our-mission": {
       title: "Our Mission",
-      content:
+      content: ourMissionApi?.body ||
         "We partner with skilled artisans across Africa to create contemporary garments that honor traditional craftsmanship. Our brand aims to share the rich stories embedded in each piece, celebrating cultural diversity and empowering local communities. We believe fashion is a powerful bridge between cultures, and through our designs, we invite you to experience the authentic beauty and timeless elegance of African style.",
     },
     "our-vision": {
       title: "Our Vision",
-      content:
+      content: ourVisionApi?.body ||
         "We believe fashion is a powerful bridge between cultures, and through our designs, we invite you to experience the authentic beauty and timeless elegance of African style. Our vision is to become the leading platform for African fashion globally.",
     },
   };
@@ -110,11 +117,24 @@ const ContentManagementSystem = () => {
     setEditData({ [id]: contentData[id].content });
   };
 
-  const handleBack = () => setCurrentView(null);
+  const updateSiteContent = useUpdateSiteContent();
+  const [saveError, setSaveError] = useState("");
+
+  const handleBack = () => { setCurrentView(null); setSaveError(""); };
   const handleContentChange = (id: string, value: string) =>
     setEditData((prev) => ({ ...prev, [id]: value }));
-  const handleSave = () => alert("Changes saved successfully!");
-  const handleSaveDraft = () => alert("Draft saved successfully!");
+
+  const handleSave = async () => {
+    if (!currentView || currentView === "blogs" || currentView === "users") return;
+    setSaveError("");
+    const apiKey = currentView.replace(/-/g, "_");
+    try {
+      await updateSiteContent.mutateAsync({ key: apiKey, data: { body: editData[currentView] } });
+      handleBack();
+    } catch {
+      setSaveError("Failed to publish changes. Please try again.");
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -293,23 +313,19 @@ const ContentManagementSystem = () => {
                     </p>
                   </div>
 
+                  {saveError && (
+                    <p className="text-sm text-red-600 mb-3 text-right">{saveError}</p>
+                  )}
                   <div className="flex gap-3 justify-end">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={handleSaveDraft}
-                      className="px-6 py-2.5 border border-orange-400 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium"
-                    >
-                      Save to Draft
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
                       onClick={handleSave}
-                      className="px-6 py-2.5 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors font-medium flex items-center gap-2"
+                      disabled={updateSiteContent.isPending}
+                      className="px-6 py-2.5 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors font-medium flex items-center gap-2 disabled:opacity-60"
                     >
                       <Save size={18} />
-                      Publish Changes
+                      {updateSiteContent.isPending ? "Publishing…" : "Publish Changes"}
                     </motion.button>
                   </div>
                 </div>
