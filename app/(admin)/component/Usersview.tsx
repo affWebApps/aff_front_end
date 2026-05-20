@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { User } from "../types/adminTypes";
@@ -11,8 +12,8 @@ interface UsersViewProps {
 }
 
 const UsersView = ({ onBack }: UsersViewProps) => {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [userModalOpen, setUserModalOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Sample users data
   const users: User[] = [
@@ -86,9 +87,19 @@ const UsersView = ({ onBack }: UsersViewProps) => {
     },
   ];
 
+  const rawUserId = searchParams.get("userId");
+  const selectedUser = rawUserId ? (users.find((u) => String(u.id) === rawUserId) ?? null) : null;
+
   const handleViewUser = (user: User) => {
-    setSelectedUser(user);
-    setUserModalOpen(true);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("userId", String(user.id));
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleCloseModal = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("userId");
+    router.push(`?${params.toString()}`);
   };
 
   return (
@@ -195,8 +206,8 @@ const UsersView = ({ onBack }: UsersViewProps) => {
 
       {/* User Details Modal */}
       <BaseModal
-        isOpen={userModalOpen}
-        onClose={() => setUserModalOpen(false)}
+        isOpen={selectedUser !== null}
+        onClose={handleCloseModal}
         title="User Details"
         maxWidth="2xl"
       >

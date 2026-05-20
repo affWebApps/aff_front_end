@@ -1,7 +1,9 @@
-import { useState } from "react";
+"use client";
+import { Suspense, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Edit2, Trash2, FileText, Users, ArrowLeft, Save } from "lucide-react";
+import { Edit2, FileText, Users, ArrowLeft, Save } from "lucide-react";
 import BlogsView from "./Blogsview";
 import UsersView from "./Userview";
 import { blogService } from "@/services/blogService";
@@ -9,11 +11,24 @@ import { teamMemberService } from "@/services/teamMemberService";
 import { siteContentService } from "@/services/siteContentService";
 import { useUpdateSiteContent } from "@/hooks/useSiteContent";
 
-type ViewState = null | "blogs" | "users" | string;
+const EDITOR_SECTIONS = ["about-us", "our-story", "our-mission", "our-vision"] as const;
+type EditorSection = (typeof EDITOR_SECTIONS)[number];
 
-const ContentManagementSystem = () => {
-  const [currentView, setCurrentView] = useState<ViewState>(null);
+type SectionParam = "blogs" | "team" | EditorSection;
+
+function ContentManagementSystemInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const rawSection = searchParams.get("section");
+  const validSections: string[] = ["blogs", "team", ...EDITOR_SECTIONS];
+  const currentSection: SectionParam | null =
+    rawSection && validSections.includes(rawSection)
+      ? (rawSection as SectionParam)
+      : null;
+
   const [editData, setEditData] = useState<Record<string, string>>({});
+  const [saveError, setSaveError] = useState("");
 
   const { data: blogs } = useQuery({
     queryKey: ["admin-blogs"],
@@ -104,32 +119,46 @@ const ContentManagementSystem = () => {
     },
   ];
 
+  const navigateToSection = (section: SectionParam, extraData?: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("section", section);
+    if (extraData) {
+      setEditData(extraData);
+    }
+    router.push(`?${params.toString()}`);
+  };
+
   const handleCardClick = (id: string) => {
     if (id === "blog-posts") {
-      setCurrentView("blogs");
+      navigateToSection("blogs");
       return;
     }
     if (id === "team-members") {
-      setCurrentView("users");
+      navigateToSection("team");
       return;
     }
-    setCurrentView(id);
-    setEditData({ [id]: contentData[id].content });
+    // it's an editor section
+    navigateToSection(id as EditorSection, { [id]: contentData[id].content });
+  };
+
+  const handleBack = () => {
+    setSaveError("");
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("section");
+    router.push(`?${params.toString()}`);
   };
 
   const updateSiteContent = useUpdateSiteContent();
-  const [saveError, setSaveError] = useState("");
 
-  const handleBack = () => { setCurrentView(null); setSaveError(""); };
   const handleContentChange = (id: string, value: string) =>
     setEditData((prev) => ({ ...prev, [id]: value }));
 
   const handleSave = async () => {
-    if (!currentView || currentView === "blogs" || currentView === "users") return;
+    if (!currentSection || currentSection === "blogs" || currentSection === "team") return;
     setSaveError("");
-    const apiKey = currentView.replace(/-/g, "_");
+    const apiKey = currentSection.replace(/-/g, "_");
     try {
-      await updateSiteContent.mutateAsync({ key: apiKey, data: { body: editData[currentView] } });
+      await updateSiteContent.mutateAsync({ key: apiKey, data: { body: editData[currentSection] } });
       handleBack();
     } catch {
       setSaveError("Failed to publish changes. Please try again.");
@@ -150,11 +179,16 @@ const ContentManagementSystem = () => {
     hover: { y: -5, transition: { duration: 0.2 } },
   };
 
+  const isEditorSection =
+    currentSection !== null &&
+    currentSection !== "blogs" &&
+    currentSection !== "team";
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto">
         <AnimatePresence mode="wait">
-          {currentView === "blogs" && (
+          {currentSection === "blogs" && (
             <motion.div
               key="blogs"
               initial={{ opacity: 0, x: 20 }}
@@ -166,7 +200,7 @@ const ContentManagementSystem = () => {
             </motion.div>
           )}
 
-          {currentView === "users" && (
+          {currentSection === "team" && (
             <motion.div
               key="users"
               initial={{ opacity: 0, x: 20 }}
@@ -178,7 +212,7 @@ const ContentManagementSystem = () => {
             </motion.div>
           )}
 
-          {currentView === null && (
+          {currentSection === null && (
             <motion.div
               key="list"
               variants={containerVariants}
@@ -244,22 +278,6 @@ const ContentManagementSystem = () => {
                       >
                         <Edit2 size={18} className="text-gray-600" />
                       </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (
-                            confirm(
-                              `Are you sure you want to delete ${card.title}?`
-                            )
-                          )
-                            alert(`${card.title} deleted`);
-                        }}
-                        className="p-2 hover:bg-gray-100 rounded transition-colors"
-                      >
-                        <Trash2 size={18} className="text-gray-600" />
-                      </motion.button>
                     </div>
                   </motion.div>
                 ))}
@@ -267,74 +285,78 @@ const ContentManagementSystem = () => {
             </motion.div>
           )}
 
-          {currentView !== null &&
-            currentView !== "blogs" &&
-            currentView !== "users" && (
-              <motion.div
-                key="edit"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white rounded-lg shadow-sm"
-              >
-                <div className="p-6 border-b border-gray-200">
-                  <button
-                    onClick={handleBack}
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
-                  >
-                    <ArrowLeft size={20} />
-                    <span>Back</span>
-                  </button>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {contentData[currentView]?.title}
-                  </h2>
-                  <p className="text-gray-600 text-sm mt-1">
-                    Edit the {contentData[currentView]?.title.toLowerCase()}{" "}
-                    section of your website
+          {isEditorSection && (
+            <motion.div
+              key="edit"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-lg shadow-sm"
+            >
+              <div className="p-6 border-b border-gray-200">
+                <button
+                  onClick={handleBack}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+                >
+                  <ArrowLeft size={20} />
+                  <span>Back</span>
+                </button>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {contentData[currentSection]?.title}
+                </h2>
+                <p className="text-gray-600 text-sm mt-1">
+                  Edit the {contentData[currentSection]?.title.toLowerCase()}{" "}
+                  section of your website
+                </p>
+              </div>
+
+              <div className="p-6">
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Edit Content
+                  </label>
+                  <textarea
+                    value={editData[currentSection] ?? contentData[currentSection]?.content ?? ""}
+                    onChange={(e) =>
+                      handleContentChange(currentSection, e.target.value)
+                    }
+                    className="w-full min-h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-y"
+                    placeholder="Enter your content here..."
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    {(editData[currentSection] ?? contentData[currentSection]?.content ?? "").length} characters
                   </p>
                 </div>
 
-                <div className="p-6">
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Edit Content
-                    </label>
-                    <textarea
-                      value={editData[currentView] || ""}
-                      onChange={(e) =>
-                        handleContentChange(currentView, e.target.value)
-                      }
-                      className="w-full min-h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-y"
-                      placeholder="Enter your content here..."
-                    />
-                    <p className="text-sm text-gray-500 mt-2">
-                      {editData[currentView]?.length || 0} characters
-                    </p>
-                  </div>
-
-                  {saveError && (
-                    <p className="text-sm text-red-600 mb-3 text-right">{saveError}</p>
-                  )}
-                  <div className="flex gap-3 justify-end">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleSave}
-                      disabled={updateSiteContent.isPending}
-                      className="px-6 py-2.5 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors font-medium flex items-center gap-2 disabled:opacity-60"
-                    >
-                      <Save size={18} />
-                      {updateSiteContent.isPending ? "Publishing…" : "Publish Changes"}
-                    </motion.button>
-                  </div>
+                {saveError && (
+                  <p className="text-sm text-red-600 mb-3 text-right">{saveError}</p>
+                )}
+                <div className="flex gap-3 justify-end">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSave}
+                    disabled={updateSiteContent.isPending}
+                    className="px-6 py-2.5 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors font-medium flex items-center gap-2 disabled:opacity-60"
+                  >
+                    <Save size={18} />
+                    {updateSiteContent.isPending ? "Publishing…" : "Publish Changes"}
+                  </motion.button>
                 </div>
-              </motion.div>
-            )}
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </div>
   );
-};
+}
+
+const ContentManagementSystem = () => (
+  <Suspense fallback={<div className="min-h-screen bg-white" />}>
+    <ContentManagementSystemInner />
+  </Suspense>
+);
 
 export default ContentManagementSystem;

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import TabNavigation from "../../component/Tabnavigation";
 import ContentManagementView from "../../component/Contentmanagementview";
@@ -9,12 +10,47 @@ import NewsletterView from "../../component/Newsletterview";
 import UsersView from "../../component/Usersview";
 import ProjectsView from "../../component/Projectsview";
 
+const VALID_VIEWS = ["dashboard", "users", "projects"] as const;
+type ViewParam = (typeof VALID_VIEWS)[number];
 
-function AdminDashboard() {
-  const [currentView, setCurrentView] = useState<
-    "dashboard" | "users" | "projects"
-  >("dashboard");
-  const [activeTab, setActiveTab] = useState("content");
+const VALID_TABS = ["content", "analytics", "config", "newsletter"] as const;
+type TabParam = (typeof VALID_TABS)[number];
+
+function AdminDashboardInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const rawView = searchParams.get("view") ?? "dashboard";
+  const currentView: ViewParam = (VALID_VIEWS as readonly string[]).includes(rawView)
+    ? (rawView as ViewParam)
+    : "dashboard";
+
+  const rawTab = searchParams.get("tab") ?? "content";
+  const activeTab: TabParam = (VALID_TABS as readonly string[]).includes(rawTab)
+    ? (rawTab as TabParam)
+    : "content";
+
+  const navigateTo = (view: "users" | "projects") => {
+    const params = new URLSearchParams();
+    params.set("view", view);
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleBackToDashboard = () => {
+    const params = new URLSearchParams();
+    // omit view=dashboard (it is the default)
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleTabChange = (tab: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "content") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tab);
+    }
+    router.replace(`?${params.toString()}`);
+  };
 
   const pageVariants = {
     initial: { opacity: 0, x: -20 },
@@ -42,11 +78,11 @@ function AdminDashboard() {
               exit="exit"
               transition={{ duration: 0.3 }}
             >
-              <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+              <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
               {activeTab === "content" && <ContentManagementView />}
               {activeTab === "analytics" && (
-                <AnalyticsView onNavigate={setCurrentView} />
+                <AnalyticsView onNavigate={navigateTo} />
               )}
               {activeTab === "config" && <AppConfigurationView />}
               {activeTab === "newsletter" && <NewsletterView />}
@@ -54,11 +90,11 @@ function AdminDashboard() {
           )}
 
           {currentView === "users" && (
-            <UsersView onBack={() => setCurrentView("dashboard")} />
+            <UsersView onBack={handleBackToDashboard} />
           )}
 
           {currentView === "projects" && (
-            <ProjectsView onBack={() => setCurrentView("dashboard")} />
+            <ProjectsView onBack={handleBackToDashboard} />
           )}
         </AnimatePresence>
       </main>
@@ -66,4 +102,10 @@ function AdminDashboard() {
   );
 }
 
-export default AdminDashboard;
+export default function AdminDashboard() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-gray-400">Loading…</div>}>
+      <AdminDashboardInner />
+    </Suspense>
+  );
+}
