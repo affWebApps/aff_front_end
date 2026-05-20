@@ -1,11 +1,9 @@
 "use client";
-import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { User } from "../types/adminTypes";
-import { BaseModal } from "../../../components/modals/BaseModal";
-import UserDetailsModal from "./modals/Userdetailsmodal";
 import { useUsers } from "@/hooks/useUsers";
 
 interface UsersViewProps {
@@ -13,14 +11,11 @@ interface UsersViewProps {
 }
 
 const UsersView = ({ onBack }: UsersViewProps) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
   const { data: apiUsers, isLoading, isError } = useUsers();
 
   const users: User[] = (apiUsers ?? []).map((u) => ({
     id: u.id,
-    name: [u.first_name, u.last_name].filter(Boolean).join(" ") || u.display_name,
+    name: [u.first_name, u.last_name].filter(Boolean).join(" ") || u.display_name || "—",
     email: u.email,
     role: u.role,
     dateJoined: new Date(u.created_at).toLocaleDateString("en-US", {
@@ -29,26 +24,12 @@ const UsersView = ({ onBack }: UsersViewProps) => {
       year: "numeric",
     }),
     status: u.is_verified ? "Active" : "Inactive",
+    isBlocked: !u.is_active,
     image: u.avatar_url ?? "👤",
-    contact: u.phone_number,
+    contact: u.phone_number ?? undefined,
     location: [u.city, u.country].filter(Boolean).join(", ") || undefined,
     bio: u.bio ?? undefined,
   }));
-
-  const rawUserId = searchParams.get("userId");
-  const selectedUser = rawUserId ? (users.find((u) => u.id === rawUserId) ?? null) : null;
-
-  const handleViewUser = (user: User) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("userId", user.id);
-    router.push(`?${params.toString()}`);
-  };
-
-  const handleCloseModal = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("userId");
-    router.push(`?${params.toString()}`);
-  };
 
   return (
     <motion.div
@@ -144,12 +125,14 @@ const UsersView = ({ onBack }: UsersViewProps) => {
                   </span>
                 </td>
                 <td className="p-4">
-                  <button
-                    onClick={() => handleViewUser(user)}
+                  <Link
+                    href={`/admin/users/${user.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-amber-600 hover:text-amber-700 text-sm font-medium"
                   >
                     View profile
-                  </button>
+                  </Link>
                 </td>
               </tr>
             ))}
@@ -165,15 +148,6 @@ const UsersView = ({ onBack }: UsersViewProps) => {
         )}
       </div>
 
-      {/* User Details Modal */}
-      <BaseModal
-        isOpen={selectedUser !== null}
-        onClose={handleCloseModal}
-        title="User Details"
-        maxWidth="2xl"
-      >
-        {selectedUser && <UserDetailsModal user={selectedUser} />}
-      </BaseModal>
     </motion.div>
   );
 };

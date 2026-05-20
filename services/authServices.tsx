@@ -11,32 +11,55 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  bio: string | null;
-  display_name: string;
+  display_name: string | null;
   avatar_url: string | null;
-  is_verified: boolean;
-  is_active: boolean;
+  bio: string | null;
+  phone_number: string | null;
+  country: string | null;
+  city: string | null;
   role: string;
-  created_at: string;
-  updated_at: string;
+  is_active: boolean;
+  is_verified: boolean;
+  last_logout_at: string | null;
+  auth_provider: string;
   reviews_received: Review[];
-  portfolios: any[];
+  portfolios: Portfolio[];
   projects: any[];
   bids: any[];
-  customer_id?: string;
-  vendor_id?: string;
-  city?: string;
-  country?: string;
-  phone_number?: string;
+  created_at: string;
+  updated_at: string;
+  customer_id: string | null;
+  vendor_id: string | null;
 }
 
 export interface Review {
   id: string;
+  reviewer_id: string;
+  target_user_id: string;
+  target_project_id: string | null;
+  target_product_id: string | null;
+  target_type: string;
   rating: number;
   comment: string;
-  reviewer_id: string;
-  reviewer_name: string;
+}
+
+export interface PortfolioImage {
+  id: string;
+  portfolio_id: string;
+  image_url: string;
+  is_primary: boolean;
   created_at: string;
+  updated_at: string;
+}
+
+export interface Portfolio {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  Image: PortfolioImage[];
 }
 
 export interface LoginCredentials {

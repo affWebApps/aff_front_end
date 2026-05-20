@@ -5,6 +5,7 @@ export interface User {
   role: string;
   dateJoined: string;
   status: "Active" | "Inactive";
+  isBlocked: boolean;
   image: string;
   contact?: string;
   location?: string;

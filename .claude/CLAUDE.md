@@ -243,6 +243,19 @@ Images are uploaded to **Supabase Storage**, not the main backend. Use `imageUpl
 
 ---
 
+## User Status Fields
+
+The `User` object returned by the API has two separate boolean flags with distinct meanings:
+
+| Field | Meaning |
+|---|---|
+| `is_verified` | Whether the user has verified their email. Determines **Active** (true) vs **Inactive** (false) status shown in the UI. |
+| `is_active` | Whether the admin has blocked the user. `false` means the account is **Blocked**. |
+
+Always use `is_verified` to drive Active/Inactive display. Show a separate "Blocked" badge when `is_active === false`.
+
+---
+
 ## Key API Endpoints (Backend)
 
 | Method | Path | Purpose |

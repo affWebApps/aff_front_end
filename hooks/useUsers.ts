@@ -10,3 +10,12 @@ export const useUsers = () =>
     staleTime: 60_000,
     retry: false,
   });
+
+export const useUser = (id: string) =>
+  useQuery({
+    queryKey: ["admin-user", id],
+    queryFn: () => userService.getById(id),
+    staleTime: 60_000,
+    retry: false,
+    enabled: !!id,
+  });
