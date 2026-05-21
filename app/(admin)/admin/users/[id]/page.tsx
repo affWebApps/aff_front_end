@@ -2,8 +2,8 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Star, MapPin, Phone, Mail, Calendar, Shield, Briefcase, BookOpen, Gavel } from "lucide-react";
-import { useUser } from "@/hooks/useUsers";
+import { ArrowLeft, Star, MapPin, Phone, Mail, Calendar, Shield, Briefcase, BookOpen, Gavel, Power } from "lucide-react";
+import { useUser, useUpdateUserStatus } from "@/hooks/useUsers";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -27,6 +27,7 @@ export default function UserProfilePage({
   const { id } = use(params);
   const router = useRouter();
   const { data: user, isLoading, isError } = useUser(id);
+  const updateStatus = useUpdateUserStatus(id);
 
   if (isLoading) {
     return (
@@ -80,7 +81,20 @@ export default function UserProfilePage({
       </button>
 
       {/* Hero card */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8">
+      <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm p-8">
+        <button
+          onClick={() => updateStatus.mutate(!user.is_active)}
+          disabled={updateStatus.isPending}
+          className={`absolute top-6 right-6 flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            user.is_active
+              ? "bg-red-500 text-white hover:bg-red-600"
+              : "bg-green-600 text-white hover:bg-green-700"
+          }`}
+        >
+          <Power size={13} />
+          {updateStatus.isPending ? "Saving…" : user.is_active ? "Deactivate" : "Activate"}
+        </button>
+
         <div className="flex flex-col sm:flex-row items-start gap-8">
           {/* Avatar */}
           <div className="w-28 h-28 rounded-full bg-gray-100 shrink-0 overflow-hidden flex items-center justify-center text-5xl">
@@ -106,28 +120,27 @@ export default function UserProfilePage({
               </span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                  user.is_verified
+                  user.is_active
                     ? "bg-green-100 text-green-700"
                     : "bg-gray-100 text-gray-500"
                 }`}
               >
-                {user.is_verified ? "Active" : "Inactive"}
+                {user.is_active ? "Active" : "Inactive"}
               </span>
-              {!user.is_active && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">
-                  Blocked
-                </span>
-              )}
-              {user.is_verified && (
-                <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600">
-                  <Shield size={11} />
-                  Verified
-                </span>
-              )}
+              <span
+                className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                  user.is_verified
+                    ? "bg-blue-50 text-blue-600"
+                    : "bg-orange-50 text-orange-500"
+                }`}
+              >
+                <Shield size={11} />
+                {user.is_verified ? "Verified" : "Unverified"}
+              </span>
             </div>
 
             {user.auth_provider && (
-              <p className="text-xs text-gray-400 mb-4">
+              <p className="text-xs text-gray-400 mt-2 mb-4">
                 Signed in via {user.auth_provider.charAt(0) + user.auth_provider.slice(1).toLowerCase()}
               </p>
             )}
