@@ -26,6 +26,8 @@ const validationSchema = Yup.object({
 function SignInContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [showResend, setShowResend] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setAuth } = useAuthStore();
@@ -40,6 +42,8 @@ function SignInContent() {
     onSubmit: async (values) => {
       try {
         setLoginError("");
+        setShowResend(false);
+        setResendSuccess(false);
         console.log("🔐 Sign in form submitted:", values.email);
 
         const loginResponse = await authService.login({
@@ -79,18 +83,29 @@ function SignInContent() {
       } catch (error: any) {
         console.error("❌ Login error:", error);
 
-        if (error.response?.status === 401) {
-          setLoginError("Email or password incorrect");
-        } else if (error.response?.status === 403) {
-          setLoginError("Please verify your email before logging in");
-        } else if (error.response?.data?.message) {
-          setLoginError(error.response.data.message);
+        const serverMessage: string = error.response?.data?.message ?? "";
+        if (serverMessage === "Account has been deactivated") {
+          setLoginError("Your account has been deactivated. Please contact support.");
+        } else if (serverMessage === "Email not verified") {
+          setLoginError("Please verify your email before logging in.");
+          setShowResend(true);
+        } else if (error.response?.status === 401) {
+          setLoginError("Email or password incorrect.");
+        } else if (serverMessage) {
+          setLoginError(serverMessage);
         } else {
           setLoginError("An error occurred. Please try again.");
         }
       }
     },
   });
+
+  const handleResend = () => {
+    setLoginError("");
+    setShowResend(false);
+    setResendSuccess(true);
+    authService.resendVerification(formik.values.email).catch(() => {});
+  };
 
   const hasError = (field: keyof typeof formik.values) =>
     !!(formik.errors[field] && formik.touched[field]);
@@ -111,13 +126,30 @@ function SignInContent() {
           </p>
         </div>
 
+        {resendSuccess && (
+          <div className={styles.formElement} style={{ animationDelay: "0.15s" }}>
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium">
+              Verification email sent
+            </div>
+          </div>
+        )}
+
         {loginError && (
           <div
             className={styles.formElement}
             style={{ animationDelay: "0.15s" }}
           >
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm font-medium">
-              {loginError}
+              <p>{loginError}</p>
+              {showResend && (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  className="mt-2 text-sm font-semibold underline underline-offset-2 hover:text-red-800 transition-colors"
+                >
+                  Resend verification email
+                </button>
+              )}
             </div>
           </div>
         )}

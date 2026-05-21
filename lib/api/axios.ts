@@ -51,6 +51,19 @@ apiClient.interceptors.response.use(
       data: response.data,
       url: response.config.url,
     });
+
+    // Force logout if the backend reports the account has been deactivated by admin
+    if (
+      response.config.url?.includes("/users/me") &&
+      response.data?.is_active === false
+    ) {
+      const { clearAuth } = useAuthStore.getState();
+      clearAuth();
+      if (typeof window !== "undefined") {
+        window.location.replace("/sign-in?reason=deactivated");
+      }
+    }
+
     return response;
   },
   (error) => {

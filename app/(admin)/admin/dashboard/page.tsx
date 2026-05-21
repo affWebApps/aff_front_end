@@ -30,9 +30,10 @@ function AdminDashboardInner() {
     ? (rawTab as TabParam)
     : "content";
 
-  const navigateTo = (view: "users" | "projects") => {
+  const navigateTo = (view: "users" | "projects", role?: string) => {
     const params = new URLSearchParams();
     params.set("view", view);
+    if (role) params.set("role", role);
     router.push(`?${params.toString()}`);
   };
 

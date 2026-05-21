@@ -1,6 +1,54 @@
 import apiClient from "@/lib/api/axios";
 import { User } from "@/services/authServices";
 
+export interface ProjectFile {
+  id: string;
+  project_id: string;
+  file_url: string;
+  file_type: string | null;
+  uploaded_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectRequirement {
+  id: string;
+  project_id: string;
+  content: Record<string, string> | null;
+  designer_approved: boolean;
+  tailor_approved: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectReview {
+  id: string;
+  reviewer_id: string;
+  target_user_id: string | null;
+  target_project_id: string | null;
+  target_product_id: string | null;
+  target_type: string;
+  rating: number;
+  comment: string;
+}
+
+export interface ProjectDetail {
+  id: string;
+  designer_id: string;
+  design_id: string;
+  title: string;
+  description?: string;
+  budget?: string | number | null;
+  status?: string;
+  estimated_time?: string | null;
+  deadline?: string | null;
+  created_at: string;
+  updated_at: string;
+  files: ProjectFile[];
+  requirements: ProjectRequirement[];
+  reviews: ProjectReview[];
+}
+
 export interface UserStats {
   total: number;
   designers: number;
@@ -64,6 +112,11 @@ export const userService = {
 
   updateStatus: async (id: string, isActive: boolean): Promise<User> => {
     const response = await apiClient.patch<User>(`/users/${id}/status`, { isActive });
+    return response.data;
+  },
+
+  getProjectById: async (projectId: string): Promise<ProjectDetail> => {
+    const response = await apiClient.get<ProjectDetail>(`/projects/${projectId}`);
     return response.data;
   },
 };

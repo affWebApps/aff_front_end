@@ -3,6 +3,15 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
 
+export const useProject = (projectId: string | null) =>
+  useQuery({
+    queryKey: ["admin-project", projectId],
+    queryFn: () => userService.getProjectById(projectId!),
+    staleTime: 60_000,
+    retry: false,
+    enabled: !!projectId,
+  });
+
 const PAGE_LIMIT = 20;
 
 export interface UserFilters {

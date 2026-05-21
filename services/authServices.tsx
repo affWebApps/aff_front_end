@@ -285,6 +285,10 @@ export const authService = {
     }
   },
 
+  resendVerification: async (email: string): Promise<void> => {
+    await apiClient.post("/auth/resend-verification", { email });
+  },
+
   /**
    * Update user profile
    */

@@ -7,7 +7,7 @@ import {
   Briefcase, BookOpen, Gavel, Power, X, ChevronLeft, ChevronRight,
   Clock, DollarSign,
 } from "lucide-react";
-import { useUser, useUpdateUserStatus } from "@/hooks/useUsers";
+import { useUser, useUpdateUserStatus, useProject } from "@/hooks/useUsers";
 import { Portfolio } from "@/services/authServices";
 
 function StarRating({ rating }: { rating: number }) {
@@ -24,6 +24,27 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
+function ReviewerInfo({ reviewerId }: { reviewerId: string }) {
+  const { data: reviewer } = useUser(reviewerId);
+  const name =
+    [reviewer?.first_name, reviewer?.last_name].filter(Boolean).join(" ") ||
+    reviewer?.display_name ||
+    "Unknown";
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 rounded-full bg-gray-200 overflow-hidden shrink-0 flex items-center justify-center text-xs text-gray-400">
+        {reviewer?.avatar_url ? (
+          <Image src={reviewer.avatar_url} alt={name} width={28} height={28} className="object-cover w-full h-full" />
+        ) : (
+          name.charAt(0).toUpperCase()
+        )}
+      </div>
+      <span className="text-xs font-medium text-gray-700">{reviewer ? name : "Loading…"}</span>
+    </div>
+  );
+}
+
 function StatusBadge({ status }: { status?: string }) {
   if (!status) return null;
   const s = status.toLowerCase();
@@ -36,6 +57,188 @@ function StatusBadge({ status }: { status?: string }) {
     <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${styles}`}>
       {status}
     </span>
+  );
+}
+
+function ProjectModal({
+  projectId,
+  onClose,
+}: {
+  projectId: string;
+  onClose: () => void;
+}) {
+  const { data: project, isLoading, isError } = useProject(projectId);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const files = project?.files ?? [];
+  const fmt = (date: string) =>
+    new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-900">
+            {isLoading ? "Loading…" : (project?.title ?? "Project Details")}
+          </h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            <X size={18} className="text-gray-500" />
+          </button>
+        </div>
+
+        {isLoading && (
+          <div className="p-10 text-center text-sm text-gray-400">Loading project details…</div>
+        )}
+        {isError && (
+          <div className="p-10 text-center text-sm text-red-500">Failed to load project details.</div>
+        )}
+
+        {project && !isLoading && (
+          <>
+            {/* File gallery */}
+            {files.length > 0 && (
+              <div className="p-5">
+                <div className="relative h-64 bg-gray-100 rounded-xl overflow-hidden mb-3">
+                  <Image
+                    src={files[activeIdx].file_url}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
+                  {files.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setActiveIdx((i) => (i - 1 + files.length) % files.length)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-1.5 transition-colors"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button
+                        onClick={() => setActiveIdx((i) => (i + 1) % files.length)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full p-1.5 transition-colors"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                      <span className="absolute bottom-3 right-3 bg-black/40 text-white text-xs px-2 py-1 rounded-full">
+                        {activeIdx + 1} / {files.length}
+                      </span>
+                    </>
+                  )}
+                </div>
+                {files.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {files.map((f, i) => (
+                      <button
+                        key={f.id}
+                        onClick={() => setActiveIdx(i)}
+                        className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${
+                          i === activeIdx ? "border-[#5C4033]" : "border-transparent"
+                        }`}
+                      >
+                        <Image src={f.file_url} alt="" fill className="object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="px-5 pb-5 space-y-5">
+              {/* Meta badges */}
+              <div className="flex flex-wrap items-center gap-2">
+                {project.status && <StatusBadge status={project.status} />}
+                {project.budget != null && (
+                  <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                    <DollarSign size={11} /> {project.budget}
+                  </span>
+                )}
+                {project.estimated_time && (
+                  <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                    <Clock size={11} /> {project.estimated_time}
+                  </span>
+                )}
+                {project.deadline && (
+                  <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                    <Calendar size={11} /> Due {fmt(project.deadline)}
+                  </span>
+                )}
+                <span className="text-xs text-gray-400">
+                  Created {fmt(project.created_at)}
+                </span>
+              </div>
+
+              {/* Description */}
+              {project.description && (
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
+                  <p className="text-sm text-gray-700 leading-relaxed">{project.description}</p>
+                </div>
+              )}
+
+              {/* Requirements */}
+              {project.requirements?.length > 0 && (() => {
+                const filled = project.requirements.filter(
+                  (r) => r.content && Object.values(r.content).some((v) => v?.trim())
+                );
+                if (!filled.length) return null;
+                return (
+                  <div>
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Requirements</p>
+                    <div className="space-y-3">
+                      {filled.map((req) => (
+                        <div key={req.id} className="border border-gray-100 rounded-lg p-4 space-y-2">
+                          {Object.entries(req.content!).map(([key, val]) =>
+                            val?.trim() ? (
+                              <div key={key}>
+                                <p className="text-xs text-gray-400 capitalize">{key.replace(/_/g, " ")}</p>
+                                <p className="text-sm text-gray-700">{val}</p>
+                              </div>
+                            ) : null
+                          )}
+                          <div className="flex gap-3 pt-1 text-xs">
+                            <span className={req.designer_approved ? "text-green-600" : "text-gray-400"}>
+                              {req.designer_approved ? "✓" : "✗"} Designer approved
+                            </span>
+                            <span className={req.tailor_approved ? "text-green-600" : "text-gray-400"}>
+                              {req.tailor_approved ? "✓" : "✗"} Tailor approved
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Reviews */}
+              {project.reviews?.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">Reviews</p>
+                  <div className="space-y-3">
+                    {project.reviews.map((review) => (
+                      <div key={review.id} className="border border-gray-100 rounded-lg p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <ReviewerInfo reviewerId={review.reviewer_id} />
+                          <span className="text-xs text-gray-400 capitalize">{review.target_type}</span>
+                        </div>
+                        <StarRating rating={review.rating} />
+                        {review.comment && (
+                          <p className="text-sm text-gray-700">{review.comment}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -139,6 +342,7 @@ export default function UserProfilePage({
   const { data: user, isLoading, isError } = useUser(id);
   const updateStatus = useUpdateUserStatus(id);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -181,6 +385,9 @@ export default function UserProfilePage({
     <>
       {selectedPortfolio && (
         <PortfolioModal portfolio={selectedPortfolio} onClose={() => setSelectedPortfolio(null)} />
+      )}
+      {selectedProjectId && (
+        <ProjectModal projectId={selectedProjectId} onClose={() => setSelectedProjectId(null)} />
       )}
 
       <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
@@ -301,7 +508,11 @@ export default function UserProfilePage({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {user.projects.map((project: any) => (
-                <div key={project.id} className="border border-gray-100 rounded-lg p-4 space-y-2">
+                <button
+                  key={project.id}
+                  onClick={() => setSelectedProjectId(project.id)}
+                  className="border border-gray-100 rounded-lg p-4 space-y-2 text-left hover:shadow-md hover:border-gray-200 transition-all"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-gray-900 text-sm leading-snug">{project.title ?? "Untitled project"}</h3>
                     <StatusBadge status={project.status} />
@@ -326,7 +537,8 @@ export default function UserProfilePage({
                       </span>
                     )}
                   </div>
-                </div>
+                  <p className="text-xs text-[#5C4033] font-medium pt-1">View details →</p>
+                </button>
               ))}
             </div>
           )}
@@ -380,7 +592,12 @@ export default function UserProfilePage({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {user.bids.map((bid: any) => (
-                <div key={bid.id} className="border border-gray-100 rounded-lg p-4 space-y-2">
+                <button
+                  key={bid.id}
+                  onClick={() => bid.project_id && setSelectedProjectId(bid.project_id)}
+                  disabled={!bid.project_id}
+                  className="border border-gray-100 rounded-lg p-4 space-y-2 text-left hover:shadow-md hover:border-gray-200 transition-all disabled:cursor-default disabled:hover:shadow-none disabled:hover:border-gray-100"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold text-gray-900 text-sm">
                       {bid.project?.title ?? bid.project_id ?? "Bid"}
@@ -407,7 +624,10 @@ export default function UserProfilePage({
                       </span>
                     )}
                   </div>
-                </div>
+                  {bid.project_id && (
+                    <p className="text-xs text-[#5C4033] font-medium pt-1">View project →</p>
+                  )}
+                </button>
               ))}
             </div>
           )}
@@ -421,12 +641,15 @@ export default function UserProfilePage({
             </h2>
             <div className="space-y-4">
               {user.reviews_received.map((review) => (
-                <div key={review.id} className="border border-gray-100 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <StarRating rating={review.rating} />
+                <div key={review.id} className="border border-gray-100 rounded-lg p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <ReviewerInfo reviewerId={review.reviewer_id} />
                     <span className="text-xs text-gray-400 capitalize">{review.target_type}</span>
                   </div>
-                  <p className="text-sm text-gray-700">{review.comment}</p>
+                  <StarRating rating={review.rating} />
+                  {review.comment && (
+                    <p className="text-sm text-gray-700">{review.comment}</p>
+                  )}
                 </div>
               ))}
             </div>

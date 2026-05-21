@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
 
 interface AnalyticsViewProps {
-  onNavigate: (view: "users" | "projects") => void;
+  onNavigate: (view: "users" | "projects", role?: string) => void;
 }
 
 const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
@@ -38,24 +38,28 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
       value: userStats ? userStats.total.toLocaleString() : "—",
       change: "+156 this week",
       positive: true,
+      role: undefined,
     },
     {
       title: "Total Designers",
       value: userStats ? userStats.designers.toLocaleString() : "—",
       change: "+12% from last month",
       positive: true,
+      role: "designer",
     },
     {
       title: "Total Tailors",
       value: userStats ? userStats.tailors.toLocaleString() : "—",
       change: "+3 new this week",
       positive: true,
+      role: "tailor",
     },
     {
       title: "Total Revenue",
       value: "₦580,000",
       change: "+23% from last month",
       positive: true,
+      role: undefined,
     },
   ];
 
@@ -111,7 +115,7 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
           return (
             <Component
               key={index}
-              onClick={isClickable ? () => onNavigate("users") : undefined}
+              onClick={isClickable ? () => onNavigate("users", card.role) : undefined}
               className={`bg-white rounded-lg border border-gray-200  p-6 text-center ${
                 isClickable
                   ? "cursor-pointer hover:shadow-lg transition-all"

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
@@ -14,10 +15,15 @@ interface UsersViewProps {
 }
 
 const UsersView = ({ onBack }: UsersViewProps) => {
+  const searchParams = useSearchParams();
+  const initialRole = searchParams.get("role") ?? undefined;
+
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<SortField | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const [filters, setFilters] = useState<UserFilters>({});
+  const [filters, setFilters] = useState<UserFilters>(
+    initialRole ? { role: initialRole } : {}
+  );
 
   const { data, isLoading, isError, isFetching } = useUsers(currentPage, sortBy, sortOrder, filters);
 
