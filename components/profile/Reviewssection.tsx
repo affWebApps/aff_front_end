@@ -45,13 +45,11 @@ export default function ReviewsSection({
             >
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center font-semibold text-amber-700">
-                  {review.reviewer_name?.charAt(0) || "U"}
+                  U
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-gray-900">
-                      {review.reviewer_name || "Anonymous"}
-                    </h3>
+                    <h3 className="font-semibold text-gray-900">Anonymous</h3>
                     <div className="flex text-[#FAB75B]">
                       {[...Array(review.rating || 0)].map((_, i) => (
                         <Star key={i} className="w-4 h-4 fill-current" />
@@ -60,11 +58,6 @@ export default function ReviewsSection({
                   </div>
                   <p className="text-sm text-gray-700 mb-1">
                     {review.comment || "No comment"}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {review.created_at
-                      ? new Date(review.created_at).toLocaleDateString()
-                      : "Date unknown"}
                   </p>
                 </div>
               </div>
