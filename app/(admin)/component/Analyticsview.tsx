@@ -15,6 +15,13 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
     retry: false,
   });
 
+  const { data: projectStats } = useQuery({
+    queryKey: ["project-stats"],
+    queryFn: userService.getProjectStats,
+    staleTime: 60_000,
+    retry: false,
+  });
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -66,13 +73,13 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
   const additionalStats = [
     {
       title: "Active Projects",
-      value: "482",
+      value: projectStats ? projectStats.inProgress.toLocaleString() : "—",
       change: "-1.8% vs last month",
       positive: false,
     },
     {
       title: "Completed Projects",
-      value: "1,847",
+      value: projectStats ? projectStats.completed.toLocaleString() : "—",
       change: "-12% vs Q1",
       positive: false,
     },

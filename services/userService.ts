@@ -55,6 +55,12 @@ export interface UserStats {
   tailors: number;
 }
 
+export interface ProjectStats {
+  total: number;
+  inProgress: number;
+  completed: number;
+}
+
 export interface UserListItem {
   id: string;
   email: string;
@@ -79,6 +85,11 @@ export interface UsersListResponse {
 export const userService = {
   getStats: async (): Promise<UserStats> => {
     const response = await apiClient.get<UserStats>("/users/stats");
+    return response.data;
+  },
+
+  getProjectStats: async (): Promise<ProjectStats> => {
+    const response = await apiClient.get<ProjectStats>("/projects/stats");
     return response.data;
   },
 
