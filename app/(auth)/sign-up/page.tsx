@@ -66,8 +66,8 @@ function RegisterFormContent() {
       register({
         email: values.email,
         password: values.password,
-        first_name: values.firstName,
-        last_name: values.lastName,
+        firstName: values.firstName,
+        lastName: values.lastName,
       });
     },
   });
@@ -156,7 +156,7 @@ function RegisterFormContent() {
             className={`${styles.formElement} mb-4 p-4 bg-red-50 border border-red-200 rounded-lg`}
             style={{ animationDelay: "0.15s" }}
           >
-            <p className="text-red-700 text-sm">{getErrorMessage()}</p>
+            <p className="text-red-700 text-sm">There was an error during registration.</p>
           </div>
         )}
 

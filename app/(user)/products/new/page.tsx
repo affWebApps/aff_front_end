@@ -161,6 +161,16 @@ export default function NewProductPage() {
     [variantCombosRaw, removedVariants]
   );
 
+  const variantsByColor = useMemo(() => {
+    const groups = new Map<string, VariantCombo[]>();
+    variantCombos.forEach((combo) => {
+      const colorVal = combo.pairs.find((p) => p.name === "Color")?.value ?? "__no_color__";
+      if (!groups.has(colorVal)) groups.set(colorVal, []);
+      groups.get(colorVal)!.push(combo);
+    });
+    return groups;
+  }, [variantCombos]);
+
   // Persist draft (debounced via timeout)
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -245,6 +255,10 @@ export default function NewProductPage() {
     // Basic validation
     if (!form.name.trim()) {
       alert("Product name is required");
+      return;
+    }
+    if (!selectedColours.length) {
+      alert("Please select at least one colour. Colour is required.");
       return;
     }
     if (!variantCombos.length) {
@@ -430,7 +444,7 @@ export default function NewProductPage() {
               </span>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-800">Colour Options</label>
+                <label className="text-sm font-semibold text-gray-800">Colour Options <span className="text-red-500">*</span></label>
                 <div className="flex flex-wrap gap-2 items-center">
                   {colourOptions.map((c: string) => {
                     const active = selectedColours.includes(c);
@@ -801,57 +815,79 @@ export default function NewProductPage() {
                 Select colour and size options to generate variants.
               </p>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {variantCombos.map((v: VariantCombo) => (
-                  <div
-                    key={v.key}
-                    className="border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-800 space-y-2"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span>{v.label}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRemovedVariants((prev) => [...prev, v.key]);
-                          setVariantOverrides((prev) => {
-                            const next = { ...prev };
-                            delete next[v.key];
-                            return next;
-                          });
-                        }}
-                        className="text-red-500 hover:text-red-700 text-xs"
-                      >
-                        Remove
-                      </button>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-[1fr_120px_120px_48px] bg-gray-50 border-b border-gray-200 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <div>Variant</div>
+                  <div>Price (NGN)</div>
+                  <div>Stock</div>
+                  <div />
+                </div>
+                {Array.from(variantsByColor.entries()).map(([colorKey, combos]) => (
+                  <div key={colorKey}>
+                    <div className="px-4 py-2 bg-amber-50 border-b border-amber-100 text-sm font-semibold text-amber-800">
+                      {colorKey === "__no_color__" ? "All Variants" : colorKey}
                     </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Price"
-                        value={variantOverrides[v.key]?.price ?? ""}
-                        onChange={(e) =>
-                          setVariantOverrides((prev) => ({
-                            ...prev,
-                            [v.key]: { ...prev[v.key], price: e.target.value },
-                          }))
-                        }
-                        className="w-1/2 rounded-md border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-amber-300"
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Stock"
-                        value={variantOverrides[v.key]?.quantity ?? ""}
-                        onChange={(e) =>
-                          setVariantOverrides((prev) => ({
-                            ...prev,
-                            [v.key]: { ...prev[v.key], quantity: e.target.value },
-                          }))
-                        }
-                        className="w-1/2 rounded-md border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-amber-300"
-                      />
-                    </div>
+                    {combos.map((v: VariantCombo) => {
+                      const otherPairs = v.pairs.filter((p) => p.name !== "Color");
+                      const rowLabel = otherPairs.length
+                        ? otherPairs.map((p) => `${p.name}: ${p.value}`).join(" • ")
+                        : "—";
+                      return (
+                        <div
+                          key={v.key}
+                          className="grid grid-cols-[1fr_120px_120px_48px] items-center px-4 py-2 border-b border-gray-100 last:border-0 text-sm"
+                        >
+                          <div className="text-gray-700">{rowLabel}</div>
+                          <div>
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder="Price"
+                              value={variantOverrides[v.key]?.price ?? ""}
+                              onChange={(e) =>
+                                setVariantOverrides((prev) => ({
+                                  ...prev,
+                                  [v.key]: { ...prev[v.key], price: e.target.value },
+                                }))
+                              }
+                              className="w-full rounded-md border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-amber-300"
+                            />
+                          </div>
+                          <div>
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder="Stock"
+                              value={variantOverrides[v.key]?.quantity ?? ""}
+                              onChange={(e) =>
+                                setVariantOverrides((prev) => ({
+                                  ...prev,
+                                  [v.key]: { ...prev[v.key], quantity: e.target.value },
+                                }))
+                              }
+                              className="w-full rounded-md border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-amber-300"
+                            />
+                          </div>
+                          <div className="flex justify-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRemovedVariants((prev) => [...prev, v.key]);
+                                setVariantOverrides((prev) => {
+                                  const next = { ...prev };
+                                  delete next[v.key];
+                                  return next;
+                                });
+                              }}
+                              className="text-red-400 hover:text-red-600"
+                              aria-label={`Remove variant ${v.label}`}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
               </div>

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { googleAuthService } from "@/services/googleAuthService";
 import { facebookAuthService } from "@/services/facebookAuthService";
 import { useAuthStore } from "@/store/authStore";
-import { User } from "@/services/authServices";
+import { authService } from "@/services/authServices";
 
 type OAuthProvider = "google" | "facebook";
 
@@ -69,25 +69,7 @@ export const useOAuth = () => {
 
           console.log(`✅ ${provider} OAuth exchange successful`);
 
-          // Create user object from auth data
-          const user: User = {
-            id: authData.user.id,
-            email: authData.user.email,
-            first_name: authData.user.firstName,
-            last_name: authData.user.lastName,
-            bio: null,
-            display_name: `${authData.user.firstName} ${authData.user.lastName}`,
-            avatar_url: null,
-            is_verified: true,
-            is_active: true,
-            role: "user",
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            reviews_received: [],
-            portfolios: [],
-            projects: [],
-            bids: [],
-          };
+          const user = await authService.getCurrentUser(authData.access_token);
 
           // Save auth state
           setAuth(user, authData.access_token);

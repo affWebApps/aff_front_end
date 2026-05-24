@@ -1,5 +1,6 @@
 // UserDetailsModal.tsx
-import { Calendar, Clock, Star } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
+import Image from "next/image";
 import { User } from "../../types/adminTypes";
 
 interface UserDetailsModalProps {
@@ -10,8 +11,18 @@ const UserDetailsModal = ({ user }: UserDetailsModalProps) => {
   return (
     <div className="space-y-8  overflow-y-auto px-6 py-4">
       <div className="flex items-start gap-6">
-        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-6xl shrink-0">
-          {user.image}
+        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-6xl shrink-0 overflow-hidden">
+          {user.image.startsWith("http") ? (
+            <Image
+              src={user.image}
+              alt={user.name}
+              width={128}
+              height={128}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span>{user.image}</span>
+          )}
         </div>
         <div className="flex-1">
           <div className="grid grid-cols-2 gap-4">

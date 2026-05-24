@@ -1,10 +1,11 @@
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: string;
   dateJoined: string;
   status: "Active" | "Inactive";
+  isBlocked: boolean;
   image: string;
   contact?: string;
   location?: string;

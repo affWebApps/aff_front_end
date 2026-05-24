@@ -1,10 +1,27 @@
+"use client";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { userService } from "@/services/userService";
 
 interface AnalyticsViewProps {
-  onNavigate: (view: "users" | "projects") => void;
+  onNavigate: (view: "users" | "projects", role?: string) => void;
 }
 
 const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
+  const { data: userStats } = useQuery({
+    queryKey: ["user-stats"],
+    queryFn: userService.getStats,
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const { data: projectStats } = useQuery({
+    queryKey: ["project-stats"],
+    queryFn: userService.getProjectStats,
+    staleTime: 60_000,
+    retry: false,
+  });
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -25,40 +42,44 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
   const statsCards = [
     {
       title: "Total Users",
-      value: "2,341",
+      value: userStats ? userStats.total.toLocaleString() : "—",
       change: "+156 this week",
       positive: true,
+      role: undefined,
     },
     {
       title: "Total Designers",
-      value: "2,341",
+      value: userStats ? userStats.designers.toLocaleString() : "—",
       change: "+12% from last month",
       positive: true,
+      role: "designer",
     },
     {
       title: "Total Tailors",
-      value: "156",
+      value: userStats ? userStats.tailors.toLocaleString() : "—",
       change: "+3 new this week",
       positive: true,
+      role: "tailor",
     },
     {
       title: "Total Revenue",
       value: "₦580,000",
       change: "+23% from last month",
       positive: true,
+      role: undefined,
     },
   ];
 
   const additionalStats = [
     {
       title: "Active Projects",
-      value: "482",
+      value: projectStats ? projectStats.inProgress.toLocaleString() : "—",
       change: "-1.8% vs last month",
       positive: false,
     },
     {
       title: "Completed Projects",
-      value: "1,847",
+      value: projectStats ? projectStats.completed.toLocaleString() : "—",
       change: "-12% vs Q1",
       positive: false,
     },
@@ -101,8 +122,8 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
           return (
             <Component
               key={index}
-              onClick={isClickable ? () => onNavigate("users") : undefined}
-              className={`bg-white rounded-lg border border-gray-200  p-6 text-left ${
+              onClick={isClickable ? () => onNavigate("users", card.role) : undefined}
+              className={`bg-white rounded-lg border border-gray-200  p-6 text-center ${
                 isClickable
                   ? "cursor-pointer hover:shadow-lg transition-all"
                   : ""
@@ -112,13 +133,13 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
               <h3 className="text-3xl font-bold text-gray-900 mb-2">
                 {card.value}
               </h3>
-              <p
+              {/* <p
                 className={`text-sm ${
                   card.positive ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {card.change}
-              </p>
+              </p> */}
             </Component>
           );
         })}
@@ -139,7 +160,7 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
             <Component
               key={index}
               onClick={isClickable ? () => onNavigate("projects") : undefined}
-              className={`bg-white rounded-lg border border-gray-200 p-6 text-left ${
+              className={`bg-white rounded-lg border border-gray-200 p-6 text-center ${
                 isClickable
                   ? "cursor-pointer hover:shadow-lg transition-all"
                   : ""
@@ -149,13 +170,13 @@ const AnalyticsView = ({ onNavigate }: AnalyticsViewProps) => {
               <h3 className="text-3xl font-bold text-gray-900 mb-2">
                 {card.value}
               </h3>
-              <p
+              {/* <p
                 className={`text-sm ${
                   card.positive ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {card.change}
-              </p>
+              </p> */}
             </Component>
           );
         })}
