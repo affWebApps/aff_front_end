@@ -1,6 +1,6 @@
 "use client";
 import { Search } from "@mui/icons-material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import HomeLayout from "../(home)/layout";
 import { CustomSelect } from "../../components/CustomSelect";
@@ -8,7 +8,7 @@ import { ProductsGrid } from "../../components/grid/ProductsGrid";
 import { ServicesGrid } from "../../components/grid/ServicesGrid";
 import { Pagination } from "../../components/ui/Pagination";
 import ServiceDetailPage from "./services/[id]/page";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
 
 
@@ -44,15 +44,24 @@ interface Service {
   bids: string | number; // ✅ Changed from string to string | number
 }
 
-export default function MarketplacePage() {
-  const [activeTab, setActiveTab] = useState("products");
+function MarketplaceContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const rawTab = searchParams.get("tab");
+  const activeTab = rawTab === "services" ? "services" : "products";
+
   const [category, setCategory] = useState("");
   const [size, setSize] = useState("");
   const [expertiseLevel, setExpertiseLevel] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showServiceDetail, setShowServiceDetail] = useState(false);
-  const router = useRouter();
+
+  const setActiveTab = (tab: string) => {
+    setCurrentPage(1);
+    router.replace(`/marketplace?tab=${tab}`);
+  };
 
 
   const [totalPages, setTotalPages] = useState<number>(1)
@@ -354,10 +363,7 @@ export default function MarketplacePage() {
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           >
             <button
-              onClick={() => {
-                setActiveTab("products");
-                setCurrentPage(1);
-              }}
+              onClick={() => setActiveTab("products")}
               className={`py-4 rounded-lg font-medium transition-all ${activeTab === "products"
                 ? "bg-white text-gray-800 shadow-md"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -366,10 +372,7 @@ export default function MarketplacePage() {
               Products
             </button>
             <button
-              onClick={() => {
-                setActiveTab("services");
-                setCurrentPage(1);
-              }}
+              onClick={() => setActiveTab("services")}
               className={`py-4 rounded-lg font-medium transition-all ${activeTab === "services"
                 ? "bg-white text-gray-800 shadow-md"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -500,5 +503,13 @@ export default function MarketplacePage() {
         </div>
       </div>
     </HomeLayout>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <Suspense>
+      <MarketplaceContent />
+    </Suspense>
   );
 }
