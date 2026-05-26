@@ -66,7 +66,16 @@ function SignInContent() {
         }
 
         setAuth(userData, loginResponse.access_token);
-        const redirectTarget = searchParams.get("redirect") || "/hub";
+        const raw = searchParams.get("redirect") || "/hub";
+        let redirectTarget = "/hub";
+        try {
+          const parsed = new URL(raw, window.location.origin);
+          if (parsed.origin === window.location.origin) {
+            redirectTarget = parsed.pathname + parsed.search + parsed.hash;
+          }
+        } catch {
+          // malformed URL — fall back to default
+        }
         if (typeof window !== "undefined") {
           window.dispatchEvent(
             new CustomEvent("showToast", {
@@ -154,7 +163,7 @@ function SignInContent() {
           </div>
         )}
 
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
+        <form onSubmit={formik.handleSubmit} method="post" className="space-y-5">
           <div
             className={styles.formElement}
             style={{ animationDelay: "0.2s" }}
@@ -250,6 +259,7 @@ function SignInContent() {
             style={{ animationDelay: "0.4s" }}
           >
             <Button
+              type="submit"
               variant="default"
               size="large"
               className="w-full transition-all duration-300 hover:scale-105"

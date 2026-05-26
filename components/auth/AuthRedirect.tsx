@@ -14,11 +14,18 @@ export function AuthRedirect({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, token } = useAuthStore();
 
   useEffect(() => {
-    // If user is already authenticated, redirect away from auth pages
     if (isAuthenticated && token) {
-      const redirect = searchParams.get("redirect") || "/hub";
-      console.log("✅ User already authenticated, redirecting to:", redirect);
-      router.push(redirect);
+      const raw = searchParams.get("redirect") || "/hub";
+      let destination = "/hub";
+      try {
+        const parsed = new URL(raw, window.location.origin);
+        if (parsed.origin === window.location.origin) {
+          destination = parsed.pathname + parsed.search + parsed.hash;
+        }
+      } catch {
+        // malformed URL — use default
+      }
+      router.push(destination);
     }
   }, [isAuthenticated, token, router, searchParams]);
 

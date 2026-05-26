@@ -17,6 +17,7 @@ interface ButtonProps {
   outlined?: boolean;
   onClick?: () => void;
   className?: string;
+  type?: "button" | "submit" | "reset";
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -29,6 +30,7 @@ export const Button: React.FC<ButtonProps> = ({
   outlined = false,
   onClick,
   className = "",
+  type = "button",
 }) => {
   const baseStyles =
     "font-poppins font-medium transition-all duration-200 rounded-lg flex items-center justify-center gap-2";
@@ -71,6 +73,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      type={type}
       className={buttonClasses}
       disabled={disabled}
       onClick={onClick}
