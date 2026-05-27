@@ -13,6 +13,7 @@ import ReusableTable from "../../../components/table/ReusableTable";
 import { Button } from "../../../components/ui/Button";
 import apiClient from "@/lib/api/axios";
 import { BaseModal } from "@/components/modals/BaseModal";
+import { ComingSoonGate } from "@/components/ui/ComingSoon";
 
 type WalletOrder = {
   id: string;
@@ -243,361 +244,364 @@ const MyWalletPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      {/* Header */}
-      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 sm:mb-8 font-(family-name:--font-montserrat)">
-        My Wallet
-      </h1>
+    <ComingSoonGate enabled={true}>
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-6 sm:mb-8 font-(family-name:--font-montserrat)">
+          My Wallet
+        </h1>
 
-      {/* Top Section - Balance and Account Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4">
-        {/* Available Balance Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <p className="text-sm text-gray-600 mb-3">Available Balance</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-3">
-            ₦350,000.00
+        {/* Top Section - Balance and Account Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4">
+          {/* Available Balance Card */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <p className="text-sm text-gray-600 mb-3">Available Balance</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-3">
+              ₦350,000.00
+            </h2>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-gray-600">Today</span>
+              <span className="text-green-600 font-medium">+ ₦250,000</span>
+              <span className="text-red-600 font-medium">- ₦50,000</span>
+            </div>
+          </div>
+
+          {/* Withdrawal Account Card */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex justify-between items-start mb-4">
+              <p className="text-sm text-gray-600">Withdrawal Account</p>
+              <button
+                onClick={() => router.push("/wallet/create-account")}
+                className="text-[#E9A556] text-sm font-medium hover:underline"
+              >
+                Add withdrawal account
+              </button>
+            </div>
+            <div>
+              <p className="font-semibold text-gray-800 mb-1">
+                United Bank of Africa
+              </p>
+              <p className="text-sm text-gray-600 mb-1">Acc no: ********456</p>
+              <p className="text-sm text-gray-600">Acc name: John Doe</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Buttons Below Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
+          <Button variant="default" onClick={() => router.push("/wallet/deposit")}>
+            Deposit Funds
+          </Button>
+          <Button variant="default" outlined onClick={() => router.push("/wallet/withdraw")}>
+            Withdraw Funds
+          </Button>
+        </div>
+
+        {/* Transaction History */}
+        <div className="mb-4 space-y-4">
+          <div className="flex gap-6 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("transactions")}
+              className={`pb-3 text-sm sm:text-base font-medium transition-colors ${activeTab === "transactions"
+                ? "text-gray-900 border-b-2 border-[#5C4033]"
+                : "text-gray-500"
+                }`}
+            >
+              Transaction History
+            </button>
+            <button
+              onClick={() => setActiveTab("orders")}
+              className={`pb-3 text-sm sm:text-base font-medium transition-colors ${activeTab === "orders"
+                ? "text-gray-900 border-b-2 border-[#5C4033]"
+                : "text-gray-500"
+                }`}
+            >
+              Orders
+            </button>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-normal text-gray-800 font-(family-name:--font-montserrat)">
+            {activeTab === "transactions" ? "Transaction History" : "Orders"}
           </h2>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-gray-600">Today</span>
-            <span className="text-green-600 font-medium">+ ₦250,000</span>
-            <span className="text-red-600 font-medium">- ₦50,000</span>
+        </div>
+
+        {/* Reusable Table */}
+        {activeTab === "transactions" && transactionsError ? (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {transactionsError instanceof Error
+              ? transactionsError.message
+              : "Failed to load transactions"}
           </div>
-        </div>
-
-        {/* Withdrawal Account Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <div className="flex justify-between items-start mb-4">
-            <p className="text-sm text-gray-600">Withdrawal Account</p>
-            <button
-              onClick={() => router.push("/wallet/create-account")}
-              className="text-[#E9A556] text-sm font-medium hover:underline"
-            >
-              Add withdrawal account
-            </button>
+        ) : null}
+        {activeTab === "orders" && ordersError ? (
+          <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {ordersError instanceof Error
+              ? ordersError.message
+              : "Failed to load orders"}
           </div>
-          <div>
-            <p className="font-semibold text-gray-800 mb-1">
-              United Bank of Africa
-            </p>
-            <p className="text-sm text-gray-600 mb-1">Acc no: ********456</p>
-            <p className="text-sm text-gray-600">Acc name: John Doe</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Buttons Below Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8">
-        <Button variant="default" onClick={() => router.push("/wallet/deposit")}>
-          Deposit Funds
-        </Button>
-        <Button variant="default" outlined onClick={() => router.push("/wallet/withdraw")}>
-          Withdraw Funds
-        </Button>
-      </div>
-
-      {/* Transaction History */}
-      <div className="mb-4 space-y-4">
-        <div className="flex gap-6 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab("transactions")}
-            className={`pb-3 text-sm sm:text-base font-medium transition-colors ${activeTab === "transactions"
-              ? "text-gray-900 border-b-2 border-[#5C4033]"
-              : "text-gray-500"
-              }`}
-          >
-            Transaction History
-          </button>
-          <button
-            onClick={() => setActiveTab("orders")}
-            className={`pb-3 text-sm sm:text-base font-medium transition-colors ${activeTab === "orders"
-              ? "text-gray-900 border-b-2 border-[#5C4033]"
-              : "text-gray-500"
-              }`}
-          >
-            Orders
-          </button>
-        </div>
-        <h2 className="text-xl sm:text-2xl font-normal text-gray-800 font-(family-name:--font-montserrat)">
-          {activeTab === "transactions" ? "Transaction History" : "Orders"}
-        </h2>
-      </div>
-
-      {/* Reusable Table */}
-      {activeTab === "transactions" && transactionsError ? (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          {transactionsError instanceof Error
-            ? transactionsError.message
-            : "Failed to load transactions"}
-        </div>
-      ) : null}
-      {activeTab === "orders" && ordersError ? (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          {ordersError instanceof Error
-            ? ordersError.message
-            : "Failed to load orders"}
-        </div>
-      ) : null}
-      <ReusableTable
-        columns={activeTab === "transactions" ? modifiedColumns : orderColumns}
-        data={activeTab === "transactions" ? transactions : orders}
-        itemsPerPage={
-          activeTab === "transactions"
-            ? transactionsResponse?.limit ?? TRANSACTIONS_PER_PAGE
-            : ordersResponse?.limit ?? ORDERS_PER_PAGE
-        }
-        currentPage={
-          activeTab === "transactions" ? transactionsPage : ordersPage
-        }
-        totalPages={
-          activeTab === "transactions"
-            ? Math.max(
-              1,
-              Math.ceil(
-                (transactionsResponse?.count ?? 0) /
-                (transactionsResponse?.limit ?? TRANSACTIONS_PER_PAGE)
+        ) : null}
+        <ReusableTable
+          columns={activeTab === "transactions" ? modifiedColumns : orderColumns}
+          data={activeTab === "transactions" ? transactions : orders}
+          itemsPerPage={
+            activeTab === "transactions"
+              ? transactionsResponse?.limit ?? TRANSACTIONS_PER_PAGE
+              : ordersResponse?.limit ?? ORDERS_PER_PAGE
+          }
+          currentPage={
+            activeTab === "transactions" ? transactionsPage : ordersPage
+          }
+          totalPages={
+            activeTab === "transactions"
+              ? Math.max(
+                1,
+                Math.ceil(
+                  (transactionsResponse?.count ?? 0) /
+                  (transactionsResponse?.limit ?? TRANSACTIONS_PER_PAGE)
+                )
               )
-            )
-            : Math.max(
-              1,
-              Math.ceil(
-                (ordersResponse?.count ?? 0) /
-                (ordersResponse?.limit ?? ORDERS_PER_PAGE)
+              : Math.max(
+                1,
+                Math.ceil(
+                  (ordersResponse?.count ?? 0) /
+                  (ordersResponse?.limit ?? ORDERS_PER_PAGE)
+                )
               )
-            )
-        }
-        totalItems={
-          activeTab === "transactions"
-            ? transactionsResponse?.count
-            : ordersResponse?.count
-        }
-        onPageChange={
-          activeTab === "transactions" ? setTransactionsPage : setOrdersPage
-        }
-        showCheckbox={false}
-        showActions={false}
-        customActionColumn={(row) => (
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                if (activeTab === "transactions" && row.rawTransaction) {
-                  setSelectedTransaction(row.rawTransaction);
-                }
-                if (activeTab === "orders" && row.rawOrder) {
-                  setSelectedOrder(row.rawOrder);
-                }
-              }}
-              className="text-gray-600 hover:text-gray-800 p-2"
-            >
-              <Eye size={18} />
-            </button>
-            <button className="text-gray-600 hover:text-gray-800 p-2">
-              <Download size={18} />
-            </button>
-          </div>
-        )}
-      />
-      {activeTab === "transactions" && transactionsLoading ? (
-        <p className="mt-3 text-sm text-gray-500">Loading transactions...</p>
-      ) : null}
-      {activeTab === "orders" && ordersLoading ? (
-        <p className="mt-3 text-sm text-gray-500">Loading orders...</p>
-      ) : null}
+          }
+          totalItems={
+            activeTab === "transactions"
+              ? transactionsResponse?.count
+              : ordersResponse?.count
+          }
+          onPageChange={
+            activeTab === "transactions" ? setTransactionsPage : setOrdersPage
+          }
+          showCheckbox={false}
+          showActions={false}
+          customActionColumn={(row) => (
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (activeTab === "transactions" && row.rawTransaction) {
+                    setSelectedTransaction(row.rawTransaction);
+                  }
+                  if (activeTab === "orders" && row.rawOrder) {
+                    setSelectedOrder(row.rawOrder);
+                  }
+                }}
+                className="text-gray-600 hover:text-gray-800 p-2"
+              >
+                <Eye size={18} />
+              </button>
+              <button className="text-gray-600 hover:text-gray-800 p-2">
+                <Download size={18} />
+              </button>
+            </div>
+          )}
+        />
+        {activeTab === "transactions" && transactionsLoading ? (
+          <p className="mt-3 text-sm text-gray-500">Loading transactions...</p>
+        ) : null}
+        {activeTab === "orders" && ordersLoading ? (
+          <p className="mt-3 text-sm text-gray-500">Loading orders...</p>
+        ) : null}
 
-      <BaseModal
-        isOpen={Boolean(selectedTransaction)}
-        onClose={() => setSelectedTransaction(null)}
-        title="Transaction details"
-        subtitle={
-          selectedTransaction
-            ? `Transaction ${selectedTransaction.id.replace(/^ordtrx_/, "")}`
-            : undefined
-        }
-        maxWidth="xl"
-      >
-        {selectedTransaction && (
-          <div className="p-6 space-y-6">
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Amount
+        <BaseModal
+          isOpen={Boolean(selectedTransaction)}
+          onClose={() => setSelectedTransaction(null)}
+          title="Transaction details"
+          subtitle={
+            selectedTransaction
+              ? `Transaction ${selectedTransaction.id.replace(/^ordtrx_/, "")}`
+              : undefined
+          }
+          maxWidth="xl"
+        >
+          {selectedTransaction && (
+            <div className="p-6 space-y-6">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Amount
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    {formatMoney(selectedTransaction.amount)}
+                  </div>
                 </div>
-                <div className="font-semibold text-gray-900">
-                  {formatMoney(selectedTransaction.amount)}
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Reference
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    {toTitleCase(selectedTransaction.reference)}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Date
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    {formatDate(selectedTransaction.created_at)}
+                  </div>
                 </div>
               </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Reference
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Transaction ID
+                  </div>
+                  <div className="font-semibold text-gray-900 break-all">
+                    {selectedTransaction.id}
+                  </div>
                 </div>
-                <div className="font-semibold text-gray-900">
-                  {toTitleCase(selectedTransaction.reference)}
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Order ID
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openOrderFromTransaction(selectedTransaction.order_id)
+                    }
+                    className="font-semibold text-[#E9A556] break-all text-left hover:underline"
+                  >
+                    {selectedTransaction.order_id}
+                  </button>
                 </div>
-              </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Date
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Reference ID
+                  </div>
+                  <div className="font-semibold text-gray-900 break-all">
+                    {selectedTransaction.reference_id}
+                  </div>
                 </div>
-                <div className="font-semibold text-gray-900">
-                  {formatDate(selectedTransaction.created_at)}
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Currency
+                  </div>
+                  <div className="font-semibold text-gray-900 uppercase">
+                    {selectedTransaction.currency_code}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Version
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    {selectedTransaction.version}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Updated
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    {formatDate(selectedTransaction.updated_at)}
+                  </div>
                 </div>
               </div>
             </div>
+          )}
+        </BaseModal>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Transaction ID
+        <BaseModal
+          isOpen={Boolean(selectedOrder)}
+          onClose={() => setSelectedOrder(null)}
+          title="Order details"
+          subtitle={
+            selectedOrder
+              ? `Order ${selectedOrder.id.replace(/^order_/, "")}`
+              : undefined
+          }
+          maxWidth="2xl"
+        >
+          {selectedOrder && (
+            <div className="p-6 space-y-6">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Status
+                  </div>
+                  <div className="font-semibold text-gray-900 capitalize">
+                    {selectedOrder.status}
+                  </div>
                 </div>
-                <div className="font-semibold text-gray-900 break-all">
-                  {selectedTransaction.id}
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Total
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    {formatMoney(selectedOrder.total)}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-gray-200 p-4">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Date
+                  </div>
+                  <div className="font-semibold text-gray-900">
+                    {formatDate(selectedOrder.created_at)}
+                  </div>
                 </div>
               </div>
+
               <div className="rounded-lg border border-gray-200 p-4">
                 <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
                   Order ID
                 </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    openOrderFromTransaction(selectedTransaction.order_id)
-                  }
-                  className="font-semibold text-[#E9A556] break-all text-left hover:underline"
-                >
-                  {selectedTransaction.order_id}
-                </button>
-              </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Reference ID
-                </div>
                 <div className="font-semibold text-gray-900 break-all">
-                  {selectedTransaction.reference_id}
+                  {selectedOrder.id}
                 </div>
               </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Currency
-                </div>
-                <div className="font-semibold text-gray-900 uppercase">
-                  {selectedTransaction.currency_code}
-                </div>
-              </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Version
-                </div>
-                <div className="font-semibold text-gray-900">
-                  {selectedTransaction.version}
-                </div>
-              </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Updated
-                </div>
-                <div className="font-semibold text-gray-900">
-                  {formatDate(selectedTransaction.updated_at)}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </BaseModal>
 
-      <BaseModal
-        isOpen={Boolean(selectedOrder)}
-        onClose={() => setSelectedOrder(null)}
-        title="Order details"
-        subtitle={
-          selectedOrder
-            ? `Order ${selectedOrder.id.replace(/^order_/, "")}`
-            : undefined
-        }
-        maxWidth="2xl"
-      >
-        {selectedOrder && (
-          <div className="p-6 space-y-6">
-            <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Status
-                </div>
-                <div className="font-semibold text-gray-900 capitalize">
-                  {selectedOrder.status}
-                </div>
-              </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Total
-                </div>
-                <div className="font-semibold text-gray-900">
-                  {formatMoney(selectedOrder.total)}
-                </div>
-              </div>
-              <div className="rounded-lg border border-gray-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                  Date
-                </div>
-                <div className="font-semibold text-gray-900">
-                  {formatDate(selectedOrder.created_at)}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-gray-500 mb-1">
-                Order ID
-              </div>
-              <div className="font-semibold text-gray-900 break-all">
-                {selectedOrder.id}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900">Items</h3>
-              {selectedOrder.items?.length ? (
-                <div className="space-y-3">
-                  {selectedOrder.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="border rounded-lg p-3 flex gap-3 items-start"
-                    >
-                      {item.thumbnail ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={item.thumbnail}
-                          alt={item.title || "Order item"}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded bg-gray-100 shrink-0" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900">
-                          {item.title || "Item"}
-                        </div>
-                        {item.subtitle ? (
-                          <div className="text-sm text-gray-600">
-                            {item.subtitle}
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold text-gray-900">Items</h3>
+                {selectedOrder.items?.length ? (
+                  <div className="space-y-3">
+                    {selectedOrder.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="border rounded-lg p-3 flex gap-3 items-start"
+                      >
+                        {item.thumbnail ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={item.thumbnail}
+                            alt={item.title || "Order item"}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded bg-gray-100 shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-900">
+                            {item.title || "Item"}
                           </div>
-                        ) : null}
-                        <div className="text-sm text-gray-700">
-                          Qty: {item.quantity ?? 0}
+                          {item.subtitle ? (
+                            <div className="text-sm text-gray-600">
+                              {item.subtitle}
+                            </div>
+                          ) : null}
+                          <div className="text-sm text-gray-700">
+                            Qty: {item.quantity ?? 0}
+                          </div>
+                        </div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          {formatMoney(item.total)}
                         </div>
                       </div>
-                      <div className="text-sm font-semibold text-gray-900">
-                        {formatMoney(item.total)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-gray-500">No items found.</div>
-              )}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">No items found.</div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-      </BaseModal>
-    </div>
+          )}
+        </BaseModal>
+      </div>
+    </ComingSoonGate>
+
   );
 };
 
