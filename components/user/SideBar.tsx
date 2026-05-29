@@ -5,6 +5,7 @@ import {
   Folder,
   Home,
   LogOut,
+  MessageCircle,
   Package,
   Wallet,
   Wrench,
@@ -143,6 +144,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             label="Wallet"
             active={pathname === "/wallet"}
             href="/wallet"
+            onClick={onClose}
+          />
+          <NavItem
+            icon={<MessageCircle size={20} />}
+            label="Messages"
+            active={pathname === "/messages"}
+            href="/messages"
             onClick={onClose}
           />
           <NavItem
