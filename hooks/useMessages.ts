@@ -51,12 +51,12 @@ export const useRealtimeMessages = (
 
   useEffect(() => {
     if (!chatId) return;
+    if (process.env.NODE_ENV === "development") return;
 
     let supabase: ReturnType<typeof getSupabaseClient> | null = null;
     try {
       supabase = getSupabaseClient();
     } catch {
-      // Supabase not configured — real-time unavailable, polling only
       return;
     }
 
@@ -74,7 +74,11 @@ export const useRealtimeMessages = (
           callbackRef.current(payload.new as Message);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          supabase!.removeChannel(channel);
+        }
+      });
 
     return () => {
       supabase!.removeChannel(channel);

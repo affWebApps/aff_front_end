@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import HomeLayout from "@/app/(home)/layout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -51,6 +52,7 @@ const quickLinks = [
 
 export default function HubPage() {
   return (
+    <Suspense>
     <ProtectedRoute>
       <HomeLayout>
         <section className="min-h-[calc(100vh-10rem)] px-4 py-10 sm:px-6 lg:px-10">
@@ -104,5 +106,6 @@ export default function HubPage() {
         </section>
       </HomeLayout>
     </ProtectedRoute>
+    </Suspense>
   );
 }
