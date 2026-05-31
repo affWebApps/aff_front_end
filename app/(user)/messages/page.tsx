@@ -1,12 +1,13 @@
 "use client";
 import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle, Send, X, UserSearch as SearchUser } from "lucide-react";
 import { useState } from "react";
 import { useChats, useSendMessage } from "@/hooks/useMessages";
 import { useUser } from "@/hooks/useUsers";
 import { ChatList } from "@/components/messages/ChatList";
 import { ChatWindow } from "@/components/messages/ChatWindow";
+import { UserSearch } from "@/components/messages/UserSearch";
 import { Chat } from "@/services/messageService";
 
 function StartChatPanel({ userId, onChatCreated }: { userId: string; onChatCreated: (chatId: string) => void }) {
@@ -89,6 +90,7 @@ function MessagesContent() {
   const targetUserId = searchParams.get("userId");
 
   const { data: chats = [], isLoading } = useChats();
+  const [showSearch, setShowSearch] = useState(false);
 
   // If a userId param is present and there's already a chat with that user, redirect to it
   useEffect(() => {
@@ -116,21 +118,41 @@ function MessagesContent() {
     router.replace(`/messages?chat=${newChatId}`);
   };
 
-  const showRightPanel = selectedChat !== null || showNewChat;
+  const handleSelectUser = (userId: string) => {
+    setShowSearch(false);
+    router.replace(`/messages?userId=${userId}`);
+  };
+
+  const showRightPanel = selectedChat !== null || showNewChat || Boolean(chatId);
 
   return (
     <div className="h-full flex rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
       {/* Left: Chat List — hidden on mobile when a chat is open */}
       <div
-        className={`w-full lg:w-80 shrink-0 border-r border-gray-200 flex flex-col ${
-          showRightPanel ? "hidden lg:flex" : "flex"
-        }`}
+        className={`w-full lg:w-80 shrink-0 border-r border-gray-200 flex flex-col ${showRightPanel ? "hidden lg:flex" : "flex"
+          }`}
       >
-        <div className="px-4 py-3 border-b border-gray-200 shrink-0">
+        <div className="px-4 py-3 border-b border-gray-200 shrink-0 flex items-center justify-between">
           <h2 className="font-semibold text-gray-900 text-lg">Messages</h2>
+          <div className="relative group">
+            <button
+              onClick={() => setShowSearch((v) => !v)}
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-colors"
+              aria-label={showSearch ? "Back to chats" : "Search user"}
+            >
+              {showSearch ? <X size={18} /> : <SearchUser size={18} />}
+            </button>
+            {!showSearch && (
+              <span className="pointer-events-none absolute right-0 top-full mt-1 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                Search user
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {isLoading ? (
+          {showSearch ? (
+            <UserSearch onSelectUser={handleSelectUser} />
+          ) : isLoading ? (
             <div className="flex justify-center pt-10">
               <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
             </div>
@@ -148,6 +170,10 @@ function MessagesContent() {
       <div className={`flex-1 flex-col ${showRightPanel ? "flex" : "hidden lg:flex"}`}>
         {selectedChat ? (
           <ChatWindow chat={selectedChat} onBack={handleBack} />
+        ) : chatId && isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+          </div>
         ) : showNewChat ? (
           <StartChatPanel userId={targetUserId!} onChatCreated={handleChatCreated} />
         ) : (

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, Check, CheckCheck, Clock } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Message, Chat } from "@/services/messageService";
 import { useAuthStore } from "@/store/authStore";
@@ -153,6 +153,17 @@ export function ChatWindow({ chat, onBack }: ChatWindowProps) {
                   } ${msg.id.startsWith("optimistic-") ? "opacity-60" : ""}`}
                 >
                   {msg.content}
+                  {isOwn && (
+                    <span className="flex justify-end mt-1">
+                      {msg.id.startsWith("optimistic-") ? (
+                        <Clock size={12} className="text-white/60" />
+                      ) : msg.read ? (
+                        <CheckCheck size={12} className="text-blue-200" />
+                      ) : (
+                        <Check size={12} className="text-white/60" />
+                      )}
+                    </span>
+                  )}
                 </div>
               </div>
             );

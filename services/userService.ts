@@ -61,6 +61,23 @@ export interface ProjectStats {
   completed: number;
 }
 
+export interface SearchUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  role: string;
+}
+
+export interface UserSearchResponse {
+  data: SearchUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface UserListItem {
   id: string;
   email: string;
@@ -123,6 +140,13 @@ export const userService = {
 
   updateStatus: async (id: string, isActive: boolean): Promise<User> => {
     const response = await apiClient.patch<User>(`/users/${id}/status`, { isActive });
+    return response.data;
+  },
+
+  searchUsers: async (q: string, page = 1, limit = 20): Promise<UserSearchResponse> => {
+    const response = await apiClient.get<UserSearchResponse>("/users/search", {
+      params: { q, page, limit },
+    });
     return response.data;
   },
 

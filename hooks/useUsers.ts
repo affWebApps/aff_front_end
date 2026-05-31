@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { userService } from "@/services/userService";
 
 export const useProject = (projectId: string | null) =>
@@ -43,6 +44,23 @@ export const useUser = (id: string) =>
     retry: false,
     enabled: !!id,
   });
+
+export const useUserSearch = (query: string, page = 1) => {
+  const [debounced, setDebounced] = useState(query);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  return useQuery({
+    queryKey: ["user-search", debounced, page],
+    queryFn: () => userService.searchUsers(debounced, page),
+    enabled: debounced.trim().length > 0,
+    staleTime: 30_000,
+    placeholderData: keepPreviousData,
+  });
+};
 
 export const useUpdateUserStatus = (id: string) => {
   const queryClient = useQueryClient();

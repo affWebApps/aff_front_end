@@ -39,12 +39,13 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         {/* Header Icons */}
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <button
+          <Link
+            href="/messages"
             className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block"
             aria-label="Messages"
           >
             <MessageSquare size={24} className="text-gray-600" />
-          </button>
+          </Link>
           <button
             className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
             aria-label="Notifications"
