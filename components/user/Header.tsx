@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, Search, Bell, Menu, User } from "lucide-react";
+import { MessageSquare, Bell, Menu, User } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 
@@ -22,23 +22,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Menu size={24} className="text-gray-600" />
         </button>
 
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search
-              className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-10 sm:pl-12 pr-4 py-2 sm:py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-sm sm:text-base"
-            />
-          </div>
-        </div>
-
-        {/* Header Icons */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
+{/* Header Icons */}
+        <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
           <Link
             href="/messages"
             className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block"
