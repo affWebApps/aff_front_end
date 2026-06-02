@@ -106,12 +106,13 @@ const fetchProducts = async (page: number, limit: number) => {
   return data;
 };
 
-export const useProducts = (page: number, limit: number) =>
+export const useProducts = (page: number, limit: number, options?: { enabled?: boolean }) =>
   useQuery<ProductsResponse>({
     queryKey: ["products", page, limit],
     queryFn: () => fetchProducts(page, limit),
     staleTime: 60_000,
     placeholderData: keepPreviousData,
+    enabled: options?.enabled !== false,
   });
 
 const fetchVendorProduct = async (productId: string) => {

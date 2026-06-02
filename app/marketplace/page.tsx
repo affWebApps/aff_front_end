@@ -74,7 +74,7 @@ function MarketplaceContent() {
     data: productsData,
     isLoading: isLoadingProducts,
     error: productsError,
-  } = useProducts(currentPage, limit);
+  } = useProducts(currentPage, limit, { enabled: activeTab === "products" });
 
   const fetchedProducts: Product[] = useMemo(() => {
     if (!productsData?.products) return [];

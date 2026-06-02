@@ -145,7 +145,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             href="/wallet"
             onClick={onClose}
           />
-          <NavItem
+<NavItem
             icon={<BarChart3 size={20} />}
             label="Analytics"
             active={pathname === "/analytics"}

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   ArrowLeft, Star, MapPin, Phone, Mail, Calendar, Shield,
-  Briefcase, BookOpen, Gavel, Power, X, ChevronLeft, ChevronRight,
+  Briefcase, BookOpen, Gavel, Power, MessageCircle, X, ChevronLeft, ChevronRight,
   Clock, DollarSign,
 } from "lucide-react";
 import { useUser, useUpdateUserStatus, useProject } from "@/hooks/useUsers";
@@ -402,18 +402,27 @@ export default function UserProfilePage({
 
         {/* Hero card */}
         <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm p-8">
-          <button
-            onClick={() => updateStatus.mutate(!user.is_active)}
-            disabled={updateStatus.isPending}
-            className={`absolute top-6 right-6 flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              user.is_active
-                ? "bg-red-500 text-white hover:bg-red-600"
-                : "bg-green-600 text-white hover:bg-green-700"
-            }`}
-          >
-            <Power size={13} />
-            {updateStatus.isPending ? "Saving…" : user.is_active ? "Deactivate" : "Activate"}
-          </button>
+          <div className="absolute top-6 right-6 flex items-center gap-2">
+            <button
+              onClick={() => router.push(`/messages?userId=${user.id}`)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold bg-amber-50 text-[#5C4033] border border-amber-200 hover:bg-amber-100 transition-colors"
+            >
+              <MessageCircle size={13} />
+              Message
+            </button>
+            <button
+              onClick={() => updateStatus.mutate(!user.is_active)}
+              disabled={updateStatus.isPending}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                user.is_active
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+            >
+              <Power size={13} />
+              {updateStatus.isPending ? "Saving…" : user.is_active ? "Deactivate" : "Activate"}
+            </button>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-start gap-8">
             <div className="w-28 h-28 rounded-full bg-gray-100 shrink-0 overflow-hidden flex items-center justify-center text-5xl">

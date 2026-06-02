@@ -37,14 +37,9 @@ const validationSchema = Yup.object({
 function RegisterFormContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const {
-    mutate: register,
-    isPending,
-    isError,
-    error,
-    isSuccess,
-  } = useRegister();
+  const { mutate: register, isPending } = useRegister();
 
 
   const {
@@ -63,6 +58,7 @@ function RegisterFormContent() {
     },
     validationSchema,
     onSubmit: (values) => {
+      setSubmitted(true);
       register({
         email: values.email,
         password: values.password,
@@ -76,7 +72,7 @@ function RegisterFormContent() {
     !!(formik.errors[field] && formik.touched[field]);
 
 
-  if (isSuccess) {
+  if (submitted) {
     return (
       <div className="max-w-md mx-auto">
         <div className={styles.formElement} style={{ animationDelay: "0.1s" }}>
@@ -118,23 +114,6 @@ function RegisterFormContent() {
   }
 
 
-  const getErrorMessage = () => {
-    if (!error) return "Registration failed. Please try again.";
-
-    if (typeof error === "object" && error !== null && "response" in error) {
-      const err = error as { response?: { data?: { message?: string } } };
-      return (
-        err.response?.data?.message || "Registration failed. Please try again."
-      );
-    }
-
-    if (error instanceof Error) {
-      return error.message;
-    }
-
-    return "Registration failed. Please try again.";
-  };
-
   return (
     <AuthRedirect>
       <>
@@ -151,16 +130,7 @@ function RegisterFormContent() {
           </p>
         </div>
 
-        {isError && (
-          <div
-            className={`${styles.formElement} mb-4 p-4 bg-red-50 border border-red-200 rounded-lg`}
-            style={{ animationDelay: "0.15s" }}
-          >
-            <p className="text-red-700 text-sm">There was an error during registration.</p>
-          </div>
-        )}
-
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
+<form onSubmit={formik.handleSubmit} className="space-y-5">
           <div className={styles.formElement} style={{ animationDelay: "0.2s" }}>
             <label
               htmlFor="firstName"
@@ -344,6 +314,7 @@ function RegisterFormContent() {
 
           <div className={styles.formElement} style={{ animationDelay: "0.45s" }}>
             <Button
+              type="submit"
               variant="default"
               size="large"
               className="w-full transition-all duration-300 hover:scale-105"

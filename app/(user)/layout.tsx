@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Header } from "../../components/user/Header";
 import { Sidebar } from "../../components/user/SideBar";
 import { ProtectedRoute } from "../../components/auth/ProtectedRoute";
@@ -8,6 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
+    <Suspense>
     <ProtectedRoute>
       <div className="flex h-screen">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -20,5 +21,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </ProtectedRoute>
+    </Suspense>
   );
 }
