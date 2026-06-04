@@ -145,6 +145,13 @@ export const useUserBids = () =>
     staleTime: 60_000,
   });
 
+export const useMyBids = () =>
+  useQuery({
+    queryKey: ["my-bids"],
+    queryFn: projectService.getMyBids,
+    staleTime: 60_000,
+  });
+
 // ── Bids ────────────────────────────────────────────────────
 
 export const useProjectBids = (projectId: string | null) =>

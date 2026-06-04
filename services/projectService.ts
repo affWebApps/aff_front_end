@@ -23,6 +23,14 @@ export interface ProjectRequirement {
   updated_at: string;
 }
 
+export interface BidProject {
+  id: string;
+  title: string;
+  status: ProjectStatus;
+  budget: string;
+  designer_id: string;
+}
+
 export interface Bid {
   id: string;
   project_id: string;
@@ -33,6 +41,7 @@ export interface Bid {
   status: BidStatus;
   created_at: string;
   updated_at: string;
+  project?: BidProject;
 }
 
 export interface Project {
@@ -133,6 +142,11 @@ export const projectService = {
   listUserBids: async (): Promise<Bid[]> => {
     const res = await apiClient.get<{ bids: Bid[] }>("/users/me");
     return res.data.bids ?? [];
+  },
+
+  getMyBids: async (): Promise<Bid[]> => {
+    const res = await apiClient.get<Bid[]>("/bids/my-bids");
+    return res.data;
   },
 
   // ── Requirements ──────────────────────────────────────────
