@@ -108,9 +108,8 @@ export const projectService = {
   },
 
   list: async (): Promise<Project[]> => {
-    const res = await apiClient.get<Project[] | { data: Project[] }>("/projects");
-    const data = res.data;
-    return Array.isArray(data) ? data : (data.data ?? []);
+    const res = await apiClient.get<{ projects: Project[] }>("/users/me");
+    return res.data.projects ?? [];
   },
 
   update: async (id: string, payload: UpdateProjectPayload): Promise<Project> => {
@@ -129,6 +128,11 @@ export const projectService = {
 
   deleteFile: async (projectId: string, fileId: string): Promise<void> => {
     await apiClient.delete(`/projects/${projectId}/files/${fileId}`);
+  },
+
+  listUserBids: async (): Promise<Bid[]> => {
+    const res = await apiClient.get<{ bids: Bid[] }>("/users/me");
+    return res.data.bids ?? [];
   },
 
   // ── Requirements ──────────────────────────────────────────

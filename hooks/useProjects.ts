@@ -136,6 +136,15 @@ export const useApproveRequirement = (projectId: string) => {
   });
 };
 
+// ── User Bids (from /users/me) ───────────────────────────────
+
+export const useUserBids = () =>
+  useQuery({
+    queryKey: ["user-bids"],
+    queryFn: projectService.listUserBids,
+    staleTime: 60_000,
+  });
+
 // ── Bids ────────────────────────────────────────────────────
 
 export const useProjectBids = (projectId: string | null) =>
@@ -161,6 +170,7 @@ export const useSubmitBid = (projectId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bids", projectId] });
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["user-bids"] });
     },
   });
 };
@@ -174,6 +184,7 @@ export const useDecideBid = () => {
       queryClient.invalidateQueries({ queryKey: ["bids", updatedBid.project_id] });
       queryClient.invalidateQueries({ queryKey: ["project", updatedBid.project_id] });
       queryClient.invalidateQueries({ queryKey: ["bid", updatedBid.id] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 };
@@ -183,7 +194,7 @@ export const useDeleteBid = () => {
   return useMutation({
     mutationFn: (bidId: string) => projectService.deleteBid(bidId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bids"] });
+      queryClient.invalidateQueries({ queryKey: ["user-bids"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });

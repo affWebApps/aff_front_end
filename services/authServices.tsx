@@ -6,6 +6,8 @@ import apiClient from "../lib/api/axios";
 // TYPES & INTERFACES
 // ============================================
 
+import { Project, Bid } from "@/services/projectService";
+
 export interface User {
   id: string;
   email: string;
@@ -24,8 +26,8 @@ export interface User {
   auth_provider: string;
   reviews_received: Review[];
   portfolios: Portfolio[];
-  projects: any[];
-  bids: any[];
+  projects: Project[];
+  bids: Bid[];
   created_at: string;
   updated_at: string;
   customer_id: string | null;
