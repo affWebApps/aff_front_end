@@ -13,13 +13,16 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // Wait for Zustand to rehydrate from localStorage before checking auth.
   // On first render token is null (before persist kicks in), so we must not
   // redirect until we know hydration is complete.
-  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
+  const [hydrated, setHydrated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (hydrated) return;
-    return useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-  }, [hydrated]);
+    if (useAuthStore.persist?.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+    return useAuthStore.persist?.onFinishHydration(() => setHydrated(true));
+  }, []);
 
   useEffect(() => {
     if (!hydrated) return;

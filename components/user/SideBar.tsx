@@ -3,11 +3,11 @@
 import {
   BarChart3,
   Folder,
+  Gavel,
   Home,
   LogOut,
   Package,
   Wallet,
-  Wrench,
   X,
   Undo2
 } from "lucide-react";
@@ -31,46 +31,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { logout, token } = useAuthStore();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  // const handleSignOut = async () => {
-  //   try {
-  //     setIsSigningOut(true);
-  //     console.log("🚪 Signing out...");
-
-  //     // Call backend logout with token
-  //     try {
-  //       if (token) {
-  //         await authService.logout(token);
-  //       }
-  //     } catch (error) {
-  //       console.warn("Backend logout failed, but continuing with local logout");
-  //     }
-
-  //     // Clear auth state from Zustand store (this also clears localStorage)
-  //     logout();
-
-  //     console.log("✅ Signed out successfully");
-
-  //     // Redirect to sign-in page
-  //     router.push("/sign-in");
-  //   } catch (error) {
-  //     console.error("❌ Sign out error:", error);
-  //     // Even if there's an error, we should still clear local state
-  //     logout();
-  //     router.push("/sign-in");
-  //   } finally {
-  //     setIsSigningOut(false);
-  //   }
-  // };
-
   const handleSignOut = async () => {
     try {
       await logout();
-      // setShowProfileMenu(false);
       router.push("/");
-      // setToast({ message: "Logged out successfully", type: "success" });
     } catch (error) {
       console.error("Logout failed:", error);
-      // setToast({ message: "Logout failed", type: "error" });
     }
   };
 
@@ -132,10 +98,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             onClick={onClose}
           />
           <NavItem
-            icon={<Wrench size={20} />}
-            label="Services"
-            active={pathname === "/services"}
-            href="/services"
+            icon={<Gavel size={20} />}
+            label="My Bids"
+            active={pathname === "/bids"}
+            href="/bids"
             onClick={onClose}
           />
           <NavItem
@@ -145,7 +111,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             href="/wallet"
             onClick={onClose}
           />
-<NavItem
+          <NavItem
             icon={<BarChart3 size={20} />}
             label="Analytics"
             active={pathname === "/analytics"}
