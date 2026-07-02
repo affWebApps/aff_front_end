@@ -8,7 +8,17 @@ import {
   CreateRequirementPayload,
   UpdateRequirementPayload,
   SubmitBidPayload,
+  ListAllProjectsParams,
 } from "@/services/projectService";
+
+// ── All Projects (public listing) ───────────────────────────
+
+export const useAllProjects = (params?: ListAllProjectsParams) =>
+  useQuery({
+    queryKey: ["all-projects", params],
+    queryFn: () => projectService.listAll(params),
+    staleTime: 60_000,
+  });
 
 // ── Projects ────────────────────────────────────────────────
 

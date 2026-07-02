@@ -7,10 +7,10 @@ import { CustomSelect } from "../../components/CustomSelect";
 import { ProductsGrid } from "../../components/grid/ProductsGrid";
 import { ServicesGrid } from "../../components/grid/ServicesGrid";
 import { Pagination } from "../../components/ui/Pagination";
-import ServiceDetailPage from "./services/[id]/page";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
-
+import { useAllProjects } from "@/hooks/useProjects";
+import { Project } from "@/services/projectService";
 
 export interface Product {
   id: string;
@@ -20,29 +20,7 @@ export interface Product {
   seller: string;
 }
 
-interface Service {
-  id: number;
-  image: string;
-  title: string;
-  description: string;
-  fullDescription: string;
-  category: string;
-  deadline: string;
-  startingBid: number;
-  currentBid: number;
-  totalBids: number;
-  requiredSkills: string[];
-  client: {
-    name: string;
-    username: string;
-    avatar: string;
-    bio: string;
-    email: string;
-    location: string;
-  };
-  budget: string | number; // ✅ Changed from string to string | number
-  bids: string | number; // ✅ Changed from string to string | number
-}
+const SERVICE_LIMIT = 12;
 
 function MarketplaceContent() {
   const router = useRouter();
@@ -51,30 +29,40 @@ function MarketplaceContent() {
   const rawTab = searchParams.get("tab");
   const activeTab = rawTab === "services" ? "services" : "products";
 
+  const rawPage = searchParams.get("page");
+  const currentPage = Math.max(1, parseInt(rawPage ?? "1", 10) || 1);
+
   const [category, setCategory] = useState("");
   const [size, setSize] = useState("");
   const [expertiseLevel, setExpertiseLevel] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [showServiceDetail, setShowServiceDetail] = useState(false);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   const setActiveTab = (tab: string) => {
-    setCurrentPage(1);
-    router.replace(`/marketplace?tab=${tab}`);
+    router.replace(`/marketplace?tab=${tab}&page=1`);
   };
 
-
-  const [totalPages, setTotalPages] = useState<number>(1)
+  const setCurrentPage = (page: number) => {
+    router.replace(`/marketplace?tab=${activeTab}&page=${page}`);
+  };
 
   const limit =
-    Number.parseInt(process.env.NEXT_PUBLIC_PRODUCTS_PER_PAGE || "", 10) ||
-    12;
+    Number.parseInt(process.env.NEXT_PUBLIC_PRODUCTS_PER_PAGE || "", 10) || 12;
 
   const {
     data: productsData,
     isLoading: isLoadingProducts,
     error: productsError,
   } = useProducts(currentPage, limit, { enabled: activeTab === "products" });
+
+  const {
+    data: projectsData,
+    isLoading: isLoadingServices,
+    error: servicesError,
+  } = useAllProjects(
+    activeTab === "services"
+      ? { status: "OPEN", page: currentPage, limit: SERVICE_LIMIT }
+      : undefined
+  );
 
   const fetchedProducts: Product[] = useMemo(() => {
     if (!productsData?.products) return [];
@@ -88,217 +76,16 @@ function MarketplaceContent() {
   }, [productsData]);
 
   useEffect(() => {
-    if (productsData?.pagination) {
-      setTotalPages(Math.max(1, Math.ceil(productsData.pagination?.count / limit)));
+    if (activeTab === "products" && productsData?.pagination) {
+      setTotalPages(Math.max(1, Math.ceil(productsData.pagination.count / limit)));
     }
-  }, [productsData, limit]);
+  }, [productsData, limit, activeTab]);
 
-  const services = [
-    {
-      id: 1,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription:
-        "I'm looking for a skilled tailor to bring my design concept to life for an upcoming wedding. I have a clear vision, drafted patterns, and a collection of inspiration images for the wedding gown.",
-      category: "Sewing and Tailoring",
-      deadline: "2 weeks",
-      startingBid: 100000,
-      currentBid: 150000,
-      totalBids: 5,
-      requiredSkills: [
-        "Fashion Design",
-        "Pattern Drafting",
-        "Alterations & Repairs",
-      ],
-      client: {
-        name: "Amina Yusuf",
-        username: "@aminat60",
-        avatar: "/api/placeholder/80/80",
-        bio: "Passionate about fashion and design.",
-        email: "aminayusuf@gmail.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-    {
-      id: 2,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription:
-        "I'm looking for a skilled tailor to bring my design concept to life for an upcoming wedding. I have a clear vision, drafted patterns, and a collection of inspiration images for the wedding gown.",
-      category: "Sewing and Tailoring",
-      deadline: "3 weeks",
-      startingBid: 120000,
-      currentBid: 150000,
-      totalBids: 8,
-      requiredSkills: [
-        "Fashion Design",
-        "Pattern Drafting",
-        "Alterations & Repairs",
-      ],
-      client: {
-        name: "Folake Johnson",
-        username: "@folake_j",
-        avatar: "/api/placeholder/80/80",
-        bio: "Fashion enthusiast and designer.",
-        email: "folake@example.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-    {
-      id: 3,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription:
-        "I'm looking for a skilled tailor to bring my design concept to life for an upcoming wedding.",
-      category: "Sewing and Tailoring",
-      deadline: "4 weeks",
-      startingBid: 100000,
-      currentBid: 150000,
-      totalBids: 6,
-      requiredSkills: ["Fashion Design", "Pattern Drafting"],
-      client: {
-        name: "Zainab Ahmed",
-        username: "@zainab_a",
-        avatar: "/api/placeholder/80/80",
-        bio: "Designer and creator.",
-        email: "zainab@example.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-    {
-      id: 4,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription: "Seeking experienced tailor for custom wedding gown.",
-      category: "Sewing and Tailoring",
-      deadline: "2 weeks",
-      startingBid: 100000,
-      currentBid: 150000,
-      totalBids: 7,
-      requiredSkills: ["Fashion Design", "Alterations & Repairs"],
-      client: {
-        name: "Ngozi Eze",
-        username: "@ngozi_e",
-        avatar: "/api/placeholder/80/80",
-        bio: "Fashion lover.",
-        email: "ngozi@example.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-    {
-      id: 5,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription: "Need expert tailor for wedding gown project.",
-      category: "Sewing and Tailoring",
-      deadline: "3 weeks",
-      startingBid: 100000,
-      currentBid: 150000,
-      totalBids: 4,
-      requiredSkills: ["Fashion Design", "Pattern Drafting"],
-      client: {
-        name: "Aisha Bello",
-        username: "@aisha_b",
-        avatar: "/api/placeholder/80/80",
-        bio: "Style enthusiast.",
-        email: "aisha@example.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-    {
-      id: 6,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription: "Looking for professional tailor for custom gown.",
-      category: "Sewing and Tailoring",
-      deadline: "2 weeks",
-      startingBid: 100000,
-      currentBid: 150000,
-      totalBids: 9,
-      requiredSkills: ["Fashion Design"],
-      client: {
-        name: "Chidinma Okon",
-        username: "@chidi_o",
-        avatar: "/api/placeholder/80/80",
-        bio: "Creative designer.",
-        email: "chidinma@example.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-    {
-      id: 7,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription: "Experienced tailor needed for wedding gown.",
-      category: "Sewing and Tailoring",
-      deadline: "4 weeks",
-      startingBid: 100000,
-      currentBid: 150000,
-      totalBids: 5,
-      requiredSkills: ["Fashion Design", "Pattern Drafting"],
-      client: {
-        name: "Fatima Usman",
-        username: "@fatima_u",
-        avatar: "/api/placeholder/80/80",
-        bio: "Fashion designer.",
-        email: "fatima@example.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-    {
-      id: 8,
-      image: "/images/ankara-gown.jpg",
-      title: "Custom wedding gown sewing",
-      description:
-        "Looking for a tailor to bring to life my wedding gown which has already be patterned out",
-      fullDescription:
-        "Skilled tailor required for custom wedding gown design.",
-      category: "Sewing and Tailoring",
-      deadline: "3 weeks",
-      startingBid: 100000,
-      currentBid: 150000,
-      totalBids: 6,
-      requiredSkills: ["Fashion Design", "Alterations & Repairs"],
-      client: {
-        name: "Blessing Nwosu",
-        username: "@blessing_n",
-        avatar: "/api/placeholder/80/80",
-        bio: "Design enthusiast.",
-        email: "blessing@example.com",
-        location: "Lagos, NG",
-      },
-      budget: "150,000",
-      bids: "5 - 10",
-    },
-  ];
+  useEffect(() => {
+    if (activeTab === "services" && projectsData?.totalPages) {
+      setTotalPages(Math.max(1, projectsData.totalPages));
+    }
+  }, [projectsData, activeTab]);
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -310,35 +97,13 @@ function MarketplaceContent() {
     visible: { opacity: 1, y: 0 },
   };
 
-  let productsToShow = fetchedProducts;
-  console.log("productsData to show are", productsData)
-
-
-
   const handleProductClick = (product: Product) => {
     router.push(`/marketplace/products/${product.id}`);
   };
 
-  const handleServiceClick = (service: Service) => {
-    setSelectedService(service);
-    setShowServiceDetail(true);
+  const handleServiceClick = (project: Project) => {
+    router.push(`/marketplace/services/${project.id}`);
   };
-
-  const handleBackFromService = () => {
-    setShowServiceDetail(false);
-    setSelectedService(null);
-  };
-
-  if (showServiceDetail && selectedService) {
-    return (
-      <HomeLayout>
-        <ServiceDetailPage
-          service={selectedService}
-          onBack={handleBackFromService}
-        />
-      </HomeLayout>
-    );
-  }
 
   return (
     <HomeLayout>
@@ -415,12 +180,7 @@ function MarketplaceContent() {
                     value={category}
                     onChange={setCategory}
                     placeholder="Select category"
-                    options={[
-                      "Ankara Gowns",
-                      "Blouses",
-                      "Dresses",
-                      "Accessories",
-                    ]}
+                    options={["Ankara Gowns", "Blouses", "Dresses", "Accessories"]}
                   />
                 </div>
                 <div className="w-full sm:w-48">
@@ -439,12 +199,7 @@ function MarketplaceContent() {
                     value={category}
                     onChange={setCategory}
                     placeholder="Select category"
-                    options={[
-                      "Wedding Gowns",
-                      "Custom Tailoring",
-                      "Alterations",
-                      "Design",
-                    ]}
+                    options={["Wedding Gowns", "Custom Tailoring", "Alterations", "Design"]}
                   />
                 </div>
                 <div className="w-full sm:w-48">
@@ -459,13 +214,19 @@ function MarketplaceContent() {
             )}
           </motion.div>
 
-          {/* Content Grid */}
-          {productsError && (
+          {/* Errors */}
+          {productsError && activeTab === "products" && (
             <div className="max-w-4xl mx-auto mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
               {productsError instanceof Error ? productsError.message : String(productsError)}
             </div>
           )}
+          {servicesError && activeTab === "services" && (
+            <div className="max-w-4xl mx-auto mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {servicesError instanceof Error ? servicesError.message : String(servicesError)}
+            </div>
+          )}
 
+          {/* Content Grid */}
           {activeTab === "products" ? (
             isLoadingProducts ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -482,14 +243,27 @@ function MarketplaceContent() {
                 ))}
               </div>
             ) : (
-              <ProductsGrid
-                products={productsToShow}
-                onProductClick={handleProductClick}
-              />
+              <ProductsGrid products={fetchedProducts} onProductClick={handleProductClick} />
             )
+          ) : isLoadingServices ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto mb-12">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-lg shadow-md overflow-hidden flex animate-pulse"
+                >
+                  <div className="w-40 shrink-0 bg-gray-200" />
+                  <div className="p-4 flex-1 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-full" />
+                    <div className="h-3 bg-gray-200 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <ServicesGrid
-              services={services}
+              services={projectsData?.data ?? []}
               onServiceClick={handleServiceClick}
             />
           )}

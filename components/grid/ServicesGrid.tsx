@@ -1,34 +1,12 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { Scissors } from "lucide-react";
 import { ComingSoon, ComingSoonGate } from "../ui/ComingSoon";
-
-interface Service {
-  id: number;
-  image: string;
-  title: string;
-  description: string;
-  fullDescription: string;
-  category: string;
-  deadline: string;
-  startingBid: number;
-  currentBid: number;
-  totalBids: number;
-  requiredSkills: string[];
-  client: {
-    name: string;
-    username: string;
-    avatar: string;
-    bio: string;
-    email: string;
-    location: string;
-  };
-  budget: string | number;
-  bids: string | number;
-}
+import { Project } from "@/services/projectService";
 
 interface ServicesGridProps {
-  services: Service[];
-  onServiceClick: (service: Service) => void;
+  services: Project[];
+  onServiceClick: (project: Project) => void;
 }
 
 export const ServicesGrid = ({
@@ -41,7 +19,7 @@ export const ServicesGrid = ({
   };
 
   return (
-    <ComingSoonGate enabled={true}>
+    <ComingSoonGate enabled={false}>
       <motion.div
         className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto mb-12"
         initial="hidden"
@@ -50,42 +28,51 @@ export const ServicesGrid = ({
           visible: { transition: { staggerChildren: 0.1 } },
         }}
       >
-        {services.map((service) => (
-          <motion.div
-            key={service.id}
-            variants={fadeInUp}
-            onClick={() => onServiceClick(service)}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer flex flex-col sm:flex-row"
-          >
-            <div className="w-full sm:w-40 h-48 sm:h-auto shrink-0 relative">
-              <Image
-                src={service.image}
-                alt={service.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, 160px"
-              />
-            </div>
-            <div className="p-4 flex-1">
-              <h3 className="font-bold text-gray-900 mb-2">{service.title}</h3>
-              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div>
-                  <span className="text-gray-500">Budget: </span>
-                  <span className="font-semibold text-gray-900">
-                    ₦ {service.budget}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Bids: </span>
-                  <span className="font-semibold text-gray-900">
-                    {service.bids}
-                  </span>
+        {services.map((project) => {
+          const thumb = project.files?.find((f) => f.file_type?.startsWith("image/"))?.file_url;
+          return (
+            <motion.div
+              key={project.id}
+              variants={fadeInUp}
+              onClick={() => onServiceClick(project)}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer flex flex-col sm:flex-row"
+            >
+              <div className="w-full sm:w-40 h-48 sm:h-auto shrink-0 relative bg-gray-100 flex items-center justify-center">
+                {thumb ? (
+                  <Image
+                    src={thumb}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 160px"
+                  />
+                ) : (
+                  <Scissors size={36} className="text-gray-300" />
+                )}
+              </div>
+              <div className="p-4 flex-1">
+                <h3 className="font-bold text-gray-900 mb-2">{project.title}</h3>
+                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                  {project.description ?? ""}
+                </p>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Budget: </span>
+                    <span className="font-semibold text-gray-900">
+                      ₦ {project.budget ? Number(project.budget).toLocaleString() : "—"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Bids: </span>
+                    <span className="font-semibold text-gray-900">
+                      {project.bids?.length ?? 0}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </motion.div>
     </ComingSoonGate>
   );

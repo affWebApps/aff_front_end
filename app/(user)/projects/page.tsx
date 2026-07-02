@@ -178,7 +178,6 @@ function ProjectRow({
   onDeleted: () => void;
 }) {
   const router = useRouter();
-
   return (
     <div
       onClick={() => router.push(`/projects/${project.id}`)}

@@ -105,8 +105,31 @@ export interface SubmitBidPayload {
   message?: string;
 }
 
+export interface ListAllProjectsParams {
+  page?: number;
+  limit?: number;
+  sortBy?: "created_at" | "budget" | "title" | "updated_at";
+  sortOrder?: "asc" | "desc";
+  status?: ProjectStatus;
+  designerId?: string;
+  isBlocked?: boolean;
+}
+
+export interface AllProjectsResponse {
+  data: Project[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export const projectService = {
   // ── Projects ──────────────────────────────────────────────
+
+  listAll: async (params?: ListAllProjectsParams): Promise<AllProjectsResponse> => {
+    const res = await apiClient.get<AllProjectsResponse>("/projects", { params });
+    return res.data;
+  },
 
   create: async (payload: CreateProjectPayload): Promise<Project> => {
     const res = await apiClient.post<Project>("/projects", payload);
