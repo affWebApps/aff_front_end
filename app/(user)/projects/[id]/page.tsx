@@ -9,10 +9,13 @@ import {
   FileText,
   ImageIcon,
   Lock,
+  Pencil,
   Users,
 } from "lucide-react";
 import { useProject } from "@/hooks/useProjects";
+import { useAuthStore } from "@/store/authStore";
 import { ProjectStatus, BidStatus } from "@/services/projectService";
+import { RequirementsSection } from "@/components/projects/RequirementsSection";
 
 const STATUS_COLOURS: Record<ProjectStatus, string> = {
   OPEN: "bg-green-100 text-green-700",
@@ -52,7 +55,9 @@ function formatDate(dateStr: string) {
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useAuthStore();
   const { data: project, isLoading, error } = useProject(id ?? null);
+  const isOwner = !!(project && user && project.designer_id === user.id);
 
   if (isLoading) {
     return (
@@ -95,7 +100,7 @@ export default function ProjectDetailPage() {
       </button>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+      <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <h1 className="text-2xl font-semibold text-gray-800">{project.title}</h1>
@@ -112,6 +117,15 @@ export default function ProjectDetailPage() {
             <p className="text-gray-500 text-sm mt-1 max-w-2xl">{project.description}</p>
           )}
         </div>
+
+        {isOwner && project.status !== "COMPLETED" && project.status !== "CLOSED" && (
+          <button
+            onClick={() => router.push(`/projects/${id}/edit`)}
+            className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:border-amber-400 hover:text-amber-600 transition-colors shrink-0"
+          >
+            <Pencil size={14} /> Edit
+          </button>
+        )}
       </div>
 
       {/* Stats grid */}
@@ -196,45 +210,13 @@ export default function ProjectDetailPage() {
           )}
         </div>
 
-        {/* Requirements */}
-        <div className="bg-white rounded-lg shadow-sm p-5">
-          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <FileText size={16} className="text-gray-400" /> Requirements
-          </h2>
-          {project.requirements?.length > 0 ? (
-            <ul className="space-y-3">
-              {project.requirements.map((req) => {
-                const entries = Object.entries(req.content ?? {}).filter(([, v]) => v);
-                return (
-                  <li key={req.id} className="text-sm border border-gray-100 rounded-lg p-3">
-                    {entries.length > 0 ? (
-                      <dl className="space-y-1">
-                        {entries.map(([k, v]) => (
-                          <div key={k} className="flex gap-2">
-                            <dt className="text-gray-400 shrink-0 capitalize">{k}:</dt>
-                            <dd className="text-gray-700">{v}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    ) : (
-                      <span className="text-gray-400">No content</span>
-                    )}
-                    <div className="flex gap-3 mt-2 text-xs text-gray-400">
-                      <span className={req.designer_approved ? "text-green-600" : ""}>
-                        Designer {req.designer_approved ? "✓" : "pending"}
-                      </span>
-                      <span className={req.tailor_approved ? "text-green-600" : ""}>
-                        Tailor {req.tailor_approved ? "✓" : "pending"}
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="text-sm text-gray-400">No requirements yet.</p>
-          )}
-        </div>
+        <RequirementsSection
+          projectId={id}
+          requirements={project.requirements ?? []}
+          isOwner={isOwner}
+          isAssignedTailor={!!(user && project.assigned_tailor_id === user.id)}
+          canEdit={isOwner && project.status !== "COMPLETED" && project.status !== "CLOSED"}
+        />
 
         {/* Bids */}
         {project.bids?.length > 0 && (

@@ -83,6 +83,8 @@ export interface UpdateProjectPayload {
   budget?: number;
   estimatedTime?: string;
   status?: ProjectStatus;
+  designId?: string;
+  files?: { fileUrl: string; fileType?: string }[];
 }
 
 export interface CreateRequirementPayload {
