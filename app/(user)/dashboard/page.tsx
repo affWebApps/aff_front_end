@@ -66,6 +66,20 @@ export default function Dashboard() {
             <div className="text-sm text-gray-500">Based on your projects</div>
           </div>
 
+          {/* Total Projects */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Wrench className="w-5 h-5 text-gray-600 fill-gray-600" />
+              <span className="text-gray-600 font-medium">
+                Total Projects
+              </span>
+            </div>
+            <div className="text-4xl font-bold text-gray-900 mb-2">
+              {totalServices}
+            </div>
+            <div className="text-sm text-gray-500">Based on your projects</div>
+          </div>
+
           {/* Total Products */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -79,19 +93,6 @@ export default function Dashboard() {
             </div>
             <div className="text-sm text-gray-500">
               {vendorId ? "Linked to your vendor profile" : "Vendor ID missing"}
-            </div>
-          </div>
-
-          {/* Total Services */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Wrench className="w-5 h-5 text-gray-600 fill-gray-600" />
-              <span className="text-gray-600 font-medium">
-                Total Services posted
-              </span>
-            </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">
-              {totalServices}
             </div>
           </div>
 
@@ -109,15 +110,15 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-6">
           {/* Recent Designs */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-thin text-gray-900">
                 Recent Designs
               </h2>
               <button className="text-[#FBC57C] hover:text-[#dfac68] font-medium cursor-pointer">
-                View all projects
+                View all designs
               </button>
             </div>
 
@@ -224,7 +225,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Marketplace Activity */}
+          {/* Marketplace Activity — commented out until dynamic data is ready
           <div className="bg-[#FBF6F0] rounded-lg shadow-sm overflow-hidden">
             <div className="flex items-center gap-2 p-4 bg-[#FBC57C]">
               <Lightbulb className="w-5 h-5 text-gray-900" />
@@ -234,88 +235,60 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-4 bg-[#FBF6F0] p-4">
-              {/* Activity 1 */}
               <div className="flex items-start gap-3">
                 <div className="bg-amber-900 p-2.5 rounded-lg flex-shrink-0">
                   <ShoppingCart className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="font-semibold text-gray-900">
-                      New Product sold
-                    </span>
-                    <span className="text-green-600 font-semibold whitespace-nowrap">
-                      + ₦15,000
-                    </span>
+                    <span className="font-semibold text-gray-900">New Product sold</span>
+                    <span className="text-green-600 font-semibold whitespace-nowrap">+ ₦15,000</span>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    "Vintage Leather Jacket"
-                  </div>
+                  <div className="text-sm text-gray-600">"Vintage Leather Jacket"</div>
                   <div className="text-sm text-gray-500 mt-1">2h ago</div>
                 </div>
               </div>
-
-              {/* Activity 2 */}
               <div className="flex items-start gap-3">
                 <div className="bg-amber-900 p-2.5 rounded-lg flex-shrink-0">
                   <Hammer className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="font-semibold text-gray-900">
-                      New Bids on service
-                    </span>
-                    <span className="font-semibold text-gray-900 whitespace-nowrap">
-                      ₦140,000
-                    </span>
+                    <span className="font-semibold text-gray-900">New Bids on service</span>
+                    <span className="font-semibold text-gray-900 whitespace-nowrap">₦140,000</span>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    "Photoshoot Stylist"
-                  </div>
+                  <div className="text-sm text-gray-600">"Photoshoot Stylist"</div>
                   <div className="text-sm text-gray-500 mt-1">1d ago</div>
                 </div>
               </div>
-
-              {/* Activity 3 */}
               <div className="flex items-start gap-3">
                 <div className="bg-amber-900 p-2.5 rounded-lg flex-shrink-0">
                   <ShoppingBag className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="font-semibold text-gray-900">
-                      Product Purchased
-                    </span>
-                    <span className="text-red-600 font-semibold whitespace-nowrap">
-                      - ₦35,000
-                    </span>
+                    <span className="font-semibold text-gray-900">Product Purchased</span>
+                    <span className="text-red-600 font-semibold whitespace-nowrap">- ₦35,000</span>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    "Organic Cotton Fabric"
-                  </div>
+                  <div className="text-sm text-gray-600">"Organic Cotton Fabric"</div>
                   <div className="text-sm text-gray-500 mt-1">2d ago</div>
                 </div>
               </div>
-
-              {/* Activity 4 */}
               <div className="flex items-start gap-3">
                 <div className="bg-amber-900 p-2.5 rounded-lg flex-shrink-0">
                   <ShoppingCart className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <span className="font-semibold text-gray-900">
-                      New Product Listed
-                    </span>
+                    <span className="font-semibold text-gray-900">New Product Listed</span>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    "Handcrafted Silk Scarf"
-                  </div>
+                  <div className="text-sm text-gray-600">"Handcrafted Silk Scarf"</div>
                   <div className="text-sm text-gray-500 mt-1">3d ago</div>
                 </div>
               </div>
             </div>
           </div>
+          */}
         </div>
       </div>
     </div>

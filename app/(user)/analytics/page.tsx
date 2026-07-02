@@ -14,6 +14,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
+import { ComingSoonGate } from "@/components/ui/ComingSoon";
 
 
 interface MetricCardProps {
@@ -46,6 +48,27 @@ const Analytics = () => {
   const [activeTab, setActiveTab] = useState("tailor");
   const [timeRange, setTimeRange] = useState("Last 7 days");
 
+  const { data: projectsData } = useProjects();
+  const projects = projectsData ?? [];
+
+  const statusCounts = {
+    OPEN: projects.filter((p) => p.status === "OPEN").length,
+    IN_PROGRESS: projects.filter((p) => p.status === "IN_PROGRESS").length,
+    COMPLETED: projects.filter((p) => p.status === "COMPLETED").length,
+    CLOSED: projects.filter((p) => p.status === "CLOSED").length,
+  };
+
+  const allStatusData = [
+    { name: "Open", value: statusCounts.OPEN, color: "#FAB75B" },
+    { name: "In Progress", value: statusCounts.IN_PROGRESS, color: "#1e3a8a" },
+    { name: "Completed", value: statusCounts.COMPLETED, color: "#14b8a6" },
+    { name: "Closed", value: statusCounts.CLOSED, color: "#6b7280" },
+  ];
+
+  const projectStatusData = allStatusData.filter((s) => s.value > 0);
+
+  const totalProjects = projects.length;
+
   const tailorEarningsData = [
     { day: "Mon", value: 40 },
     { day: "Tue", value: 85 },
@@ -66,13 +89,9 @@ const Analytics = () => {
     { day: "Sun", value: 100 },
   ];
 
-  const projectStatusData = [
-    { name: "Completed", value: 12, color: "#14b8a6" },
-    { name: "In Progress", value: 5, color: "#1e3a8a" },
-    { name: "Revisions", value: 3, color: "#f97316" },
-  ];
 
   return (
+    <ComingSoonGate enabled={true}>
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -213,13 +232,13 @@ const Analytics = () => {
                   </ResponsiveContainer>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-gray-900">20</div>
+                      <div className="text-3xl font-bold text-gray-900">{totalProjects}</div>
                       <div className="text-sm text-gray-500">Projects</div>
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-center gap-6 mt-6">
-                  {projectStatusData.map((item, index) => (
+                <div className="flex flex-wrap justify-center gap-6 mt-6">
+                  {allStatusData.map((item, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div
                         className="w-3 h-3 rounded-full"
@@ -300,6 +319,7 @@ const Analytics = () => {
         )}
       </div>
     </div>
+    </ComingSoonGate>
   );
 };
 
