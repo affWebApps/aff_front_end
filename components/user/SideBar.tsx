@@ -92,7 +92,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           />
           <NavItem
             icon={<Package size={20} />}
-            label="Products"
+            label="Products/Orders"
             active={pathname === "/products"}
             href="/products"
             onClick={onClose}

@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Plus, Eye } from "lucide-react";
 import ReusableTable from "../../../components/table/ReusableTable";
 import { Button } from "../../../components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
@@ -9,6 +9,9 @@ import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api/axios";
 import { BaseModal } from "@/components/modals/BaseModal";
 import { useDeleteVendorProduct } from "@/hooks/useProducts";
+import { useOrders, useVendorOrders } from "@/hooks/useOrders";
+import { getFulfillmentStatus, getFulfillmentStatusColor } from "@/utils/orderFulfillment";
+import type { Order } from "@/types/order";
 
 interface Product {
   id: string;
@@ -20,14 +23,43 @@ interface Product {
   status?: string;
 }
 
+interface OrderRow {
+  id: string;
+  orderNumber: string;
+  date: string;
+  items: string;
+  amount: string;
+  status: string;
+  statusRaw: string;
+}
+
+const ORDERS_PER_PAGE = 10;
+
+type ProductsTab = "listed" | "my-orders" | "received";
+
+const TAB_FROM_QUERY: Record<string, ProductsTab> = {
+  orders: "my-orders",
+  "my-orders": "my-orders",
+  received: "received",
+};
+
 const MyProductsPage = () => {
-  const [activeTab, setActiveTab] = useState("listed");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = TAB_FROM_QUERY[searchParams.get("tab") ?? ""] ?? "listed";
+  const [activeTab, setActiveTab] = useState<ProductsTab>(initialTab);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [receivedOrdersPage, setReceivedOrdersPage] = useState(1);
   const [productPendingDelete, setProductPendingDelete] = useState<Product | null>(null);
   const [deleteStep, setDeleteStep] = useState<"idle" | "confirm" | "final">("idle");
-  const router = useRouter();
   const { user } = useAuthStore();
   const vendorId = (user as any)?.vendor_id || (user as any)?.vendorId;
   const deleteProduct = useDeleteVendorProduct();
+
+  const switchTab = (tab: ProductsTab) => {
+    setActiveTab(tab);
+    router.replace(tab === "listed" ? "/products" : `/products?tab=${tab}`);
+  };
 
   const columns = [
     { key: "image", label: "Product Image" },
@@ -63,6 +95,76 @@ const MyProductsPage = () => {
       status: p.status || "—",
     }));
   }, [productResponse]);
+
+  const {
+    data: ordersResponse,
+    isLoading: ordersLoading,
+    error: ordersError,
+  } = useOrders(ordersPage, ORDERS_PER_PAGE);
+
+  const formatMoney = (value?: number, currency?: string) => {
+    if (value == null) return "—";
+    const symbol = currency?.toLowerCase() === "usd" ? "$" : "₦";
+    return `${symbol}${value.toLocaleString()}`;
+  };
+
+  const toTitleCase = (value: string) =>
+    value
+      .split(/[_-\s]+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+
+  const toOrderRows = (orders?: Order[]): OrderRow[] =>
+    (orders || []).map((order) => {
+      const itemCount = order.items?.length ?? 0;
+      const fulfillmentStatus = getFulfillmentStatus(order);
+      return {
+        id: order.id,
+        orderNumber: `#${order.display_id}`,
+        date: new Date(order.created_at).toLocaleDateString(),
+        items: `${itemCount} ${itemCount === 1 ? "item" : "items"}`,
+        amount: formatMoney(order.total, order.currency_code),
+        status: toTitleCase(fulfillmentStatus),
+        statusRaw: fulfillmentStatus,
+      };
+    });
+
+  const orderRows: OrderRow[] = useMemo(
+    () => toOrderRows(ordersResponse?.orders),
+    [ordersResponse]
+  );
+
+  const {
+    data: receivedOrdersResponse,
+    isLoading: receivedOrdersLoading,
+    error: receivedOrdersError,
+  } = useVendorOrders(vendorId, receivedOrdersPage, ORDERS_PER_PAGE);
+
+  const receivedOrderRows: OrderRow[] = useMemo(
+    () => toOrderRows(receivedOrdersResponse?.orders),
+    [receivedOrdersResponse]
+  );
+
+  const orderColumns = [
+    { key: "orderNumber", label: "Order" },
+    { key: "date", label: "Date" },
+    { key: "items", label: "Items" },
+    { key: "amount", label: "Total" },
+    {
+      key: "status",
+      label: "Status",
+      render: (row: OrderRow) => (
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-medium ${getFulfillmentStatusColor(
+            row.statusRaw
+          )}`}
+        >
+          {row.status}
+        </span>
+      ),
+    },
+  ];
 
   const handleView = (product: Product) => {
     console.log("View:", product);
@@ -115,7 +217,7 @@ const MyProductsPage = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex gap-4 sm:gap-8 border-b border-gray-300 overflow-x-auto w-full sm:w-auto">
           <button
-            onClick={() => setActiveTab("listed")}
+            onClick={() => switchTab("listed")}
             className={`pb-3 px-1 whitespace-nowrap ${activeTab === "listed"
               ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
               : "text-gray-500"
@@ -123,18 +225,128 @@ const MyProductsPage = () => {
           >
             Listed Products
           </button>
+          <button
+            onClick={() => switchTab("my-orders")}
+            className={`pb-3 px-1 whitespace-nowrap ${activeTab === "my-orders"
+              ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
+              : "text-gray-500"
+              }`}
+          >
+            My Orders
+          </button>
+          <button
+            onClick={() => switchTab("received")}
+            className={`pb-3 px-1 whitespace-nowrap ${activeTab === "received"
+              ? "border-b-2 border-gray-800 text-gray-800 font-medium font-(family-name:--font-montserrat)"
+              : "text-gray-500"
+              }`}
+          >
+            Orders Received
+          </button>
         </div>
       </div>
 
       {/* Table */}
-      <ReusableTable
-        columns={columns}
-        data={products}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        itemsPerPage={10}
-      />
+      {activeTab === "listed" ? (
+        <ReusableTable
+          columns={columns}
+          data={products}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          itemsPerPage={10}
+        />
+      ) : activeTab === "my-orders" ? (
+        <>
+          {ordersError ? (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-4">
+              {ordersError instanceof Error
+                ? ordersError.message
+                : "Failed to load orders"}
+            </div>
+          ) : null}
+          <ReusableTable
+            columns={orderColumns}
+            data={orderRows}
+            itemsPerPage={ordersResponse?.limit ?? ORDERS_PER_PAGE}
+            currentPage={ordersPage}
+            totalPages={Math.max(
+              1,
+              Math.ceil(
+                (ordersResponse?.count ?? 0) /
+                (ordersResponse?.limit ?? ORDERS_PER_PAGE)
+              )
+            )}
+            totalItems={ordersResponse?.count}
+            onPageChange={setOrdersPage}
+            showCheckbox={false}
+            showActions={false}
+            customActionColumn={(row) => (
+              <button
+                onClick={() => router.push(`/products/orders/${row.id}`)}
+                className="text-gray-600 hover:text-gray-800 p-2"
+                aria-label="View order"
+                title="View order"
+              >
+                <Eye size={18} />
+              </button>
+            )}
+          />
+          {ordersLoading ? (
+            <p className="mt-3 text-sm text-gray-500">Loading orders...</p>
+          ) : null}
+          {!ordersLoading && orderRows.length === 0 ? (
+            <p className="mt-3 text-sm text-gray-500">
+              You haven&apos;t placed any orders yet.
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <>
+          {receivedOrdersError ? (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-4">
+              {receivedOrdersError instanceof Error
+                ? receivedOrdersError.message
+                : "Failed to load orders received"}
+            </div>
+          ) : null}
+          <ReusableTable
+            columns={orderColumns}
+            data={receivedOrderRows}
+            itemsPerPage={receivedOrdersResponse?.limit ?? ORDERS_PER_PAGE}
+            currentPage={receivedOrdersPage}
+            totalPages={Math.max(
+              1,
+              Math.ceil(
+                (receivedOrdersResponse?.count ?? 0) /
+                (receivedOrdersResponse?.limit ?? ORDERS_PER_PAGE)
+              )
+            )}
+            totalItems={receivedOrdersResponse?.count}
+            onPageChange={setReceivedOrdersPage}
+            showCheckbox={false}
+            showActions={false}
+            customActionColumn={(row) => (
+              <button
+                onClick={() => router.push(`/products/orders/${row.id}`)}
+                className="text-gray-600 hover:text-gray-800 p-2"
+                aria-label="View order"
+                title="View order"
+              >
+                <Eye size={18} />
+              </button>
+            )}
+          />
+          {receivedOrdersLoading ? (
+            <p className="mt-3 text-sm text-gray-500">Loading orders...</p>
+          ) : null}
+          {!receivedOrdersLoading && receivedOrderRows.length === 0 ? (
+            <p className="mt-3 text-sm text-gray-500">
+              No customer orders on your products yet.
+            </p>
+          ) : null}
+        </>
+      )}
 
       <BaseModal
         isOpen={deleteStep === "confirm"}
