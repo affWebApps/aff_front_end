@@ -71,3 +71,24 @@ export interface OrdersResponse {
   limit: number;
   offset: number;
 }
+
+// Row shape returned by GET /store/vendors/orders — a lighter summary
+// than the customer-facing Order (no line items, just a count).
+export interface VendorOrderListItem {
+  id: string;
+  display_id: number;
+  status: string;
+  email: string;
+  currency_code: string;
+  created_at: string;
+  item_count: number;
+  total: number;
+}
+
+export interface VendorOrdersResponse {
+  orders: VendorOrderListItem[];
+  count: number;
+  page: number;
+  limit: number;
+  offset: number;
+}

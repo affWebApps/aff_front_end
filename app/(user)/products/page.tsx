@@ -11,7 +11,8 @@ import { BaseModal } from "@/components/modals/BaseModal";
 import { useDeleteVendorProduct } from "@/hooks/useProducts";
 import { useOrders, useVendorOrders } from "@/hooks/useOrders";
 import { getFulfillmentStatus, getFulfillmentStatusColor } from "@/utils/orderFulfillment";
-import type { Order } from "@/types/order";
+import type { Order, VendorOrderListItem } from "@/types/order";
+import { VendorSyncGate } from "@/components/vendor/VendorSyncGate";
 
 interface Product {
   id: string;
@@ -33,6 +34,15 @@ interface OrderRow {
   statusRaw: string;
 }
 
+interface ReceivedOrderRow {
+  id: string;
+  orderNumber: string;
+  date: string;
+  items: string;
+  amount: string;
+  status: string;
+}
+
 const ORDERS_PER_PAGE = 10;
 
 type ProductsTab = "listed" | "my-orders" | "received";
@@ -42,6 +52,34 @@ const TAB_FROM_QUERY: Record<string, ProductsTab> = {
   "my-orders": "my-orders",
   received: "received",
 };
+
+const formatMoney = (value?: number, currency?: string) => {
+  if (value == null) return "—";
+  const symbol = currency?.toLowerCase() === "usd" ? "$" : "₦";
+  return `${symbol}${value.toLocaleString()}`;
+};
+
+const toTitleCase = (value: string) =>
+  value
+    .split(/[_-\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+const toOrderRows = (orders?: Order[]): OrderRow[] =>
+  (orders || []).map((order) => {
+    const itemCount = order.items?.length ?? 0;
+    const fulfillmentStatus = getFulfillmentStatus(order);
+    return {
+      id: order.id,
+      orderNumber: `#${order.display_id}`,
+      date: new Date(order.created_at).toLocaleDateString(),
+      items: `${itemCount} ${itemCount === 1 ? "item" : "items"}`,
+      amount: formatMoney(order.total, order.currency_code),
+      status: toTitleCase(fulfillmentStatus),
+      statusRaw: fulfillmentStatus,
+    };
+  });
 
 const MyProductsPage = () => {
   const router = useRouter();
@@ -102,34 +140,6 @@ const MyProductsPage = () => {
     error: ordersError,
   } = useOrders(ordersPage, ORDERS_PER_PAGE);
 
-  const formatMoney = (value?: number, currency?: string) => {
-    if (value == null) return "—";
-    const symbol = currency?.toLowerCase() === "usd" ? "$" : "₦";
-    return `${symbol}${value.toLocaleString()}`;
-  };
-
-  const toTitleCase = (value: string) =>
-    value
-      .split(/[_-\s]+/)
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
-
-  const toOrderRows = (orders?: Order[]): OrderRow[] =>
-    (orders || []).map((order) => {
-      const itemCount = order.items?.length ?? 0;
-      const fulfillmentStatus = getFulfillmentStatus(order);
-      return {
-        id: order.id,
-        orderNumber: `#${order.display_id}`,
-        date: new Date(order.created_at).toLocaleDateString(),
-        items: `${itemCount} ${itemCount === 1 ? "item" : "items"}`,
-        amount: formatMoney(order.total, order.currency_code),
-        status: toTitleCase(fulfillmentStatus),
-        statusRaw: fulfillmentStatus,
-      };
-    });
-
   const orderRows: OrderRow[] = useMemo(
     () => toOrderRows(ordersResponse?.orders),
     [ordersResponse]
@@ -139,12 +149,28 @@ const MyProductsPage = () => {
     data: receivedOrdersResponse,
     isLoading: receivedOrdersLoading,
     error: receivedOrdersError,
-  } = useVendorOrders(vendorId, receivedOrdersPage, ORDERS_PER_PAGE);
+  } = useVendorOrders(receivedOrdersPage, ORDERS_PER_PAGE);
 
-  const receivedOrderRows: OrderRow[] = useMemo(
-    () => toOrderRows(receivedOrdersResponse?.orders),
-    [receivedOrdersResponse]
-  );
+  const receivedOrderRows: ReceivedOrderRow[] = useMemo(() => {
+    return (receivedOrdersResponse?.orders || []).map(
+      (order: VendorOrderListItem) => ({
+        id: order.id,
+        orderNumber: `#${order.display_id}`,
+        date: new Date(order.created_at).toLocaleDateString(),
+        items: `${order.item_count} ${order.item_count === 1 ? "item" : "items"}`,
+        amount: formatMoney(order.total, order.currency_code),
+        status: toTitleCase(order.status),
+      })
+    );
+  }, [receivedOrdersResponse]);
+
+  const receivedOrderColumns = [
+    { key: "orderNumber", label: "Order" },
+    { key: "date", label: "Date" },
+    { key: "items", label: "Items" },
+    { key: "amount", label: "Total" },
+    { key: "status", label: "Status" },
+  ];
 
   const orderColumns = [
     { key: "orderNumber", label: "Order" },
@@ -202,6 +228,8 @@ const MyProductsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <VendorSyncGate />
+
       {/* Header */}
       <div className="flex justify-between items-center gap-4 mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 font-(family-name:--font-montserrat)">
@@ -311,7 +339,7 @@ const MyProductsPage = () => {
             </div>
           ) : null}
           <ReusableTable
-            columns={orderColumns}
+            columns={receivedOrderColumns}
             data={receivedOrderRows}
             itemsPerPage={receivedOrdersResponse?.limit ?? ORDERS_PER_PAGE}
             currentPage={receivedOrdersPage}

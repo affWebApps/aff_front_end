@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { orderService } from "@/services/orderService";
-import type { Order, OrdersResponse } from "@/types/order";
+import type { Order, OrdersResponse, VendorOrdersResponse } from "@/types/order";
 
 export const useOrders = (page: number, limit: number) =>
   useQuery<OrdersResponse>({
@@ -20,15 +20,10 @@ export const useOrder = (orderId: string | undefined) =>
     staleTime: 60_000,
   });
 
-export const useVendorOrders = (
-  vendorId: string | undefined,
-  page: number,
-  limit: number
-) =>
-  useQuery<OrdersResponse>({
-    queryKey: ["vendor-orders", vendorId, page, limit],
-    queryFn: () => orderService.getVendorOrders(vendorId as string, page, limit),
-    enabled: Boolean(vendorId),
+export const useVendorOrders = (page: number, limit: number) =>
+  useQuery<VendorOrdersResponse>({
+    queryKey: ["vendor-orders", page, limit],
+    queryFn: () => orderService.getVendorOrders(page, limit),
     staleTime: 60_000,
     placeholderData: keepPreviousData,
   });

@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api/axios";
-import type { Order, OrdersResponse } from "@/types/order";
+import type { Order, OrdersResponse, VendorOrdersResponse } from "@/types/order";
 
 export const orderService = {
   getOrders: async (page: number, limit: number): Promise<OrdersResponse> => {
@@ -13,15 +13,13 @@ export const orderService = {
   },
 
   // Orders placed by customers against this vendor's listed products.
-  // Endpoint guessed from the existing /store/vendors/products convention —
-  // confirm against the backend and adjust if it differs.
+  // Vendor is resolved server-side from the auth token — no vendor_id param.
   getVendorOrders: async (
-    vendorId: string,
     page: number,
     limit: number
-  ): Promise<OrdersResponse> => {
+  ): Promise<VendorOrdersResponse> => {
     const res = await apiClient.get(
-      `/store/vendors/orders?vendor_id=${vendorId}&page=${page}&limit=${limit}`
+      `/store/vendors/orders?page=${page}&limit=${limit}`
     );
     return res.data;
   },

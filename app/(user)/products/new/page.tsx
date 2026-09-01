@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import { uploadFileToSupabase } from "@/lib/storageService";
 import { CreateVendorProductPayload, useCreateVendorProduct } from "@/hooks/useProducts";
+import { VendorSyncGate } from "@/components/vendor/VendorSyncGate";
 
 const defaultColourOptions = ["Blue", "Black", "Green", "Red", "Grey"];
 const defaultSizeOptions = ["S", "M", "L", "XL"];
@@ -388,6 +389,7 @@ export default function NewProductPage() {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-6 lg:p-8">
+      <VendorSyncGate />
       <form
         onSubmit={handleSubmit}
         onKeyDown={preventEnterSubmit}

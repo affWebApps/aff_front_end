@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from "../../../store/authStore";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api/axios";
+import { VendorSyncGate } from "@/components/vendor/VendorSyncGate";
 
 export default function Dashboard() {
   const { user } = useAuthStore();
@@ -42,6 +43,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
+        <VendorSyncGate />
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
